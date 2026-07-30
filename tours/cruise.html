@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paket Cruise — Bee Happy Holiday</title>
+  <link rel="stylesheet" href="../css/main.css" />
+</head>
+<body>
+<div id="page">
+  <div id="nav-placeholder"></div>
+
+  <div class="page-hero section">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="../index.html">Beranda</a><span>›</span>
+        <a href="index.html">Paket Wisata</a><span>›</span>
+        <span>Cruise</span>
+      </div>
+      <p class="eyebrow" style="margin-bottom:.5rem">🚢 Paket Cruise</p>
+      <h1 style="margin-bottom:.75rem">Berlayar <em class="text-gold">Menjelajahi Dunia</em></h1>
+      <p style="max-width:520px;margin-inline:auto;font-size:.95rem">
+        Nikmati kemewahan kapal pesiar sambil singgah di berbagai destinasi indah Asia dan dunia dalam satu pelayaran.
+      </p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid-auto" id="grid"></div>
+    </div>
+  </section>
+
+  <!-- Why Cruise section -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header centered reveal">
+        <p class="eyebrow">🌊 Kenapa Cruise?</p>
+        <h2>Satu Kapal, Banyak Negara</h2>
+        <p>Cruise adalah cara paling efisien dan mewah untuk menjelajahi banyak destinasi sekaligus.</p>
+      </div>
+      <div class="grid-3">
+        <div class="doc-card reveal">
+          <div class="doc-icon">🏨</div>
+          <div class="doc-title">Hotel Berjalan</div>
+          <p class="doc-desc">Check-in sekali, tidur di kapal, dan bangun di kota yang berbeda setiap harinya. Tidak perlu bongkar-pasang koper.</p>
+        </div>
+        <div class="doc-card reveal">
+          <div class="doc-icon">🍽️</div>
+          <div class="doc-title">All-Inclusive</div>
+          <p class="doc-desc">Makanan, hiburan, dan fasilitas kapal bintang 5 sudah termasuk. Nikmati tanpa perlu khawatir tagihan tambahan.</p>
+        </div>
+        <div class="doc-card reveal">
+          <div class="doc-icon">🌏</div>
+          <div class="doc-title">Multi-Destinasi</div>
+          <p class="doc-desc">Singgah di 3–10 negara atau kota dalam satu perjalanan. Efisien waktu, efisien biaya, maksimal pengalaman.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-placeholder"></div>
+</div>
+
+<script type="module">
+import { API_BASE } from '../js/config.js';
+import '../js/main.js';
+import { fetchCruise, renderCard, showLoading, showError, reObserve, DEMO } from '../js/listings.js';
+
+async function init() {
+  const grid = document.getElementById('grid');
+  showLoading(grid);
+  const useDemo = API_BASE.includes('YOUR_WORKER');
+  try {
+    const data = useDemo ? DEMO.cruise : await fetchCruise();
+    grid.innerHTML = data.length
+      ? data.map((item, i) => renderCard(item, i * 80)).join('')
+      : '<div class="state-box"><div class="state-icon">🚢</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket cruise sedang kami siapkan. Hubungi kami untuk info lebih lanjut.</p></div>';
+    reObserve();
+  } catch { showError(grid); }
+}
+
+init();
+</script>
+</body>
+</html>

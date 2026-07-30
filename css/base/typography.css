@@ -1,0 +1,32 @@
+/* ═══════════════════════════════════════════
+   Typography — Light Theme
+   ═══════════════════════════════════════════ */
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-display);
+  color: var(--text);           /* dark purple #2A1838 */
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+h1 { font-size: clamp(2.2rem, 5.5vw, 4rem); font-weight: 900; }
+h2 { font-size: clamp(1.7rem, 3.5vw, 2.6rem); }
+h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
+h4 { font-size: 1.1rem; }
+
+p { line-height: 1.75; color: var(--text-muted); }
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-500);       /* dark gold on white */
+}
+
+.text-gold    { color: var(--gold-500); }
+.text-purple  { color: var(--purple-700); }
+.text-body    { color: var(--text); }
+.text-muted   { color: var(--text-muted); }
+.text-center  { text-align: center; }
+.italic       { font-style: italic; }

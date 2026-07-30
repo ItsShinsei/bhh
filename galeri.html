@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galeri — Bee Happy Holiday</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <style>
+    .gallery-filter { display:flex; gap:.75rem; flex-wrap:wrap; margin-bottom:2rem; }
+
+    .masonry {
+      columns: 3;
+      column-gap: 1rem;
+    }
+    .masonry-item {
+      break-inside: avoid;
+      margin-bottom: 1rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      background: var(--purple-600);
+    }
+    .masonry-item img {
+      width: 100%;
+      display: block;
+      transition: transform var(--slow);
+    }
+    .masonry-item:hover img { transform: scale(1.05); }
+
+    .masonry-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(29,6,43,.8), transparent 50%);
+      opacity: 0;
+      transition: opacity var(--mid);
+      display: flex;
+      align-items: flex-end;
+      padding: 1rem;
+    }
+    .masonry-item:hover .masonry-overlay { opacity: 1; }
+    .masonry-title { font-family: var(--font-display); font-size:.9rem; font-weight:700; color:var(--text); }
+
+    @media (max-width: 768px) { .masonry { columns: 2; } }
+    @media (max-width: 480px) { .masonry { columns: 1; } }
+  </style>
+</head>
+<body>
+<div id="page">
+  <div id="nav-placeholder"></div>
+
+  <div class="page-hero section">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html">Beranda</a><span>›</span><span>Galeri</span>
+      </div>
+      <p class="eyebrow" style="margin-bottom:.5rem">🖼️ Galeri</p>
+      <h1 style="margin-bottom:.75rem">Momen <em class="text-gold">Perjalanan Indah</em></h1>
+      <p style="max-width:500px;margin-inline:auto;font-size:.95rem">
+        Setiap foto adalah cerita. Lihat momen-momen tak terlupakan para wisatawan bersama Bee Happy Holiday.
+      </p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" data-cat="all">🌍 Semua</button>
+        <button class="filter-tab" data-cat="domestik">🇮🇩 Domestik</button>
+        <button class="filter-tab" data-cat="inter">✈️ Mancanegara</button>
+        <button class="filter-tab" data-cat="cruise">🚢 Cruise</button>
+        <button class="filter-tab" data-cat="umroh">🕌 Umroh</button>
+      </div>
+
+      <div class="masonry" id="galleryGrid"></div>
+    </div>
+  </section>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+    <button class="lightbox-close" id="lightboxClose" aria-label="Tutup">✕</button>
+    <img id="lightboxImg" src="" alt="" />
+  </div>
+
+  <div id="footer-placeholder"></div>
+</div>
+
+<script type="module">
+import { API_BASE, driveThumb } from './js/config.js';
+import './js/main.js';
+import { fetchGallery } from './js/listings.js';
+
+const DEMO_GALLERY = [
+  { title:'Sunset Kuta, Bali',    image_url:'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&auto=format&fit=crop', category:'domestik' },
+  { title:'Sakura Tokyo',          image_url:'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800&auto=format&fit=crop', category:'inter'    },
+  { title:'Marina Bay Sands',      image_url:'https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=600&auto=format&fit=crop', category:'inter'    },
+  { title:'Gili Trawangan, NTB',   image_url:'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=700&auto=format&fit=crop', category:'domestik' },
+  { title:'Cruise Asia',           image_url:'https://images.unsplash.com/photo-1548194099-bed76927b52e?w=600&auto=format&fit=crop', category:'cruise'   },
+  { title:'Masjidil Haram',        image_url:'https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=700&auto=format&fit=crop', category:'umroh'    },
+  { title:'Kawah Ijen',            image_url:'https://images.unsplash.com/photo-1588087640728-2a2d98ed4b88?w=600&auto=format&fit=crop', category:'domestik' },
+  { title:'Seoul, Korea Selatan',  image_url:'https://images.unsplash.com/photo-1480796927426-f609979314bd?w=700&auto=format&fit=crop', category:'inter'    },
+  { title:'Swiss Alps',            image_url:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&auto=format&fit=crop', category:'inter'    },
+  { title:'Komodo Island',         image_url:'https://images.unsplash.com/photo-1580508174046-170816f65662?w=700&auto=format&fit=crop', category:'domestik' },
+  { title:'Raja Ampat, Papua',     image_url:'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?w=600&auto=format&fit=crop', category:'domestik' },
+  { title:'Paris, Perancis',       image_url:'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=700&auto=format&fit=crop', category:'inter'    },
+];
+
+let allGallery = [];
+let currentCat = 'all';
+
+function render() {
+  const grid = document.getElementById('galleryGrid');
+  const items = allGallery.filter(g => currentCat === 'all' || g.category === currentCat);
+
+  if (!items.length) {
+    grid.style.display = 'block';
+    grid.innerHTML = '<div class="state-box"><div class="state-icon">📷</div><p class="state-desc">Belum ada foto untuk kategori ini.</p></div>';
+    return;
+  }
+
+  grid.innerHTML = items.map((g) => {
+    const url = driveThumb(g.image_url);
+    return `
+      <div class="masonry-item" data-url="${url}" data-title="${g.title || ''}">
+        <img src="${url}" alt="${g.title || ''}" loading="lazy" />
+        <div class="masonry-overlay">
+          ${g.title ? `<div class="masonry-title">${g.title}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  grid.querySelectorAll('.masonry-item').forEach(el => {
+    el.addEventListener('click', () => {
+      document.getElementById('lightboxImg').src = el.dataset.url;
+      document.getElementById('lightboxImg').alt = el.dataset.title;
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+}
+
+document.getElementById('filterTabs').addEventListener('click', e => {
+  const tab = e.target.closest('.filter-tab');
+  if (!tab) return;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  currentCat = tab.dataset.cat;
+  render();
+});
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+document.getElementById('lightbox').addEventListener('click', e => {
+  if (e.target === document.getElementById('lightbox')) closeLightbox();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+async function init() {
+  const useDemo = API_BASE.includes('YOUR_WORKER');
+  try {
+    allGallery = useDemo ? DEMO_GALLERY : await fetchGallery();
+  } catch {
+    allGallery = DEMO_GALLERY;
+  }
+  render();
+}
+
+init();
+</script>
+</body>
+</html>

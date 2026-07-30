@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wisata Domestik — Bee Happy Holiday</title>
+  <link rel="stylesheet" href="../css/main.css" />
+</head>
+<body>
+<div id="page">
+  <div id="nav-placeholder"></div>
+
+  <div class="page-hero section">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="../index.html">Beranda</a><span>›</span>
+        <a href="index.html">Paket Wisata</a><span>›</span>
+        <span>Wisata Domestik</span>
+      </div>
+      <p class="eyebrow" style="margin-bottom:.5rem">🇮🇩 Wisata Domestik</p>
+      <h1 style="margin-bottom:.75rem">Jelajahi <em class="text-gold">Keindahan Nusantara</em></h1>
+      <p style="max-width:520px;margin-inline:auto;font-size:.95rem">
+        Dari Sabang sampai Merauke — ribuan destinasi indah menanti di tanah air sendiri.
+      </p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <!-- Province filter (built dynamically from meta API) -->
+      <div style="margin-bottom:1rem">
+        <p style="font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--gold-dim);margin-bottom:.6rem">Provinsi</p>
+        <div class="filter-tabs" id="provinceTabs"></div>
+      </div>
+
+      <!-- City filter (shown after province is picked) -->
+      <div id="cityFilterWrap" style="display:none;margin-bottom:2rem">
+        <p style="font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--gold-dim);margin-bottom:.6rem">Kota / Destinasi</p>
+        <div class="filter-tabs" id="cityTabs"></div>
+      </div>
+
+      <div class="grid-auto" id="grid"></div>
+    </div>
+  </section>
+
+  <div id="footer-placeholder"></div>
+</div>
+
+<script type="module">
+import { API_BASE } from '../js/config.js';
+import '../js/main.js';
+import { fetchDomestik, fetchMetaDomestik, renderCard, showLoading, showEmpty, showError, reObserve, DEMO } from '../js/listings.js';
+
+const useDemo = API_BASE.includes('YOUR_WORKER');
+
+let allMeta = [];      // [{ province, city }]
+let activeProvince = null;
+let activeCity = null;
+
+const grid         = document.getElementById('grid');
+const provinceTabs = document.getElementById('provinceTabs');
+const cityTabs     = document.getElementById('cityTabs');
+const cityWrap     = document.getElementById('cityFilterWrap');
+
+// ── Build province tabs from meta ──
+function buildProvinceTabs() {
+  const provinces = [...new Set(allMeta.map(m => m.province))].sort();
+  provinceTabs.innerHTML =
+    `<button class="filter-tab active" data-val="">🇮🇩 Semua</button>` +
+    provinces.map(p => `<button class="filter-tab" data-val="${p}">${p}</button>`).join('');
+
+  provinceTabs.addEventListener('click', e => {
+    const tab = e.target.closest('.filter-tab');
+    if (!tab) return;
+    provinceTabs.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    activeProvince = tab.dataset.val || null;
+    activeCity     = null;
+    buildCityTabs();
+    load();
+  });
+}
+
+// ── Build city tabs for selected province ──
+function buildCityTabs() {
+  if (!activeProvince) { cityWrap.style.display = 'none'; return; }
+  const cities = allMeta
+    .filter(m => m.province === activeProvince && m.city)
+    .map(m => m.city)
+    .sort();
+
+  if (!cities.length) { cityWrap.style.display = 'none'; return; }
+
+  cityWrap.style.display = '';
+  cityTabs.innerHTML =
+    `<button class="filter-tab active" data-val="">Semua Kota</button>` +
+    cities.map(c => `<button class="filter-tab" data-val="${c}">${c}</button>`).join('');
+
+  cityTabs.addEventListener('click', e => {
+    const tab = e.target.closest('.filter-tab');
+    if (!tab) return;
+    cityTabs.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    activeCity = tab.dataset.val || null;
+    load();
+  });
+}
+
+// ── Load + render grid ──
+async function load() {
+  showLoading(grid);
+  try {
+    const data = useDemo
+      ? DEMO.domestik.filter(d =>
+          (!activeProvince || d.province === activeProvince) &&
+          (!activeCity     || d.city === activeCity))
+      : await fetchDomestik(activeProvince, activeCity);
+
+    grid.innerHTML = data.length
+      ? data.map((item, i) => renderCard(item, i * 75)).join('')
+      : '<div class="state-box"><div class="state-icon">🇮🇩</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket untuk destinasi ini sedang kami siapkan.</p></div>';
+
+    reObserve();
+  } catch { showError(grid); }
+}
+
+// ── Init ──
+async function init() {
+  showLoading(grid);
+  try {
+    allMeta = useDemo
+      ? [...new Map(DEMO.domestik.map(d => [d.province + d.city, { province: d.province, city: d.city }])).values()]
+      : await fetchMetaDomestik();
+  } catch { allMeta = []; }
+
+  buildProvinceTabs();
+  load();
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paket Umroh & Haji — Bee Happy Holiday</title>
+  <link rel="stylesheet" href="../css/main.css" />
+</head>
+<body>
+<div id="page">
+  <div id="nav-placeholder"></div>
+
+  <div class="page-hero section">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="../index.html">Beranda</a><span>›</span>
+        <a href="index.html">Paket Wisata</a><span>›</span>
+        <span>Umroh & Haji</span>
+      </div>
+      <p class="eyebrow" style="margin-bottom:.5rem">🕌 Umroh & Haji</p>
+      <h1 style="margin-bottom:.75rem">Perjalanan <em class="text-gold">ke Tanah Suci</em></h1>
+      <p style="max-width:520px;margin-inline:auto;font-size:.95rem">
+        Wujudkan ibadah umroh dan haji yang khusyuk bersama pembimbing berpengalaman dan layanan terpercaya dari Bee Happy Holiday.
+      </p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <!-- Package type filter -->
+      <div style="margin-bottom:2rem">
+        <p style="font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--gold-dim);margin-bottom:.6rem">Jenis Paket</p>
+        <div class="filter-tabs" id="typeTabs">
+          <button class="filter-tab active" data-val="">🕌 Semua Paket</button>
+          <button class="filter-tab" data-val="Reguler">Reguler</button>
+          <button class="filter-tab" data-val="Plus">✨ Plus</button>
+          <button class="filter-tab" data-val="Premium">⭐ Premium</button>
+        </div>
+      </div>
+
+      <div class="grid-auto" id="grid"></div>
+    </div>
+  </section>
+
+  <!-- Package comparison -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header centered reveal">
+        <p class="eyebrow">📊 Perbandingan Paket</p>
+        <h2>Pilih yang Sesuai Kebutuhanmu</h2>
+      </div>
+      <div class="grid-3">
+        <div class="doc-card reveal" style="border-color:rgba(201,168,76,.15)">
+          <div class="doc-icon">🟢</div>
+          <div class="doc-title">Paket Reguler</div>
+          <p class="doc-desc">Pilihan terjangkau dengan fasilitas nyaman. Hotel bintang 3–4, pembimbing ibadah bersertifikat, dan transportasi AC.</p>
+          <p style="font-size:.8rem;color:var(--gold-500);font-weight:600">Mulai Rp 25.000.000</p>
+        </div>
+        <div class="doc-card reveal" style="border-color:rgba(201,168,76,.35)">
+          <div class="doc-icon">✨</div>
+          <div class="doc-title">Paket Plus</div>
+          <p class="doc-desc">Fasilitas lebih baik + wisata religi tambahan (Turki, Dubai, dll.). Hotel bintang 4–5, guide pribadi, dan ziarah lengkap.</p>
+          <p style="font-size:.8rem;color:var(--gold-500);font-weight:600">Mulai Rp 42.000.000</p>
+        </div>
+        <div class="doc-card reveal" style="border-color:rgba(201,168,76,.6)">
+          <div class="doc-icon">👑</div>
+          <div class="doc-title">Paket Premium</div>
+          <p class="doc-desc">Pengalaman paling mewah — hotel bintang 5 di depan Masjidil Haram, suite room, VIP guide, dan layanan eksklusif penuh.</p>
+          <p style="font-size:.8rem;color:var(--gold-500);font-weight:600">Mulai Rp 65.000.000</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-placeholder"></div>
+</div>
+
+<script type="module">
+import { API_BASE } from '../js/config.js';
+import '../js/main.js';
+import { fetchUmroh, renderCard, showLoading, showError, reObserve, DEMO } from '../js/listings.js';
+
+const useDemo = API_BASE.includes('YOUR_WORKER');
+let activeType = null;
+
+const grid    = document.getElementById('grid');
+const typeTabs = document.getElementById('typeTabs');
+
+typeTabs.addEventListener('click', e => {
+  const tab = e.target.closest('.filter-tab');
+  if (!tab) return;
+  typeTabs.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  activeType = tab.dataset.val || null;
+  load();
+});
+
+async function load() {
+  showLoading(grid);
+  try {
+    const data = useDemo
+      ? DEMO.umroh.filter(d => !activeType || d.package_type === activeType)
+      : await fetchUmroh(activeType);
+
+    grid.innerHTML = data.length
+      ? data.map((item, i) => renderCard(item, i * 80)).join('')
+      : '<div class="state-box"><div class="state-icon">🕌</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket untuk kategori ini sedang kami siapkan.</p></div>';
+
+    reObserve();
+  } catch { showError(grid); }
+}
+
+load();
+</script>
+</body>
+</html>

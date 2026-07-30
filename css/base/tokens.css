@@ -1,0 +1,98 @@
+/* ═══════════════════════════════════════════
+   BEE HAPPY HOLIDAY v2 — Design Tokens
+   Light theme: white bg, purple text/accents,
+   dark gold. Matches uploaded main.css palette.
+   ═══════════════════════════════════════════ */
+:root {
+  /* ── Brand Primitives ── */
+  --purple-900: #1E0730;
+  --purple-800: #2A1838;   /* text color (your --cream) */
+  --purple-700: #3A0F50;   /* your --purple-deep */
+  --purple-600: #4E1A6B;   /* your --purple-mid */
+  --purple-500: #6B5A78;   /* your --cream-dim */
+  --purple-400: #9B89A6;
+  --purple-glass: rgba(58,15,80,0.92);
+
+  --gold-500:   #9A761D;   /* your --gold */
+  --gold-400:   #B6942E;   /* your --gold-light */
+  --gold-300:   #C9A84C;   /* slightly lighter for hover */
+  --gold-200:   #D4B86A;
+  --gold-dim:   #7A5E1E;   /* your --gold-dim */
+  --gold-glow:  rgba(154,118,29,0.15);
+
+  /* ── Backgrounds (light theme) ── */
+  --bg:          #FFFFFF;
+  --bg-card:     #FAF7FC;   /* your --purple-card */
+  --bg-tint:     #F4EEF7;   /* your --purple-tint */
+  --bg-mid:      #EDE5F3;
+  --bg-elevated: #E4D8EE;
+
+  /* ── Text ── */
+  --text:        #2A1838;   /* your --cream (dark purple, used as body text) */
+  --text-muted:  #6B5A78;   /* your --cream-dim */
+  --text-light:  #9B89A6;
+
+  /* ── Borders ── */
+  --border:       rgba(58,15,80,0.10);
+  --border-hover: rgba(58,15,80,0.25);
+
+  /* ── Accent ── */
+  --accent:       var(--gold-500);
+  --accent-hover: var(--gold-400);
+
+  /* ── Semantic aliases (keep all old names working) ── */
+  --purple-deep:  #3A0F50;
+  --purple-mid:   #4E1A6B;
+  --purple-card:  #FAF7FC;
+  --purple-tint:  #F4EEF7;
+  --gold:         #9A761D;
+  --gold-light:   #B6942E;
+  --cream:        #2A1838;
+  --cream-dim:    #6B5A78;
+  --cream-100:    #F4EEF7;
+  --cream-200:    #EDE5F3;
+  --cream-400:    #9B89A6;
+  --white:        #FFFFFF;
+  --black:        #0A0010;
+
+  /* ── Spacing ── */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  /* ── Typography ── */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+
+  /* ── Radii ── */
+  --radius-sm:   6px;
+  --radius:      12px;
+  --radius-lg:   20px;
+  --radius-xl:   28px;
+  --radius-full: 9999px;
+
+  /* ── Shadows (lighter for light bg) ── */
+  --shadow-sm:   0 2px 8px  rgba(58,15,80,0.08);
+  --shadow:      0 4px 20px rgba(58,15,80,0.10);
+  --shadow-lg:   0 12px 40px rgba(58,15,80,0.14);
+  --shadow-gold: 0 0 24px   rgba(154,118,29,0.18);
+
+  /* ── Transitions ── */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --fast: 0.15s var(--ease);
+  --mid:  0.25s var(--ease);
+  --slow: 0.4s  var(--ease);
+
+  /* ── Layout ── */
+  --nav-h: 68px;
+  --max-w: 1200px;
+  --pad-x: clamp(1.25rem, 5vw, 3rem);
+}
