@@ -4,12 +4,14 @@
    floating WA button, mobile menu
    ═══════════════════════════════════════════ */
 import { COMPANY, SOCIALS, WA_NUMBER, WA_DEFAULT, waLink } from './config.js';
+import { icon } from './icons.js';
 
-// ── Resolve root path (works from any subfolder) ──
+// ── Resolve root path (domain-root hosting only) ──
 function rootPath(p) {
-  // Count depth from URL: /tours/domestik.html = depth 2, need ../../
-  const depth = (window.location.pathname.match(/\//g) || []).length - 1;
-  return depth > 1 ? '../'.repeat(depth - 1) + p : p;
+  // Absolute root path — assumes the site is served at the domain root
+  // (e.g. https://example.com/). Will 404 on GitHub Pages project pages
+  // (user.github.io/repo/), subpath deploys, and file://.
+  return '/' + p;
 }
 
 // ══════════════════════════════════════════
@@ -20,14 +22,14 @@ function injectNav() {
   const currentPath = window.location.pathname;
 
   function isActive(href) {
-    if (href === 'index.html' || href === '') return currentPath === '/' || currentPath.endsWith('index.html');
+    if (href === 'index.html' || href === '') return currentPath === '/' || currentPath === '/index.html';
     return currentPath.includes(href.replace('.html',''));
   }
 
   const html = `
   <nav class="nav" id="mainNav">
     <a class="nav-logo" href="${R}index.html">
-      <img src="${R}assets/images/logo.jpeg" alt="Bee Happy Holiday" />
+      <img src="${R}assets/images/BHH.svg" alt="Bee Happy Holiday" />
       <div class="nav-logo-text">
         Bee Happy Holiday
         <small>Trip everywhere, Spread Happiness</small>
@@ -36,28 +38,28 @@ function injectNav() {
 
     <ul class="nav-links">
       <li>
-        <a class="nav-link ${isActive('index.html') ? 'active' : ''}" href="${R}index.html">Beranda</a>
+        <a class="nav-link ${isActive('index.html') ? 'active' : ''}" href="/">Beranda</a>
       </li>
       <li>
-        <a class="nav-link has-dropdown" href="${R}tours/index.html">
+          <span class="nav-link has-dropdown" tabindex="0" data-nav="tours/index.html">
           Paket Wisata <span class="nav-chevron">▾</span>
           <div class="nav-dropdown">
-            <a href="${R}tours/index.html"><span class="nav-dropdown-icon">🌍</span> Semua Paket</a>
-            <a href="${R}tours/domestik.html"><span class="nav-dropdown-icon">🇮🇩</span> Wisata Domestik</a>
-            <a href="${R}tours/inter.html"><span class="nav-dropdown-icon">✈️</span> Mancanegara</a>
-            <a href="${R}tours/cruise.html"><span class="nav-dropdown-icon">🚢</span> Cruise</a>
-            <a href="${R}tours/umroh.html"><span class="nav-dropdown-icon">🕌</span> Umroh & Haji</a>
+            <a href="${R}tours/index.html"><span class="nav-dropdown-icon">${icon('globe', 18)}</span> Semua Paket</a>
+            <a href="${R}tours/domestik.html"><span class="nav-dropdown-icon">${icon('flag', 18)}</span> Wisata Domestik</a>
+            <a href="${R}tours/inter.html"><span class="nav-dropdown-icon">${icon('plane', 18)}</span> Mancanegara</a>
+            <a href="${R}tours/cruise.html"><span class="nav-dropdown-icon">${icon('ship', 18)}</span> Cruise</a>
+            <a href="${R}tours/umroh.html"><span class="nav-dropdown-icon">${icon('mosque', 18)}</span> Umroh & Haji</a>
           </div>
-        </a>
+        </span>
       </li>
       <li>
-        <a class="nav-link has-dropdown" href="${R}dokumen/visa.html">
+        <span class="nav-link has-dropdown" tabindex="0" data-nav="dokumen/visa.html">
           Dokumen <span class="nav-chevron">▾</span>
           <div class="nav-dropdown">
-            <a href="${R}dokumen/visa.html"><span class="nav-dropdown-icon">📋</span> Visa</a>
-            <a href="${R}dokumen/paspor.html"><span class="nav-dropdown-icon">📘</span> Paspor</a>
+            <a href="${R}dokumen/visa.html"><span class="nav-dropdown-icon">${icon('fileText', 18)}</span> Visa</a>
+            <a href="${R}dokumen/paspor.html"><span class="nav-dropdown-icon">${icon('idCard', 18)}</span> Paspor</a>
           </div>
-        </a>
+        </span>
       </li>
       <li>
         <a class="nav-link ${isActive('galeri') ? 'active' : ''}" href="${R}galeri.html">Galeri</a>
@@ -81,35 +83,37 @@ function injectNav() {
   </nav>
 
   <div class="mobile-nav" id="mobileNav">
-    <a class="mobile-nav-link" href="${R}index.html">🏠 Beranda</a>
+    <a class="mobile-nav-link" href="/"><span class="mobile-nav-icon">${icon('home', 18)}</span> Beranda</a>
     <div>
-      <a class="mobile-nav-link" href="${R}tours/index.html">🌍 Paket Wisata</a>
+      <a class="mobile-nav-link" href="${R}tours/index.html"><span class="mobile-nav-icon">${icon('globe', 18)}</span> Paket Wisata</a>
       <div class="mobile-nav-sub">
-        <a href="${R}tours/domestik.html"><span>🇮🇩</span> Wisata Domestik</a>
-        <a href="${R}tours/inter.html"><span>✈️</span> Mancanegara</a>
-        <a href="${R}tours/cruise.html"><span>🚢</span> Cruise</a>
-        <a href="${R}tours/umroh.html"><span>🕌</span> Umroh & Haji</a>
+        <a href="${R}tours/domestik.html"><span class="mobile-nav-icon">${icon('flag', 15)}</span> Wisata Domestik</a>
+        <a href="${R}tours/inter.html"><span class="mobile-nav-icon">${icon('plane', 15)}</span> Mancanegara</a>
+        <a href="${R}tours/cruise.html"><span class="mobile-nav-icon">${icon('ship', 15)}</span> Cruise</a>
+        <a href="${R}tours/umroh.html"><span class="mobile-nav-icon">${icon('mosque', 15)}</span> Umroh & Haji</a>
       </div>
     </div>
     <div>
-      <a class="mobile-nav-link" href="${R}dokumen/visa.html">📋 Dokumen</a>
+      <a class="mobile-nav-link" href="${R}dokumen/visa.html"><span class="mobile-nav-icon">${icon('fileText', 18)}</span> Dokumen</a>
       <div class="mobile-nav-sub">
-        <a href="${R}dokumen/visa.html"><span>📋</span> Visa</a>
-        <a href="${R}dokumen/paspor.html"><span>📘</span> Paspor</a>
+        <a href="${R}dokumen/visa.html"><span class="mobile-nav-icon">${icon('fileText', 15)}</span> Visa</a>
+        <a href="${R}dokumen/paspor.html"><span class="mobile-nav-icon">${icon('idCard', 15)}</span> Paspor</a>
       </div>
     </div>
-    <a class="mobile-nav-link" href="${R}galeri.html">🖼️ Galeri</a>
-    <a class="mobile-nav-link" href="${R}about.html">🐝 Tentang Kami</a>
-    <a class="mobile-nav-link" href="${R}contact.html">📬 Kontak</a>
+    <a class="mobile-nav-link" href="${R}galeri.html"><span class="mobile-nav-icon">${icon('image', 18)}</span> Galeri</a>
+    <a class="mobile-nav-link" href="${R}about.html"><span class="mobile-nav-icon">${icon('info', 18)}</span> Tentang Kami</a>
+    <a class="mobile-nav-link" href="${R}contact.html"><span class="mobile-nav-icon">${icon('mail', 18)}</span> Kontak</a>
     <div class="mobile-nav-cta">
-      <a class="btn btn-wa" href="${waLink()}" target="_blank" rel="noopener" style="width:100%;justify-content:center;">
-        💬 Chat WhatsApp
+      <a class="btn btn-wa btn--block" href="${waLink()}" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Chat WhatsApp
       </a>
     </div>
   </div>`;
 
   const placeholder = document.getElementById('nav-placeholder');
   if (placeholder) placeholder.outerHTML = html;
+
 
   // Mobile toggle
   document.getElementById('hamburger')?.addEventListener('click', () => {
@@ -144,7 +148,7 @@ function injectFooter() {
       <div class="footer-grid">
         <div>
           <div class="footer-brand-logo">
-            <img src="${R}assets/images/logo.jpeg" alt="Bee Happy Holiday" />
+            <img src="${R}assets/images/BHH.svg" alt="Bee Happy Holiday" />
             <div class="footer-brand-name">
               Bee Happy Holiday
               <small>Trip everywhere, Spread Happiness</small>
@@ -154,7 +158,7 @@ function injectFooter() {
           <div class="footer-socials">
             ${Object.entries(SOCIALS).map(([k, s]) => `
               <a class="footer-social-btn" href="${s.url}" target="_blank" rel="noopener" title="${s.label}">
-                ${socialIcons[k] || '🔗'}
+                ${socialIcons[k] || `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`}
               </a>
             `).join('')}
           </div>
@@ -163,30 +167,30 @@ function injectFooter() {
         <div>
           <div class="footer-col-title">Paket Wisata</div>
           <div class="footer-links">
-            <a href="${R}tours/domestik.html">🇮🇩 Wisata Domestik</a>
-            <a href="${R}tours/inter.html">✈️ Mancanegara</a>
-            <a href="${R}tours/cruise.html">🚢 Cruise</a>
-            <a href="${R}tours/umroh.html">🕌 Umroh & Haji</a>
+            <a href="${R}tours/domestik.html"><span class="footer-link-icon">${icon('flag', 16)}</span> Wisata Domestik</a>
+            <a href="${R}tours/inter.html"><span class="footer-link-icon">${icon('plane', 16)}</span> Mancanegara</a>
+            <a href="${R}tours/cruise.html"><span class="footer-link-icon">${icon('ship', 16)}</span> Cruise</a>
+            <a href="${R}tours/umroh.html"><span class="footer-link-icon">${icon('mosque', 16)}</span> Umroh & Haji</a>
           </div>
         </div>
 
         <div>
           <div class="footer-col-title">Layanan</div>
           <div class="footer-links">
-            <a href="${R}dokumen/visa.html">📋 Pengurusan Visa</a>
-            <a href="${R}dokumen/paspor.html">📘 Pengurusan Paspor</a>
-            <a href="${R}galeri.html">🖼️ Galeri</a>
-            <a href="${R}about.html">🐝 Tentang Kami</a>
-            <a href="${R}contact.html">📬 Kontak</a>
+            <a href="${R}dokumen/visa.html"><span class="footer-link-icon">${icon('fileText', 16)}</span> Pengurusan Visa</a>
+            <a href="${R}dokumen/paspor.html"><span class="footer-link-icon">${icon('idCard', 16)}</span> Pengurusan Paspor</a>
+            <a href="${R}galeri.html"><span class="footer-link-icon">${icon('image', 16)}</span> Galeri</a>
+            <a href="${R}about.html"><span class="footer-link-icon">${icon('info', 16)}</span> Tentang Kami</a>
+            <a href="${R}contact.html"><span class="footer-link-icon">${icon('mail', 16)}</span> Kontak</a>
           </div>
         </div>
 
         <div>
           <div class="footer-col-title">Hubungi Kami</div>
-          <div class="footer-contact-row"><span>📍</span><span>${COMPANY.address}</span></div>
-          <div class="footer-contact-row"><span>📞</span><span>${COMPANY.phone}</span></div>
-          <div class="footer-contact-row"><span>✉️</span><span>${COMPANY.email}</span></div>
-          <div class="footer-contact-row"><span>🕐</span><span>${COMPANY.hours}</span></div>
+          <div class="footer-contact-row"><span class="footer-contact-icon">${icon('mapPin', 16)}</span><span>${COMPANY.address}</span></div>
+          <div class="footer-contact-row"><span class="footer-contact-icon">${icon('phone', 16)}</span><span>${COMPANY.phone}</span></div>
+          <div class="footer-contact-row"><span class="footer-contact-icon">${icon('mail', 16)}</span><span>${COMPANY.email}</span></div>
+          <div class="footer-contact-row"><span class="footer-contact-icon">${icon('clock', 16)}</span><span>${COMPANY.hours}</span></div>
         </div>
       </div>
 

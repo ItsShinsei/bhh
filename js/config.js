@@ -40,9 +40,9 @@ export const COMPANY = {
 
 // ── Social media ──
 export const SOCIALS = {
-  instagram: { label: 'Instagram',   handle: '@beehappyholiday',          url: 'https://instagram.com/beehappyholiday'  },
-  tiktok:    { label: 'TikTok',      handle: '@beehappyholiday',          url: 'https://tiktok.com/@beehappyholiday'   },
-  facebook:  { label: 'Facebook',    handle: 'Bee Happy Holiday',         url: 'https://facebook.com/beehappyholiday'  },
+  instagram: { label: 'Instagram',   handle: '@beehappyholiday',          url: 'https://www.instagram.com/bee_happyholiday'  },
+  tiktok:    { label: 'TikTok',      handle: '@beehappyholiday',          url: 'https://www.tiktok.com/@bee_happyholiday'   },
+  facebook:  { label: 'Facebook',    handle: 'Bee Happy Holiday',         url: 'https://web.facebook.com/beehappy.holiday'  },
   x:         { label: 'X (Twitter)', handle: '@beehappyholiday',          url: 'https://x.com/beehappyholiday'         },
   youtube:   { label: 'YouTube',     handle: '@beehappyholiday',          url: 'https://youtube.com/@beehappyholiday'  },
   email:     { label: 'Email',       handle: 'beehappyholiday@gmail.com', url: 'mailto:beehappyholiday@gmail.com'       },

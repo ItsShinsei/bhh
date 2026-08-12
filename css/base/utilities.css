@@ -1,0 +1,152 @@
+/* ═══════════════════════════════════════════
+   Utilities — token-driven helper classes
+   Map directly to --space-* / color tokens so
+   the 4/8 spacing rhythm and palette stay
+   consistent. Use instead of inline styles.
+   ═══════════════════════════════════════════ */
+
+/* ── Spacing (margin) ── */
+.mt-2  { margin-top: var(--space-2); }
+.mt-3  { margin-top: var(--space-3); }
+.mt-4  { margin-top: var(--space-4); }
+.mt-5  { margin-top: var(--space-5); }
+.mt-6  { margin-top: var(--space-6); }
+.mt-8  { margin-top: var(--space-8); }
+.mt-10 { margin-top: var(--space-10); }
+.mt-12 { margin-top: var(--space-12); }
+
+.mb-2  { margin-bottom: var(--space-2); }
+.mb-3  { margin-bottom: var(--space-3); }
+.mb-4  { margin-bottom: var(--space-4); }
+.mb-5  { margin-bottom: var(--space-5); }
+.mb-6  { margin-bottom: var(--space-6); }
+.mb-8  { margin-bottom: var(--space-8); }
+.mb-10 { margin-bottom: var(--space-10); }
+
+.mx-auto { margin-inline: auto; }
+
+/* ── Layout (flex) ── */
+.flex          { display: flex; }
+.flex-col      { flex-direction: column; }
+.flex-wrap     { flex-wrap: wrap; }
+.items-center  { align-items: center; }
+.items-start   { align-items: flex-start; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-6); max-width: 700px; margin-inline: auto; }
+
+.stack { display: flex; flex-direction: column; }
+
+.gap-1  { gap: var(--space-1); }
+.gap-2  { gap: var(--space-2); }
+.gap-3  { gap: var(--space-3); }
+.gap-4  { gap: var(--space-4); }
+.gap-5  { gap: var(--space-5); }
+.gap-6  { gap: var(--space-6); }
+.gap-8  { gap: var(--space-8); }
+.gap-10 { gap: var(--space-10); }
+
+/* ── Typography ── */
+.text-xs   { font-size: 0.78rem; }
+.text-sm   { font-size: 0.85rem; }
+.text-md   { font-size: 0.88rem; }
+.text-base { font-size: 0.92rem; }
+.text-lg   { font-size: 1rem; }
+.text-xl   { font-size: 1.1rem; }
+
+.fw-500 { font-weight: 500; }
+.fw-600 { font-weight: 600; }
+.fw-700 { font-weight: 700; }
+
+.uppercase { text-transform: uppercase; }
+.ls-sm { letter-spacing: 0.08em; }
+.ls-md { letter-spacing: 0.1em; }
+.ls-lg { letter-spacing: 0.12em; }
+
+.lh-normal { line-height: 1.6; }
+.lh-loose  { line-height: 1.8; }
+
+.text-gold-dim { color: var(--gold-dim); }
+.text-light    { color: var(--text-light); }
+
+/* ── Width / centering ── */
+.mw-sm { max-width: 440px; }
+.mw-md { max-width: 520px; }
+.mw-lg { max-width: 600px; }
+
+/* ── Component helpers ── */
+.doc-card--center { text-align: center; align-items: center; }
+.doc-icon--center { margin-inline: auto; }
+
+.btn--fit   { width: fit-content; }
+.btn--block { width: 100%; justify-content: center; }
+
+/* Stat tile (about page) */
+.stat-tile { text-align: center; padding: var(--space-6); }
+.stat-num-lg {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--gold-500);
+  line-height: 1;
+}
+.stat-label-sm {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Large content icon (visi/misi, value bullets) */
+.icon-lg { font-size: 2rem; margin-bottom: var(--space-4); display: inline-block; }
+
+/* Gold-tinted panels (visi/misi on about) */
+.panel-gold       { border: 1px solid rgba(201, 168, 76, 0.3); }
+.panel-gold-strong { border-color: rgba(201, 168, 76, 0.6); }
+.panel-gold-soft  { border-color: rgba(201, 168, 76, 0.15); }
+
+/* Check/bullet lists (dokumen pages) */
+.list-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  list-style: none;
+}
+.list-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-size: 0.88rem;
+}
+
+/* Team cards (about page) */
+.team-avatar {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple-600), var(--purple-500));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto var(--space-4);
+  border: 2px solid var(--border);
+}
+.team-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.3rem;
+}
+.team-role {
+  font-size: 0.75rem;
+  color: var(--gold-500);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.no-underline { text-decoration: none; }
+
+/* Flush-bottom section (no closing padding) */
+.section--flush-bottom { padding-bottom: 0; }

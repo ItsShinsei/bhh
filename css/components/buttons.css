@@ -36,7 +36,7 @@
 .btn-outline {
   background: transparent;
   color: var(--purple-700);
-  border-color: rgba(58,15,80,0.3);
+  border-color: rgba(var(--purple-rgb), 0.3);
 }
 .btn-outline:hover {
   background: var(--bg-tint);
@@ -74,7 +74,7 @@
   background: var(--purple-600);
   border-color: var(--purple-600);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(58,15,80,0.25);
+  box-shadow: 0 8px 24px rgba(var(--purple-rgb), 0.25);
 }
 
 /* Sizes */
