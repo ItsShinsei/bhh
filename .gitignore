@@ -2,3 +2,4 @@ schema.sql
 .claude
 .vscode
 opencode.json
+worker.js
