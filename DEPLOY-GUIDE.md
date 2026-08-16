@@ -27,7 +27,7 @@ gallery            → foto galeri
 
 ## Langkah 2 — Deploy Worker
 
-1. **Workers & Pages** → **Create Worker** → nama: `bhh-api`
+1. **Workers & Pages** → **Create application** → pilih **Worker** → nama: `bhh-api`
 2. **Edit Code** → hapus semua → paste isi `worker.js` → **Deploy**
 3. **Settings → Bindings → Add → D1 Database**
    - Variable name: `DB`
@@ -59,7 +59,7 @@ Salin `beehappylogo.jpeg` ke `assets/images/logo.jpeg`
 
 ## Langkah 5 — Deploy ke Cloudflare Pages
 
-1. **Workers & Pages → Create → Pages → Direct Upload**
+1. **Workers & Pages → Create application → Pages → Upload assets**
 2. Nama: `bee-happy-holiday`
 3. Upload folder project (zip semua file kecuali `worker.js` & `schema.sql`)
 4. Deploy → live di `bee-happy-holiday.pages.dev`

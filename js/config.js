@@ -6,7 +6,7 @@
 // ── Cloudflare Worker URL ──
 // After deploying worker.js, replace this with your worker URL.
 // e.g. 'https://bhh-api.yourname.workers.dev'
-export const API_BASE = 'https://YOUR_WORKER_SUBDOMAIN.workers.dev';
+export const API_BASE = 'bhh-api.mnovarahman505.workers.dev';
 
 // ── API endpoints (for reference) ──
 // GET /api/domestik         → all domestik listings
