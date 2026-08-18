@@ -87,13 +87,7 @@ function injectNav() {
         <a href="${R}tours/umroh.html"><span class="mobile-nav-icon">${icon('mosque', 15)}</span> Umroh & Haji</a>
       </div>
     </div>
-    <div>
-      <a class="mobile-nav-link" href="${R}dokumen/visa.html"><span class="mobile-nav-icon">${icon('fileText', 18)}</span> Dokumen</a>
-      <div class="mobile-nav-sub">
-        <a href="${R}dokumen/visa.html"><span class="mobile-nav-icon">${icon('fileText', 15)}</span> Visa</a>
-        <a href="${R}dokumen/paspor.html"><span class="mobile-nav-icon">${icon('idCard', 15)}</span> Paspor</a>
-      </div>
-    </div>
+    <a class="mobile-nav-link" href="${R}dokumen/dokumen.html"><span class="mobile-nav-icon">${icon('fileText', 18)}</span> Dokumen</a>
     <a class="mobile-nav-link" href="${R}galeri.html"><span class="mobile-nav-icon">${icon('image', 18)}</span> Galeri</a>
     <a class="mobile-nav-link" href="${R}about.html"><span class="mobile-nav-icon">${icon('info', 18)}</span> Tentang Kami</a>
     <a class="mobile-nav-link" href="${R}contact.html"><span class="mobile-nav-icon">${icon('mail', 18)}</span> Kontak</a>
