@@ -70,42 +70,54 @@
         </div>
         <div class="layanan-grid">
           <a class="svc-tile" href="tours/domestik.html">
-            <div class="svc-img" style="background:linear-gradient(135deg,#0F766E,#14B8A6)">🇮🇩</div>
+            <div class="svc-img" style="background:linear-gradient(135deg,#0F766E,#14B8A6)">
+              <img src="assets/images/wisata-domestik.png" alt="Wisata Domestik">
+            </div>
             <div class="svc-cap">
               <span class="svc-title">Wisata Domestik</span>
               <span class="svc-desc">Temukan wisata lokal dari Bali hingga Pelosok Nusantara</span>
             </div>
           </a>
           <a class="svc-tile" href="tours/inter.html">
-            <div class="svc-img" style="background:linear-gradient(135deg,#1D4ED8,#3B82F6)">✈️</div>
+            <div class="svc-img" style="background:linear-gradient(135deg,#1D4ED8,#3B82F6)">
+              <img src="assets/images/wisata-inter.png" alt="Wisata Internasional">
+            </div>
             <div class="svc-cap">
               <span class="svc-title">Wisata Internasional</span>
               <span class="svc-desc">Mulai dari Jepang, Korea, Eropa, dan seluruh penjuru dunia</span>
             </div>
           </a>
           <a class="svc-tile" href="tours/umroh.html">
-            <div class="svc-img" style="background:linear-gradient(135deg,#7C3AED,#A855F7)">🕌</div>
+            <div class="svc-img" style="background:linear-gradient(135deg,#7C3AED,#A855F7)">
+              <img src="assets/images/haji-umroh.png" alt="Umroh & Haji">
+            </div>
             <div class="svc-cap">
               <span class="svc-title">Umroh & Haji</span>
               <span class="svc-desc">Paket umroh dan haji lengkap dengan layanan terbaik</span>
             </div>
           </a>
           <a class="svc-tile" href="tours/cruise.html">
-            <div class="svc-img" style="background:linear-gradient(135deg,#0E7490,#06B6D4)">🚢</div>
+            <div class="svc-img" style="background:linear-gradient(135deg,#0E7490,#06B6D4)">
+              <img src="assets/images/wisata-cruise.png" alt="Kapal Pesiar">
+            </div>
             <div class="svc-cap">
               <span class="svc-title">Kapal Pesiar</span>
               <span class="svc-desc">Jelajahi keindahan laut dengan pelayaran yang menyenangkan</span>
             </div>
           </a>
           <a class="svc-tile" href="dokumen/dokumen.html">
-            <div class="svc-img" style="background:linear-gradient(135deg,#92400E,#B45309)">📋</div>
+            <div class="svc-img" style="background:linear-gradient(135deg,#92400E,#B45309)">
+              <img src="assets/images/paspor-visa.png" alt="Dokumen">
+            </div>
             <div class="svc-cap">
               <span class="svc-title">Pengurusan Dokumen</span>
               <span class="svc-desc">Urus Visa & Paspor anda dengan cepat & tanpa repot</span>
             </div>
           </a>
           <a class="svc-tile" href="galeri.html">
-            <div class="svc-img" style="background:linear-gradient(135deg,#BE185D,#EC4899)">📘</div>
+            <div class="svc-img" style="background:linear-gradient(135deg,#BE185D,#EC4899)">
+              <img src="assets/images/gallery.png" alt="Gallery">
+            </div>
             <div class="svc-cap">
               <span class="svc-title">Gallery</span>
               <span class="svc-desc">Lihat momen-momen indah dari perjalanan kami</span>
@@ -344,6 +356,9 @@
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+}
+.svc-img img {
+  width: 100%; height: 100%; object-fit: cover;
 }
 .svc-cap {
   position: absolute; left: 0; right: 0; bottom: 0;
