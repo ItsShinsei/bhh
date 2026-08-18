@@ -53,13 +53,7 @@ function injectNav() {
         </span>
       </li>
       <li>
-        <span class="nav-link has-dropdown" tabindex="0" data-nav="dokumen/visa.html">
-          Dokumen <span class="nav-chevron">▾</span>
-          <div class="nav-dropdown">
-            <a href="${R}dokumen/visa.html"><span class="nav-dropdown-icon">${icon('fileText', 18)}</span> Visa</a>
-            <a href="${R}dokumen/paspor.html"><span class="nav-dropdown-icon">${icon('idCard', 18)}</span> Paspor</a>
-          </div>
-        </span>
+        <a class="nav-link ${isActive('dokumen') ? 'active' : ''}" href="${R}dokumen/dokumen.html">Dokumen</a>
       </li>
       <li>
         <a class="nav-link ${isActive('galeri') ? 'active' : ''}" href="${R}galeri.html">Galeri</a>

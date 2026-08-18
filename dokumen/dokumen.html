@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dokumen Perjalanan — Bee Happy Holiday</title>
+  <link rel="stylesheet" href="../css/main.css" />
+</head>
+<body>
+<div id="page">
+  <div id="nav-placeholder"></div>
+
+  <div class="page-hero section">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="../index.html">Beranda</a><span>›</span>
+        <span>Dokumen Perjalanan</span>
+      </div>
+      <p class="eyebrow mb-2">📄 Dokumen Perjalanan</p>
+      <h1 class="mb-3">Urusan <em class="text-gold">Dokumen</em><br/>Jadi Mudah</h1>
+      <p class="mw-md mx-auto text-base">
+        Pilih layanan yang kamu butuhkan. Klik tombol di bawah dan langsung chat kami via WhatsApp — gratis konsultasi!
+      </p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid-2" style="max-width:680px; margin:0 auto;">
+        <a class="btn btn-wa btn-lg btn--block" id="btnPaspor" href="#" target="_blank" rel="noopener" style="display:flex; flex-direction:column; align-items:center; gap:.5rem; padding:2.5rem 1.5rem;">
+          <span style="font-size:2.5rem;">📘</span>
+          <span style="font-size:1.25rem; font-weight:700;">Paspor</span>
+          <span class="text-sm" style="opacity:.8;">Pembuatan & Perpanjangan</span>
+        </a>
+        <a class="btn btn-wa btn-lg btn--block" id="btnVisa" href="#" target="_blank" rel="noopener" style="display:flex; flex-direction:column; align-items:center; gap:.5rem; padding:2.5rem 1.5rem;">
+          <span style="font-size:2.5rem;">📋</span>
+          <span style="font-size:1.25rem; font-weight:700;">Visa</span>
+          <span class="text-sm" style="opacity:.8;">Semua Negara Tujuan</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="glass-panel reveal text-center">
+        <p class="eyebrow mb-2">💬 Gratis Konsultasi</p>
+        <h2 class="mb-3">Butuh Bantuan?</h2>
+        <p class="mw-sm mx-auto mb-8 text-base">
+          Ceritakan kebutuhanmu — apakah paspor baru, perpanjangan, atau visa untuk negara tertentu.
+          Kami bantu dari awal hingga dokumen selesai.
+        </p>
+        <a class="btn btn-primary btn-lg" id="ctaWa" href="#" target="_blank" rel="noopener">💬 Chat via WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-placeholder"></div>
+</div>
+
+<script type="module">
+import { waLink } from '../js/config.js';
+import '../js/main.js';
+
+document.getElementById('btnPaspor').href = waLink('Halo! Saya ingin tanya tentang pengurusan paspor. Bisa bantu?');
+document.getElementById('btnVisa').href   = waLink('Halo! Saya ingin tanya tentang pengurusan visa. Bisa bantu?');
+document.getElementById('ctaWa').href     = waLink('Halo! Saya ingin tanya tentang dokumen perjalanan. Bisa bantu?');
+</script>
+</body>
+</html>
