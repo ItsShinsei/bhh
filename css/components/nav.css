@@ -15,10 +15,11 @@
   padding-inline: var(--pad-x);
   gap: var(--space-8);
   box-shadow: var(--shadow-sm);
+  overflow: visible;
 }
 
 /* Logo */
-.nav-logo { display:flex; align-items:center; gap:var(--space-3); flex-shrink:0; }
+.nav-logo { display:flex; align-items:center; gap:var(--space-3); flex-shrink:0; min-width:0; }
 .nav-logo img { height:62px; width:62px; object-fit:contain; border-radius:var(--radius-sm); }
 .nav-logo-text { font-family:var(--font-display); font-weight:700; font-size:1.7rem; color:var(--purple-700); line-height:1.2; }
 .nav-logo-text small { display:block; font-family:var(--font-body); font-size:0.68rem; font-weight:400; color:var(--text-muted); letter-spacing:0.14em; text-transform:uppercase; }
@@ -87,7 +88,7 @@
 .nav-cta { margin-left:auto; }
 
 /* Hamburger */
-.nav-hamburger { display:none; flex-direction:column; gap:5px; padding:var(--space-2); margin-left:auto; }
+.nav-hamburger { display:none; flex-direction:column; gap:5px; padding:var(--space-2); margin-left:auto; flex-shrink:0; min-height:44px; min-width:44px; align-items:center; justify-content:center; }
 .nav-hamburger span { display:block; width:22px; height:2px; background:var(--purple-700); border-radius:2px; transition:all 0.3s; }
 
 /* Mobile nav */
