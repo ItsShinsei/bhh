@@ -21,7 +21,7 @@
 /* Logo */
 .nav-logo { display:flex; align-items:center; gap:var(--space-3); flex-shrink:0; min-width:0; }
 .nav-logo img { height:62px; width:62px; object-fit:contain; border-radius:var(--radius-sm); }
-.nav-logo-text { font-family:var(--font-display); font-weight:700; font-size:1.7rem; color:var(--purple-700); line-height:1.2; }
+.nav-logo-text { font-family:var(--font-display); font-weight:700; font-size:1.7rem; color:var(--purple-700); line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
 .nav-logo-text small { display:block; font-family:var(--font-body); font-size:0.68rem; font-weight:400; color:var(--text-muted); letter-spacing:0.14em; text-transform:uppercase; }
 
 /* Links */
@@ -143,4 +143,10 @@
 @media (max-width: 860px) {
   .nav-links, .nav-cta { display:none; }
   .nav-hamburger { display:flex; }
+  .nav-logo-text small { display:none; }
+}
+@media (max-width: 480px) {
+  .nav-logo-text { font-size:1.3rem; }
+  .nav-logo img { height:48px; width:48px; }
+  .mobile-nav { padding: var(--space-6) var(--space-4); }
 }
