@@ -1,0 +1,153 @@
+/* ═══════════════════════════════════════════
+   Bee Happy Holiday v2 — Admin Dashboard Styles
+   Loaded after main.css; uses the same tokens.
+   ═══════════════════════════════════════════ */
+
+/* ── Tabs ── */
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--space-4);
+}
+.admin-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--fast), color var(--fast), border-color var(--fast);
+}
+.admin-tab:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.admin-tab.active {
+  background: var(--purple-700);
+  border-color: var(--purple-700);
+  color: #fff;
+}
+.admin-tab .count {
+  font-size: 0.72rem;
+  opacity: 0.75;
+}
+
+/* ── Panels ── */
+.admin-panel { display: none; }
+.admin-panel.active { display: block; }
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .panel-grid { grid-template-columns: 1fr; }
+}
+
+.panel-list-col .admin-card { padding: var(--space-4) var(--space-5); }
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  gap: var(--space-3);
+}
+.list-header h2 { margin: 0; }
+
+/* ── Data table ── */
+.table-wrap { overflow-x: auto; }
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.data-table th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.data-table tbody tr:hover { background: var(--bg-tint); }
+.data-table td.col-id { color: var(--text-light); font-variant-numeric: tabular-nums; }
+.data-table td.col-actions { text-align: right; white-space: nowrap; }
+.data-table .cell-truncate {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.data-table .thumb {
+  width: 40px; height: 40px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  display: block;
+}
+.expired-row td { opacity: 0.55; }
+.badge-expired {
+  display: inline-block;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(220,38,38,0.1);
+  color: #dc2626;
+  font-weight: 700;
+  margin-left: var(--space-2);
+}
+
+/* ── Delete button ── */
+.btn-danger {
+  background: transparent;
+  color: #dc2626;
+  border-color: rgba(220,38,38,0.35);
+  padding: 6px 12px;
+  font-size: 0.78rem;
+}
+.btn-danger:hover {
+  background: rgba(220,38,38,0.08);
+  border-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+/* ── Empty / loading states ── */
+.list-state {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ── Form tweaks ── */
+.admin-card h2 { margin-top: 0; margin-bottom: var(--space-4); font-size: 1.05rem; }
+.form-group textarea {
+  min-height: 72px;
+  resize: vertical;
+  font-family: var(--font-body);
+}
+.form-hint {
+  font-size: 0.72rem;
+  color: var(--text-light);
+  margin-top: -6px;
+  margin-bottom: var(--space-3);
+}

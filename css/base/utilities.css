@@ -150,3 +150,21 @@
 
 /* Flush-bottom section (no closing padding) */
 .section--flush-bottom { padding-bottom: 0; }
+
+/* ── Admin layout ── */
+.admin-layout           { max-width: var(--max-w); margin: 0 auto; padding: var(--space-8); }
+.admin-header           { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-8); padding-bottom: var(--space-4); border-bottom: 1px solid var(--border); }
+.status-badge           { font-size: 0.85rem; }
+.admin-container        { display: grid; gap: var(--space-8); }
+.admin-card             { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-6); }
+.form-row               { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4); }
+.form-row .form-group   { margin-bottom: 0; }
+.form-group             { margin-bottom: var(--space-3); }
+.form-group label       { display: block; margin-bottom: var(--space-1); font-size: 0.82rem; color: var(--text-muted); }
+.form-group input,
+.form-group textarea,
+.form-group select      { width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius); font-family: var(--font-body); font-size: 0.9rem; transition: border-color var(--fast); }
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus { outline: none; border-color: var(--gold-500); }
+.results-small          { font-size: 0.78rem; margin-top: var(--space-2); }
