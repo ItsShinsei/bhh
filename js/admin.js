@@ -11,6 +11,23 @@ import { API_BASE, driveThumb } from './config.js';
 
 const workerUrl = API_BASE.replace(/\/api$/, '');
 
+// ── Image upload config ──
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
+
+// Uploads a File to the Worker's R2-backed /api/upload route.
+// Returns the public R2 URL on success, throws on failure.
+async function uploadImage(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+  const res = await fetch(`${API_BASE}/api/upload`, { method: 'POST', body: formData });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || `Upload gagal (HTTP ${res.status})`);
+  }
+  const data = await res.json();
+  return data.url;
+}
+
 // ── Resource configuration ──
 // fields  → drives the "add new" form
 // columns → drives the data table (render(item) returns HTML string)
@@ -26,7 +43,7 @@ const RESOURCES = [
       { name: 'price', label: 'Harga', type: 'text' },
       { name: 'price2', label: 'Harga Coret (opsional)', type: 'text' },
       { name: 'description', label: 'Deskripsi', type: 'textarea' },
-      { name: 'image_url', label: 'Gambar (URL Drive)', type: 'text' },
+      { name: 'image_url', label: 'Gambar', type: 'image' },
       { name: 'badge', label: 'Badge', type: 'text' },
       { name: 'whatsapp_msg', label: 'WhatsApp Msg', type: 'text' },
       { name: 'expires', label: 'Kadaluarsa (opsional)', type: 'date' },
@@ -49,7 +66,7 @@ const RESOURCES = [
       { name: 'price', label: 'Harga', type: 'text' },
       { name: 'price2', label: 'Harga Coret (opsional)', type: 'text' },
       { name: 'description', label: 'Deskripsi', type: 'textarea' },
-      { name: 'image_url', label: 'Gambar (URL Drive)', type: 'text' },
+      { name: 'image_url', label: 'Gambar', type: 'image' },
       { name: 'badge', label: 'Badge', type: 'text' },
       { name: 'whatsapp_msg', label: 'WhatsApp Msg', type: 'text' },
       { name: 'expires', label: 'Kadaluarsa (opsional)', type: 'date' },
@@ -71,7 +88,7 @@ const RESOURCES = [
       { name: 'price', label: 'Harga', type: 'text' },
       { name: 'price2', label: 'Harga Coret (opsional)', type: 'text' },
       { name: 'description', label: 'Deskripsi', type: 'textarea' },
-      { name: 'image_url', label: 'Gambar (URL Drive)', type: 'text' },
+      { name: 'image_url', label: 'Gambar', type: 'image' },
       { name: 'badge', label: 'Badge', type: 'text' },
       { name: 'whatsapp_msg', label: 'WhatsApp Msg', type: 'text' },
       { name: 'expires', label: 'Kadaluarsa (opsional)', type: 'date' },
@@ -93,7 +110,7 @@ const RESOURCES = [
       { name: 'price', label: 'Harga', type: 'text' },
       { name: 'price2', label: 'Harga Coret (opsional)', type: 'text' },
       { name: 'description', label: 'Deskripsi', type: 'textarea' },
-      { name: 'image_url', label: 'Gambar (URL Drive)', type: 'text' },
+      { name: 'image_url', label: 'Gambar', type: 'image' },
       { name: 'badge', label: 'Badge', type: 'text' },
       { name: 'whatsapp_msg', label: 'WhatsApp Msg', type: 'text' },
       { name: 'expires', label: 'Kadaluarsa (opsional)', type: 'date' },
@@ -111,7 +128,7 @@ const RESOURCES = [
     fields: [
       { name: 'name', label: 'Nama Promo', type: 'text', required: true },
       { name: 'description', label: 'Deskripsi', type: 'textarea' },
-      { name: 'image_url', label: 'Gambar (URL Drive)', type: 'text' },
+      { name: 'image_url', label: 'Gambar', type: 'image' },
       { name: 'badge', label: 'Badge', type: 'text' },
       { name: 'whatsapp_msg', label: 'WhatsApp Msg', type: 'text' },
       { name: 'expires', label: 'Kadaluarsa (opsional)', type: 'date' },
@@ -142,7 +159,7 @@ const RESOURCES = [
     fields: [
       { name: 'title', label: 'Judul', type: 'text', required: true },
       { name: 'category', label: 'Kategori', type: 'select', required: true, options: ['domestik', 'inter', 'cruise', 'umroh'] },
-      { name: 'image_url', label: 'Gambar (URL Drive)', type: 'text', required: true },
+      { name: 'image_url', label: 'Gambar', type: 'image', required: true },
     ],
     columns: [
       { label: 'Gambar', render: i => thumbCell(i.image_url) },
@@ -228,6 +245,12 @@ RESOURCES.forEach(r => {
       control = `<select name="${f.name}" ${req}>${opts}</select>`;
     } else if (f.type === 'number') {
       control = `<input type="number" name="${f.name}" ${f.min != null ? `min="${f.min}"` : ''} ${f.max != null ? `max="${f.max}"` : ''} ${req}>`;
+    } else if (f.type === 'image') {
+      control = `
+        <input type="file" name="${f.name}" accept="image/*" data-image-input>
+        <div class="form-hint">Maks 5MB · JPG, PNG, atau WebP</div>
+        <div class="image-preview" data-image-preview></div>
+      `;
     } else {
       control = `<input type="${f.type}" name="${f.name}" ${req}>`;
     }
@@ -278,25 +301,66 @@ RESOURCES.forEach(r => {
   const form = document.getElementById(`form-${r.key}`);
   form.addEventListener('submit', async e => {
     e.preventDefault();
-    const data = {};
-    for (const f of r.fields) {
-      let v = form.elements[f.name].value;
-      if (typeof v === 'string') v = v.trim();
-      if (f.type === 'number' && v !== '') v = Number(v);
-      if (v !== '') data[f.name] = v;
-    }
     const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.textContent;
     submitBtn.disabled = true;
+
+    const data = {};
     try {
+      for (const f of r.fields) {
+        if (f.type === 'image') {
+          const fileInput = form.elements[f.name];
+          const file = fileInput.files[0];
+
+          if (!file) {
+            if (f.required) throw new Error(`${f.label} wajib diisi.`);
+            continue;
+          }
+          if (!file.type.startsWith('image/')) {
+            throw new Error(`${f.label}: file harus berupa gambar.`);
+          }
+          if (file.size > MAX_IMAGE_BYTES) {
+            throw new Error(`${f.label}: ukuran maksimal 5MB.`);
+          }
+
+          submitBtn.textContent = 'Mengunggah gambar...';
+          data[f.name] = await uploadImage(file);
+          continue;
+        }
+
+        let v = form.elements[f.name].value;
+        if (typeof v === 'string') v = v.trim();
+        if (f.type === 'number' && v !== '') v = Number(v);
+        if (v !== '') data[f.name] = v;
+      }
+
+      submitBtn.textContent = 'Menyimpan...';
       const result = await apiFetch(r.endpoint, { method: 'POST', body: data });
       showResult(r.key, `✅ ${r.label} ditambahkan (ID: ${result.id})`, 'success');
       form.reset();
+      form.querySelectorAll('[data-image-preview]').forEach(el => el.innerHTML = '');
       loadList(r);
     } catch (err) {
       showResult(r.key, `❌ Error: ${err.message}`, 'error');
     } finally {
       submitBtn.disabled = false;
+      submitBtn.textContent = originalBtnText;
     }
+  });
+
+  // Live thumbnail preview when an admin picks a file, before upload happens
+  form.querySelectorAll('[data-image-input]').forEach(input => {
+    input.addEventListener('change', () => {
+      const preview = input.closest('.form-group').querySelector('[data-image-preview]');
+      const file = input.files[0];
+      preview.innerHTML = '';
+      if (!file) return;
+      if (!file.type.startsWith('image/') || file.size > MAX_IMAGE_BYTES) return; // errors surface on submit
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.onload = () => URL.revokeObjectURL(img.src);
+      preview.appendChild(img);
+    });
   });
 
   document.querySelector(`[data-refresh="${r.key}"]`).addEventListener('click', () => loadList(r));

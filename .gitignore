@@ -4,3 +4,7 @@ schema.sql
 opencode.json
 worker.js
 .vscode
+.token-optimizer
+.opencode
+hooks
+AGENTS.md

@@ -36,10 +36,10 @@
    ═══════════════════════════════════════════ */
 
 const CORS = {
-  'Content-Type': 'application/json',
+  'Content-Type':                'application/json',
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods':'GET, POST, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers':'Content-Type',
 };
 
 const ok      = (d)      => new Response(JSON.stringify(d),       { status: 200, headers: CORS });
@@ -87,6 +87,27 @@ export default {
         return ok({ deleted: true, id });
       }
 
+           // ════════════════════════════════════════
+      //  UPLOAD — /api/upload
+      //  Accepts multipart/form-data with field "image"
+      //  Stores in R2, returns public URL
+      // ════════════════════════════════════════
+      if (path === '/api/upload' && request.method === 'POST') {
+        const formData = await request.formData();
+        const file = formData.get('image');
+        if (!file) return err('No file provided', 400);
+
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+        const key = `${Date.now()}-${crypto.randomUUID()}.${ext}`;
+
+        await env.BHH_IMAGES.put(key, file.stream(), {
+          httpMetadata: { contentType: file.type },
+        });
+
+        const publicUrl = `https://pub-5effb5342cd94102a9ddd904b038efb4.r2.dev/${key}`;
+        return created({ url: publicUrl });
+      }
+
       // ════════════════════════════════════════
       //  LISTINGS — DOMESTIK
       //  ?province=Bali  ?city=Denpasar  ?all=1
@@ -96,10 +117,10 @@ export default {
           const body = await request.json();
           const { province, city, name, duration, price, price2, description, image_url, badge, whatsapp_msg, expires } = body;
           if (!province || !city || !name) return err('Missing required fields: province, city, name', 400);
-          const [res] = await env.DB.prepare(
+          const res = await env.DB.prepare(
             `INSERT INTO listings_domestik (province, city, name, duration, price, price2, description, image_url, badge, whatsapp_msg, expires) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
           ).bind(province, city, name, duration || '', price || '', price2 || '', description || '', image_url || '', badge || '', whatsapp_msg || '', expires || null).run();
-          return created({ id: res.lastInsertRowID, ...body });
+          return created({ id: res.meta.last_row_id, ...body });
         }
         let q = p.get('all') === '1' ? `SELECT * FROM listings_domestik WHERE 1=1` : `SELECT * FROM listings_domestik WHERE ${ALIVE}`;
         const args = [];
@@ -119,10 +140,10 @@ export default {
           const body = await request.json();
           const { country, city, name, duration, price, price2, description, image_url, badge, whatsapp_msg, expires } = body;
           if (!country || !city || !name) return err('Missing required fields: country, city, name', 400);
-          const [res] = await env.DB.prepare(
+          const res = await env.DB.prepare(
             `INSERT INTO listings_inter (country, city, name, duration, price, price2, description, image_url, badge, whatsapp_msg, expires) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
           ).bind(country, city, name, duration || '', price || '', price2 || '', description || '', image_url || '', badge || '', whatsapp_msg || '', expires || null).run();
-          return created({ id: res.lastInsertRowID, ...body });
+          return created({ id: res.meta.last_row_id, ...body });
         }
         let q = p.get('all') === '1' ? `SELECT * FROM listings_inter WHERE 1=1` : `SELECT * FROM listings_inter WHERE ${ALIVE}`;
         const args = [];
@@ -142,10 +163,10 @@ export default {
           const body = await request.json();
           const { route, name, duration, price, price2, description, image_url, badge, whatsapp_msg, expires } = body;
           if (!route || !name) return err('Missing required fields: route, name', 400);
-          const [res] = await env.DB.prepare(
+          const res = await env.DB.prepare(
             `INSERT INTO listings_cruise (route, name, duration, price, price2, description, image_url, badge, whatsapp_msg, expires) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
           ).bind(route, name, duration || '', price || '', price2 || '', description || '', image_url || '', badge || '', whatsapp_msg || '', expires || null).run();
-          return created({ id: res.lastInsertRowID, ...body });
+          return created({ id: res.meta.last_row_id, ...body });
         }
         const q = p.get('all') === '1' ? `SELECT * FROM listings_cruise ORDER BY created_at DESC` : `SELECT * FROM listings_cruise WHERE ${ALIVE} ORDER BY created_at DESC`;
         const { results } = await env.DB.prepare(q).all();
@@ -161,10 +182,10 @@ export default {
           const body = await request.json();
           const { package_type, name, duration, price, price2, description, image_url, badge, whatsapp_msg, expires } = body;
           if (!package_type || !name) return err('Missing required fields: package_type, name', 400);
-          const [res] = await env.DB.prepare(
+          const res = await env.DB.prepare(
             `INSERT INTO listings_umroh (package_type, name, duration, price, price2, description, image_url, badge, whatsapp_msg, expires) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
           ).bind(package_type, name, duration || '', price || '', price2 || '', description || '', image_url || '', badge || '', whatsapp_msg || '', expires || null).run();
-          return created({ id: res.lastInsertRowID, ...body });
+          return created({ id: res.meta.last_row_id, ...body });
         }
         let q = p.get('all') === '1' ? `SELECT * FROM listings_umroh WHERE 1=1` : `SELECT * FROM listings_umroh WHERE ${ALIVE}`;
         const args = [];
@@ -183,10 +204,10 @@ export default {
           const body = await request.json();
           const { name, description, image_url, badge, whatsapp_msg, expires } = body;
           if (!name) return err('Missing required field: name', 400);
-          const [res] = await env.DB.prepare(
+          const res = await env.DB.prepare(
             `INSERT INTO offers (name, description, image_url, badge, whatsapp_msg, expires) VALUES (?, ?, ?, ?, ?, ?)`
           ).bind(name, description || '', image_url || '', badge || '', whatsapp_msg || '', expires || null).run();
-          return created({ id: res.lastInsertRowID, ...body });
+          return created({ id: res.meta.last_row_id, ...body });
         }
         const q = p.get('all') === '1' ? `SELECT * FROM offers ORDER BY created_at DESC` : `SELECT * FROM offers WHERE ${ALIVE} ORDER BY created_at DESC`;
         const { results } = await env.DB.prepare(q).all();
@@ -201,10 +222,10 @@ export default {
           const body = await request.json();
           const { name, photo_url, rating, text } = body;
           if (!name || rating === undefined) return err('Missing required fields: name, rating', 400);
-          const [res] = await env.DB.prepare(
+          const res = await env.DB.prepare(
             `INSERT INTO reviews (name, photo_url, rating, text) VALUES (?, ?, ?, ?)`
           ).bind(name, photo_url || '', rating, text || '').run();
-          return created({ id: res.lastInsertRowID, ...body });
+          return created({ id: res.meta.last_row_id, ...body });
         }
         const { results } = await env.DB
           .prepare(`SELECT * FROM reviews ORDER BY created_at DESC`)
@@ -221,10 +242,10 @@ export default {
           const body = await request.json();
           const { title, image_url, category } = body;
           if (!title || !image_url || !category) return err('Missing required fields: title, image_url, category', 400);
-          const [res] = await env.DB.prepare(
+          const res = await env.DB.prepare(
             `INSERT INTO gallery (title, image_url, category) VALUES (?, ?, ?)`
           ).bind(title, image_url, category).run();
-          return created({ id: res.lastInsertRowID, ...body });
+          return created({ id: res.meta.last_row_id, ...body });
         }
         let q = `SELECT * FROM gallery`;
         const args = [];
