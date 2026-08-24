@@ -163,3 +163,44 @@
   border: 1px solid var(--border);
   display: block;
 }
+
+/* ── Header sizing ── */
+.admin-header { flex-wrap: wrap; gap: var(--space-3); }
+.admin-header h1.nav-logo {
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .admin-layout { padding: var(--space-4); }
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: var(--space-6);
+  }
+  .admin-header h1.nav-logo { font-size: 1.25rem; line-height: 1.25; }
+  .nav-logo img { height: 40px; width: 40px; }
+  .header-actions { width: 100%; }
+  .status-badge { font-size: 0.78rem; }
+  .header-actions .btn { padding: 7px 14px; font-size: 0.8rem; }
+
+  .admin-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-3);
+  }
+  .admin-tabs::-webkit-scrollbar { display: none; }
+  .admin-tab { flex-shrink: 0; white-space: nowrap; }
+
+  .form-row { grid-template-columns: 1fr; }
+  .data-table .cell-truncate { max-width: 160px; }
+}
