@@ -47,12 +47,35 @@
 
 .panel-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 360px) 1fr;
+  grid-template-columns: 1fr;
   gap: var(--space-6);
+}
+
+/* Form card now spans full width like the table below it, but its fields
+   flow into a responsive grid so short inputs (province, price, badge...)
+   sit side-by-side instead of leaving empty space on wide screens. */
+.panel-form-col .admin-card form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-4);
   align-items: start;
 }
-@media (max-width: 900px) {
-  .panel-grid { grid-template-columns: 1fr; }
+
+/* Long-form fields and the submit button always take the full row width */
+.panel-form-col .admin-card form .form-group:has(textarea),
+.panel-form-col .admin-card form .form-group:has([data-image-input]),
+.panel-form-col .admin-card form > button[type="submit"] {
+  grid-column: 1 / -1;
+}
+
+.panel-form-col .admin-card form .form-group {
+  margin-bottom: 0; /* grid gap handles spacing now */
+}
+
+@media (max-width: 640px) {
+  .panel-form-col .admin-card form {
+    grid-template-columns: 1fr;
+  }
 }
 
 .panel-list-col .admin-card { padding: var(--space-4) var(--space-5); }
@@ -67,38 +90,42 @@
 .list-header h2 { margin: 0; }
 
 /* ── Data table ── */
-.table-wrap { overflow-x: auto; }
+.table-wrap { overflow-x: auto; min-width: 0; max-width: 100%; }
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
+  table-layout: auto;
 }
 .data-table th,
 .data-table td {
   text-align: left;
-  padding: var(--space-3) var(--space-2);
+  padding: var(--space-2) 6px;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
+  white-space: normal;       /* allow wrapping instead of forcing width */
+  word-break: break-word;
 }
 .data-table th {
-  font-size: 0.72rem;
+  font-size: 0.64rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: var(--text-muted);
   font-weight: 700;
-  white-space: nowrap;
+  white-space: normal;
 }
 .data-table tbody tr:hover { background: var(--bg-tint); }
-.data-table td.col-id { color: var(--text-light); font-variant-numeric: tabular-nums; }
-.data-table td.col-actions { text-align: right; white-space: nowrap; }
+.data-table td.col-id { color: var(--text-light); font-variant-numeric: tabular-nums; width: 32px; }
+.data-table td.col-actions { text-align: right; white-space: nowrap; width: 1%; }
 .data-table .cell-truncate {
-  max-width: 260px;
+  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: block;
 }
 .data-table .thumb {
-  width: 40px; height: 40px;
+  width: 30px; height: 30px;
   object-fit: cover;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
@@ -117,12 +144,16 @@
 }
 
 /* ── Delete button ── */
+.col-actions { display: flex; gap: 4px; justify-content: flex-end; }
+.col-actions .btn {
+  padding: 5px 8px;
+  font-size: 0.72rem;
+  min-width: 0;
+}
 .btn-danger {
   background: transparent;
   color: #dc2626;
   border-color: rgba(220,38,38,0.35);
-  padding: 6px 12px;
-  font-size: 0.78rem;
 }
 .btn-danger:hover {
   background: rgba(220,38,38,0.08);
@@ -204,3 +235,152 @@
   .form-row { grid-template-columns: 1fr; }
   .data-table .cell-truncate { max-width: 160px; }
 }
+/* ── Edit modal ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(42,24,56,0.55);
+  z-index: 400;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--space-6);
+  opacity: 0; visibility: hidden;
+  transition: opacity var(--mid), visibility var(--mid);
+}
+.modal-overlay.open { opacity: 1; visibility: visible; }
+.modal-box {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-6);
+  max-width: 480px;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  position: relative;
+}
+.modal-box h2 { margin-top: 0; margin-bottom: var(--space-4); font-size: 1.05rem; padding-right: var(--space-8); }
+.modal-close {
+  position: absolute; top: var(--space-4); right: var(--space-4);
+  width: 36px; height: 36px; border-radius: var(--radius-full);
+  background: var(--bg-tint); border: 1px solid var(--border);
+  color: var(--text-muted); font-size: 1.1rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background var(--fast), color var(--fast);
+}
+.modal-close:hover { background: var(--border-hover); color: var(--text); }
+
+/* ── Row action buttons (desktop) ── */
+.col-actions { display: flex; gap: var(--space-2); justify-content: flex-end; }
+
+/* ── List header wraps for search on small screens ── */
+.list-header { flex-wrap: wrap; }
+
+/* ── Search box ── */
+.list-search { margin-bottom: var(--space-4); }
+.list-search input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  transition: border-color var(--fast);
+}
+.list-search input:focus { outline: none; border-color: var(--gold-500); }
+
+/* ── Pagination ── */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
+}
+.pagination-info { font-size: 0.78rem; color: var(--text-muted); }
+.pagination-btns { display: flex; gap: var(--space-2); }
+.pagination-btns .btn {
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+  padding: 8px 16px;
+}
+.pagination-btns .btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ── Mobile: table rows become stacked cards ── */
+@media (max-width: 640px) {
+  .data-table thead { display: none; }
+  .data-table, .data-table tbody, .data-table tr, .data-table td {
+    display: block;
+    width: 100%;
+  }
+  .data-table tr {
+    margin-bottom: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-card);
+  }
+  .data-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--border);
+    text-align: right;
+  }
+  .data-table td:last-child { border-bottom: none; }
+  .data-table td[data-label]:not([data-label=""])::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    text-align: left;
+    flex-shrink: 0;
+  }
+  .data-table td.col-id { display: none; } /* not useful for the boss on mobile */
+  .data-table .thumb { width: 64px; height: 64px; }
+
+  /* Actions stack full-width for easy tapping */
+  .data-table td.col-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+    padding-top: var(--space-4);
+  }
+  .data-table td.col-actions .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    font-size: 0.85rem;
+  }
+
+  .pagination-controls { justify-content: center; text-align: center; }
+  .pagination-info { width: 100%; text-align: center; }
+  .pagination-btns .btn { flex: 1; }
+}
+
+/* ── Fix: prevent wide tables from blowing out the grid layout ──
+   Grid children default to min-width:auto, so a table wider than its
+   column tries to grow the whole grid track instead of scrolling
+   inside .table-wrap. min-width:0 forces it to respect the track. */
+.panel-list-col,
+.panel-form-col {
+  min-width: 0;
+}
+.admin-card {
+  min-width: 0;
+}
+.table-wrap {
+  min-width: 0;
+  max-width: 100%;
+}
+
+
