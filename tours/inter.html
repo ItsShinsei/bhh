@@ -54,17 +54,26 @@ import { fetchInter, fetchMetaInter, renderCard, showLoading, showError, reObser
 
 const useDemo = API_BASE.includes('YOUR_WORKER');
 
-let allMeta     = [];
+let allMeta       = [];
 let activeCountry = null;
 let activeCity    = null;
 
-const grid       = document.getElementById('grid');
+const grid        = document.getElementById('grid');
 const countryTabs = document.getElementById('countryTabs');
-const cityTabs   = document.getElementById('cityTabs');
-const cityWrap   = document.getElementById('cityFilterWrap');
+const cityTabs    = document.getElementById('cityTabs');
+const cityWrap    = document.getElementById('cityFilterWrap');
+
+// Pecah "Changsha, Chongqing, Fenghuang" jadi ['Changsha','Chongqing','Fenghuang']
+function splitLocations(str) {
+  if (!str) return [];
+  return [...new Set(str.split(',').map(s => s.trim()).filter(Boolean))];
+}
 
 function buildCountryTabs() {
-  const countries = [...new Set(allMeta.map(m => m.country))].sort();
+  const set = new Set();
+  allMeta.forEach(m => splitLocations(m.country).forEach(c => set.add(c)));
+  const countries = [...set].sort();
+
   countryTabs.innerHTML =
     `<button class="filter-tab active" data-val="">🌍 Semua</button>` +
     countries.map(c => `<button class="filter-tab" data-val="${c}">${c}</button>`).join('');
@@ -83,10 +92,14 @@ function buildCountryTabs() {
 
 function buildCityTabs() {
   if (!activeCountry) { cityWrap.style.display = 'none'; return; }
-  const cities = allMeta
-    .filter(m => m.country === activeCountry && m.city)
-    .map(m => m.city)
-    .sort();
+
+  const set = new Set();
+  allMeta.forEach(m => {
+    if (splitLocations(m.country).includes(activeCountry)) {
+      splitLocations(m.city).forEach(c => set.add(c));
+    }
+  });
+  const cities = [...set].sort();
 
   if (!cities.length) { cityWrap.style.display = 'none'; return; }
 
@@ -108,14 +121,19 @@ function buildCityTabs() {
 async function load() {
   showLoading(grid);
   try {
-    const data = useDemo
-      ? DEMO.inter.filter(d =>
-          (!activeCountry || d.country === activeCountry) &&
-          (!activeCity    || d.city === activeCity))
-      : await fetchInter(activeCountry, activeCity);
+    // Ambil SEMUA data (tanpa filter server-side, karena backend cuma exact-match)
+    const data = useDemo ? DEMO.inter : await fetchInter();
 
-    grid.innerHTML = data.length
-      ? data.map((item, i) => renderCard(item, i * 75)).join('')
+    const filtered = data.filter(d => {
+      const countries = splitLocations(d.country);
+      const cities     = splitLocations(d.city);
+      if (activeCountry && !countries.includes(activeCountry)) return false;
+      if (activeCity    && !cities.includes(activeCity))       return false;
+      return true;
+    });
+
+    grid.innerHTML = filtered.length
+      ? filtered.map((item, i) => renderCard(item, i * 75)).join('')
       : '<div class="state-box"><div class="state-icon">✈️</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket untuk destinasi ini sedang kami siapkan.</p></div>';
 
     reObserve();
