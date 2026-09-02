@@ -544,9 +544,15 @@ function renderTable(r) {
     <tr class="${isRowExpired(item) ? 'expired-row' : ''}">
       <td class="col-id" data-label="ID">${esc(item.id)}</td>
       ${r.columns.map(c => `<td data-label="${esc(c.label)}">${c.render(item)}</td>`).join('')}
-      <td class="col-actions" data-label="">
-        <button type="button" class="btn btn-outline btn-sm" data-edit="${item.id}" title="Edit">✏️</button>
-<button type="button" class="btn btn-danger" data-delete="${item.id}" data-label="${escAttr(item.name || item.title || item.text || ('#' + item.id))}" title="Hapus">🗑️</button>
+      <td class="col-actions" data-label="Aksi">
+        <button type="button" class="btn btn-action btn-edit" data-edit="${item.id}" title="Edit data" aria-label="Edit data ${escAttr(item.name || item.title || item.text || ('#' + item.id))}">
+          <span aria-hidden="true">✏️</span>
+          <span>Edit</span>
+        </button>
+        <button type="button" class="btn btn-action btn-delete" data-delete="${item.id}" data-label="${escAttr(item.name || item.title || item.text || ('#' + item.id))}" title="Hapus data" aria-label="Hapus data ${escAttr(item.name || item.title || item.text || ('#' + item.id))}">
+          <span aria-hidden="true">🗑️</span>
+          <span>Delete</span>
+        </button>
       </td>
     </tr>
   `).join('');
