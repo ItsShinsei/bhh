@@ -150,7 +150,8 @@ function normalizePriceField(value) {
 function thumbCell(url) {
   const src = driveThumb(url, 'w200');
   if (!src) return `<span class="list-state" style="padding:0;">—</span>`;
-  return `<img class="thumb" src="${esc(src)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`;
+  const fullImage = driveThumb(url, 'w2000');
+  return `<img class="thumb table-image-preview" src="${esc(src)}" data-full-image="${escAttr(fullImage)}" title="Klik untuk melihat gambar penuh" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`;
 }
 
 function expiresCell(expires) {
@@ -241,7 +242,9 @@ function wireImagePreviews(form) {
       if (!file.type.startsWith('image/') || file.size > MAX_IMAGE_BYTES) return;
       const img = document.createElement('img');
       img.src = URL.createObjectURL(file);
-      img.onload = () => URL.revokeObjectURL(img.src);
+      img.dataset.fullImage = img.src;
+      img.title = 'Klik untuk melihat gambar penuh';
+      img.addEventListener('click', () => openImageViewer(img.dataset.fullImage));
       preview.appendChild(img);
     });
   });
@@ -351,6 +354,28 @@ editModal.innerHTML = `
 `;
 document.body.appendChild(editModal);
 
+const imageViewer = document.createElement('div');
+imageViewer.className = 'image-viewer-overlay';
+imageViewer.innerHTML = `
+  <button type="button" class="modal-close image-viewer-close" aria-label="Tutup gambar">&times;</button>
+  <img class="image-viewer-image" alt="Pratinjau gambar penuh">
+`;
+document.body.appendChild(imageViewer);
+
+function closeImageViewer() {
+  imageViewer.classList.remove('open');
+  imageViewer.querySelector('.image-viewer-image').removeAttribute('src');
+}
+
+function openImageViewer(src) {
+  if (!src) return;
+  imageViewer.querySelector('.image-viewer-image').src = src;
+  imageViewer.classList.add('open');
+}
+
+imageViewer.querySelector('.image-viewer-close').addEventListener('click', closeImageViewer);
+imageViewer.addEventListener('click', e => { if (e.target === imageViewer) closeImageViewer(); });
+
 function closeEditModal() {
   editModal.classList.remove('open');
   document.getElementById('editForm').innerHTML = '';
@@ -358,7 +383,11 @@ function closeEditModal() {
 }
 editModal.querySelector('.modal-close').addEventListener('click', closeEditModal);
 editModal.addEventListener('click', e => { if (e.target === editModal) closeEditModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && editModal.classList.contains('open')) closeEditModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (imageViewer.classList.contains('open')) closeImageViewer();
+  else if (editModal.classList.contains('open')) closeEditModal();
+});
 
 function openEditModal(r, item) {
   document.getElementById('editModalTitle').textContent = `Edit ${r.label}`;
@@ -376,7 +405,11 @@ function openEditModal(r, item) {
   if (imgField) {
     const current = item[imgField.name];
     const preview = form.querySelector('[data-image-preview]');
-    if (preview && current) preview.innerHTML = `<img src="${esc(driveThumb(current, 'w200'))}" alt="">`;
+    if (preview && current) {
+      const fullImage = escAttr(driveThumb(current, 'w2000'));
+      preview.innerHTML = `<img src="${esc(driveThumb(current, 'w200'))}" data-full-image="${fullImage}" title="Klik untuk melihat gambar penuh" alt="">`;
+      preview.querySelector('img').addEventListener('click', () => openImageViewer(preview.querySelector('img').dataset.fullImage));
+    }
   }
 
   wirePriceFormatting(form);
@@ -491,6 +524,12 @@ RESOURCES.forEach(r => {
   });
 
   document.getElementById(`tbody-${r.key}`).addEventListener('click', async e => {
+    const imagePreview = e.target.closest('[data-full-image]');
+    if (imagePreview) {
+      openImageViewer(imagePreview.dataset.fullImage);
+      return;
+    }
+
     const editBtn = e.target.closest('[data-edit]');
     if (editBtn) {
       const id = Number(editBtn.dataset.edit);

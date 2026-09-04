@@ -332,6 +332,10 @@ body {
   background: var(--bg-tint);
 }
 
+.data-table .table-image-preview {
+  cursor: zoom-in;
+}
+
 .expired-row td { opacity: 0.6; }
 
 .badge-expired {
@@ -420,6 +424,11 @@ textarea:focus-visible {
   display: block;
 }
 
+.image-preview img[data-full-image],
+.image-preview img[src^="blob:"] {
+  cursor: zoom-in;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -437,6 +446,46 @@ textarea:focus-visible {
 .modal-overlay.open {
   opacity: 1;
   visibility: visible;
+}
+
+.image-viewer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background: rgba(20, 12, 25, 0.86);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--mid), visibility var(--mid);
+}
+
+.image-viewer-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.image-viewer-image {
+  display: block;
+  max-width: min(96vw, 1400px);
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.image-viewer-close {
+  position: fixed;
+  top: var(--space-5);
+  right: var(--space-5);
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
 }
 
 .modal-box {
