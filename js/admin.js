@@ -129,6 +129,24 @@ function esc(s) {
 }
 function escAttr(s) { return esc(s).replace(/\n/g, ' '); }
 
+function formatRupiahInput(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw) return '';
+  const digits = raw.replace(/[^\d-]/g, '');
+  if (!digits) return '';
+  const isNegative = digits.startsWith('-');
+  const absDigits = digits.replace(/-/g, '');
+  const numeric = Number(absDigits);
+  if (!Number.isFinite(numeric) || absDigits === '') return raw;
+  const formatted = new Intl.NumberFormat('id-ID').format(Math.trunc(numeric));
+  return `${isNegative ? '-' : ''}RP ${formatted}`;
+}
+
+function normalizePriceField(value) {
+  const formatted = formatRupiahInput(value);
+  return formatted || '';
+}
+
 function thumbCell(url) {
   const src = driveThumb(url, 'w200');
   if (!src) return `<span class="list-state" style="padding:0;">—</span>`;
@@ -196,11 +214,21 @@ function fieldsHtml(fields) {
         <div class="form-hint">Maks 5MB · JPG, PNG, atau WebP</div>
         <div class="image-preview" data-image-preview></div>
       `;
+    } else if (f.name === 'price' || f.name === 'price2') {
+      control = `<input type="text" name="${f.name}" inputmode="numeric" autocomplete="off" data-rupiah-input ${req}>`;
     } else {
       control = `<input type="${f.type}" name="${f.name}" ${req}>`;
     }
     return `<div class="form-group"><label>${esc(f.label)}</label>${control}</div>`;
   }).join('');
+}
+
+function wirePriceFormatting(form) {
+  form.querySelectorAll('[data-rupiah-input]').forEach(input => {
+    input.addEventListener('input', () => {
+      input.value = formatRupiahInput(input.value);
+    });
+  });
 }
 
 function wireImagePreviews(form) {
@@ -340,7 +368,8 @@ function openEditModal(r, item) {
   r.fields.forEach(f => {
     if (f.type === 'image') return;
     const el = form.elements[f.name];
-    if (el) el.value = item[f.name] ?? '';
+    if (!el) return;
+    el.value = (f.name === 'price' || f.name === 'price2') ? normalizePriceField(item[f.name] ?? '') : (item[f.name] ?? '');
   });
 
   const imgField = r.fields.find(f => f.type === 'image');
@@ -350,6 +379,7 @@ function openEditModal(r, item) {
     if (preview && current) preview.innerHTML = `<img src="${esc(driveThumb(current, 'w200'))}" alt="">`;
   }
 
+  wirePriceFormatting(form);
   wireImagePreviews(form);
 
   form.onsubmit = async e => {
@@ -374,6 +404,7 @@ function openEditModal(r, item) {
         let v = form.elements[f.name].value;
         if (typeof v === 'string') v = v.trim();
         if (f.type === 'number' && v !== '') v = Number(v);
+        if ((f.name === 'price' || f.name === 'price2') && v !== '') v = normalizePriceField(v);
         data[f.name] = v;
       }
 
@@ -421,6 +452,7 @@ RESOURCES.forEach(r => {
         let v = form.elements[f.name].value;
         if (typeof v === 'string') v = v.trim();
         if (f.type === 'number' && v !== '') v = Number(v);
+        if ((f.name === 'price' || f.name === 'price2') && v !== '') v = normalizePriceField(v);
         if (v !== '') data[f.name] = v;
       }
 
@@ -438,6 +470,7 @@ RESOURCES.forEach(r => {
     }
   });
 
+  wirePriceFormatting(form);
   wireImagePreviews(form);
 
   document.querySelector(`[data-refresh="${r.key}"]`).addEventListener('click', () => loadList(r, { force: true }));
