@@ -195,7 +195,7 @@ function buildColumns(fields) {
 RESOURCES.forEach(r => {
   r.columns = buildColumns(r.fields);
   // Per-resource UI state: lazy-loaded items, pagination, search
-  r.state = { items: [], filtered: [], page: 1, search: '', loaded: false, loading: false };
+  r.state = { items: [], filtered: [], page: 1, search: '', sortKey: 'id', sortDirection: 'desc', loaded: false, loading: false };
 });
 
 function fieldsHtml(fields) {
@@ -312,6 +312,17 @@ RESOURCES.forEach(r => {
           </div>
           <div class="list-search">
             <input type="search" placeholder="Cari ${esc(r.label).toLowerCase()}..." data-search="${r.key}" inputmode="search">
+            <div class="list-sort" aria-label="Urutkan data">
+              <label for="sort-${r.key}">Urutkan:</label>
+              <select id="sort-${r.key}" data-sort="${r.key}">
+                <option value="id">ID</option>
+                ${r.fields.filter(f => !isImageField(f)).map(f => `<option value="${esc(f.name)}">${esc(f.label)}</option>`).join('')}
+              </select>
+              <select data-sort-direction="${r.key}" aria-label="Arah urutan">
+                <option value="asc">Naik</option>
+                <option value="desc" selected>Turun</option>
+              </select>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="data-table">
@@ -515,6 +526,19 @@ RESOURCES.forEach(r => {
     renderTable(r);
   }, 250));
 
+  const sortInput = document.querySelector(`[data-sort="${r.key}"]`);
+  const sortDirectionInput = document.querySelector(`[data-sort-direction="${r.key}"]`);
+  sortInput.addEventListener('change', () => {
+    r.state.sortKey = sortInput.value;
+    r.state.page = 1;
+    renderTable(r);
+  });
+  sortDirectionInput.addEventListener('change', () => {
+    r.state.sortDirection = sortDirectionInput.value;
+    r.state.page = 1;
+    renderTable(r);
+  });
+
   document.querySelector(`[data-page-prev="${r.key}"]`).addEventListener('click', () => {
     if (r.state.page > 1) { r.state.page--; renderTable(r); }
   });
@@ -598,6 +622,23 @@ function renderTable(r) {
   r.state.filtered = q
     ? r.state.items.filter(item => JSON.stringify(item).toLowerCase().includes(q))
     : r.state.items;
+
+  const direction = r.state.sortDirection === 'desc' ? -1 : 1;
+  const sortField = r.fields.find(f => f.name === r.state.sortKey);
+  const numericSort = r.state.sortKey === 'id' || sortField?.type === 'number' || sortField?.name === 'price' || sortField?.name === 'price2';
+  r.state.filtered = [...r.state.filtered].sort((left, right) => {
+    const leftValue = left[r.state.sortKey];
+    const rightValue = right[r.state.sortKey];
+    if (leftValue == null || leftValue === '') return rightValue == null || rightValue === '' ? 0 : 1;
+    if (rightValue == null || rightValue === '') return -1;
+
+    const leftNumber = Number(String(leftValue).replace(/[^\d-]/g, ''));
+    const rightNumber = Number(String(rightValue).replace(/[^\d-]/g, ''));
+    if (numericSort && Number.isFinite(leftNumber) && Number.isFinite(rightNumber)) {
+      return (leftNumber - rightNumber) * direction;
+    }
+    return String(leftValue).localeCompare(String(rightValue), 'id', { numeric: true, sensitivity: 'base' }) * direction;
+  });
 
   const totalItems = r.state.filtered.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
