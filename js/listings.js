@@ -230,3 +230,25 @@ export const DEMO = {
     { name:'Dewi Lestari', rating:5, text:'Honeymoon ke Bali jadi sempurna berkat BHH. Rekomendasi tepat dan harga kompetitif!', date:'April 2025' },
   ],
 };
+
+// ══════════════════════════════════════════
+//  PAGINATION
+// ══════════════════════════════════════════
+export function paginate(items, page, size) {
+  const totalPages = Math.max(1, Math.ceil(items.length / size));
+  page = Math.min(Math.max(1, page), totalPages);
+  const start = (page - 1) * size;
+  return { pageItems: items.slice(start, start + size), page, totalPages };
+}
+
+export function renderPager(container, page, totalPages, onChange) {
+  if (totalPages <= 1) { container.innerHTML = ''; return; }
+  container.innerHTML = `
+    <div class="pager">
+      <button type="button" class="btn btn-outline btn-sm" data-pg="prev" ${page <= 1 ? 'disabled' : ''}>‹ Sebelumnya</button>
+      <span class="pager-info">Halaman ${page} dari ${totalPages}</span>
+      <button type="button" class="btn btn-outline btn-sm" data-pg="next" ${page >= totalPages ? 'disabled' : ''}>Selanjutnya ›</button>
+    </div>`;
+  container.querySelector('[data-pg="prev"]').onclick = () => onChange(page - 1);
+  container.querySelector('[data-pg="next"]').onclick = () => onChange(page + 1);
+}

@@ -191,3 +191,14 @@
 
 @media (max-width:900px) { .grid-3,.grid-4 { grid-template-columns:repeat(2,1fr); } }
 @media (max-width:600px) { .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; } }
+
+/* ── Pager (tour listing pagination) ── */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+}
+.pager-top { margin-top: 0; margin-bottom: var(--space-6); }
+.pager-info { font-size: 0.82rem; color: var(--text-muted); }

@@ -77,7 +77,9 @@
           <h2>Penawaran Spesial</h2>
           <p>Dapatkan penawaran terbaik sebelum kehabisan.</p>
         </div>
+        <div class="pager pager-top" id="offersPagerTop"></div>
         <div class="grid-auto" id="offersGrid"></div>
+        <div class="pager" id="offersPager"></div>
       </div>
     </div>
   </section>
@@ -131,14 +133,31 @@ async function init() {
       ? featured.map((item, i) => renderCard(item, i * 70)).join('')
       : '<div class="state-box"><p class="state-desc">Belum ada paket tersedia.</p></div>';
 
-    offGrid.innerHTML = offers.length
-      ? offers.map((o, i) => renderOfferCard(o, i * 70)).join('')
-      : '<div class="state-box"><p class="state-desc">Belum ada penawaran aktif.</p></div>';
+    allOffers = offers;
+    renderOffersPage(1);
 
     reObserve();
   } catch { showError(featGrid); showError(offGrid); }
 }
+import { paginate, renderPager, renderOfferCard /* ...keep your other imports */ } from '../js/listings.js'; // or './js/listings.js' on index.html
 
+const OFFERS_PAGE_SIZE = 6;
+let allOffers = [];
+const offersPagerTop = document.getElementById('offersPagerTop');
+const offersPager = document.getElementById('offersPager');
+
+function renderOffersPage(page) {
+  const { pageItems, page: p, totalPages } = paginate(allOffers, page, OFFERS_PAGE_SIZE);
+  offGrid.innerHTML = pageItems.length
+    ? pageItems.map((o, i) => renderOfferCard(o, i * 70)).join('')
+    : '<div class="state-box"><p class="state-desc">Belum ada penawaran aktif.</p></div>';
+  const changePage = newPage => {
+    renderOffersPage(newPage);
+  };
+  renderPager(offersPagerTop, p, totalPages, changePage);
+  renderPager(offersPager, p, totalPages, changePage);
+  reObserve();
+}
 init();
 </script>
 </body>
