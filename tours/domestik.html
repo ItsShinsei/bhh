@@ -54,18 +54,26 @@ import { fetchDomestik, fetchMetaDomestik, renderCard, showLoading, showEmpty, s
 
 const useDemo = API_BASE.includes('YOUR_WORKER');
 
-let allMeta = [];      // [{ province, city }]
-let activeProvince = null;
-let activeCity = null;
+let allMeta         = [];
+let activeProvince  = null;
+let activeCity      = null;
 
-const grid         = document.getElementById('grid');
-const provinceTabs = document.getElementById('provinceTabs');
-const cityTabs     = document.getElementById('cityTabs');
-const cityWrap     = document.getElementById('cityFilterWrap');
+const grid          = document.getElementById('grid');
+const provinceTabs  = document.getElementById('provinceTabs');
+const cityTabs      = document.getElementById('cityTabs');
+const cityWrap      = document.getElementById('cityFilterWrap');
 
-// ── Build province tabs from meta ──
+// Pecah "Chongqing, Zhangjiajie" jadi ['Chongqing','Zhangjiajie']
+function splitLocations(str) {
+  if (!str) return [];
+  return [...new Set(str.split(',').map(s => s.trim()).filter(Boolean))];
+}
+
 function buildProvinceTabs() {
-  const provinces = [...new Set(allMeta.map(m => m.province))].sort();
+  const set = new Set();
+  allMeta.forEach(m => splitLocations(m.province).forEach(p => set.add(p)));
+  const provinces = [...set].sort();
+
   provinceTabs.innerHTML =
     `<button class="filter-tab active" data-val="">🇮🇩 Semua</button>` +
     provinces.map(p => `<button class="filter-tab" data-val="${p}">${p}</button>`).join('');
@@ -82,13 +90,16 @@ function buildProvinceTabs() {
   });
 }
 
-// ── Build city tabs for selected province ──
 function buildCityTabs() {
   if (!activeProvince) { cityWrap.style.display = 'none'; return; }
-  const cities = allMeta
-    .filter(m => m.province === activeProvince && m.city)
-    .map(m => m.city)
-    .sort();
+
+  const set = new Set();
+  allMeta.forEach(m => {
+    if (splitLocations(m.province).includes(activeProvince)) {
+      splitLocations(m.city).forEach(c => set.add(c));
+    }
+  });
+  const cities = [...set].sort();
 
   if (!cities.length) { cityWrap.style.display = 'none'; return; }
 
@@ -107,25 +118,28 @@ function buildCityTabs() {
   });
 }
 
-// ── Load + render grid ──
 async function load() {
   showLoading(grid);
   try {
-    const data = useDemo
-      ? DEMO.domestik.filter(d =>
-          (!activeProvince || d.province === activeProvince) &&
-          (!activeCity     || d.city === activeCity))
-      : await fetchDomestik(activeProvince, activeCity);
+    // Ambil SEMUA data (tanpa filter server-side, backend cuma exact-match)
+    const data = useDemo ? DEMO.domestik : await fetchDomestik();
 
-    grid.innerHTML = data.length
-      ? data.map((item, i) => renderCard(item, i * 75)).join('')
+    const filtered = data.filter(d => {
+      const provinces = splitLocations(d.province);
+      const cities     = splitLocations(d.city);
+      if (activeProvince && !provinces.includes(activeProvince)) return false;
+      if (activeCity     && !cities.includes(activeCity))         return false;
+      return true;
+    });
+
+    grid.innerHTML = filtered.length
+      ? filtered.map((item, i) => renderCard(item, i * 75)).join('')
       : '<div class="state-box"><div class="state-icon">🇮🇩</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket untuk destinasi ini sedang kami siapkan.</p></div>';
 
     reObserve();
   } catch { showError(grid); }
 }
 
-// ── Init ──
 async function init() {
   showLoading(grid);
   try {
