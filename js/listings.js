@@ -169,6 +169,137 @@ export function renderReviewCard(r, delay = 0) {
       </div>
     </div>`;
 }
+// ══════════════════════════════════════════
+//  COMBOBOX (searchable dropdown filter)
+//  Scales to hundreds of options. Same public
+//  API as before: setOptions / clear / disable / enable.
+// ══════════════════════════════════════════
+export function createSearchFilter(container, { placeholder = 'Cari...', onSelect }) {
+  container.innerHTML = `
+    <div class="combobox">
+      <div class="combobox-control">
+        <input type="text" placeholder="${placeholder}" data-input autocomplete="off"
+               role="combobox" aria-expanded="false" aria-autocomplete="list">
+        <button type="button" class="combobox-clear" data-clear hidden aria-label="Hapus filter">✕</button>
+        <button type="button" class="combobox-arrow" data-arrow tabindex="-1" aria-label="Buka daftar">▾</button>
+      </div>
+      <ul class="combobox-list" data-list role="listbox" hidden></ul>
+    </div>`;
+
+  const root     = container.querySelector('.combobox');
+  const input    = container.querySelector('[data-input]');
+  const clearBtn = container.querySelector('[data-clear]');
+  const arrowBtn = container.querySelector('[data-arrow]');
+  const list     = container.querySelector('[data-list]');
+
+  let options = [];
+  let activeIndex = -1;
+
+  function filtered() {
+    const q = input.value.trim().toLowerCase();
+    if (!q) return options;
+    return options.filter(o => o.toLowerCase().includes(q));
+  }
+
+  function renderList() {
+    const items = filtered();
+    activeIndex = -1;
+    list.innerHTML = items.length
+      ? items.map(o => `<li role="option" data-val="${o}">${o}</li>`).join('')
+      : `<li class="combobox-empty">Tidak ditemukan</li>`;
+  }
+
+  function openList() {
+    renderList();
+    list.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    root.classList.add('open');
+  }
+
+  function closeList() {
+    list.hidden = true;
+    input.setAttribute('aria-expanded', 'false');
+    root.classList.remove('open');
+    activeIndex = -1;
+  }
+
+  function highlight(rows) {
+    rows.forEach(r => r.classList.remove('active'));
+    if (rows[activeIndex]) {
+      rows[activeIndex].classList.add('active');
+      rows[activeIndex].scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function select(val) {
+    input.value = val || '';
+    clearBtn.hidden = !val;
+    closeList();
+    onSelect(val || null);
+  }
+
+  function setOptions(opts) {
+    options = opts;
+  }
+
+  function clear(silent = false) {
+    input.value = '';
+    clearBtn.hidden = true;
+    closeList();
+    if (!silent) onSelect(null);
+  }
+
+  input.addEventListener('focus', openList);
+  input.addEventListener('click', openList);
+  input.addEventListener('input', () => {
+    clearBtn.hidden = !input.value;
+    openList();
+  });
+
+  input.addEventListener('keydown', e => {
+    const rows = list.querySelectorAll('li[data-val]');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (list.hidden) { openList(); return; }
+      activeIndex = Math.min(activeIndex + 1, rows.length - 1);
+      highlight(rows);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIndex = Math.max(activeIndex - 1, 0);
+      highlight(rows);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeIndex >= 0 && rows[activeIndex]) select(rows[activeIndex].dataset.val);
+    } else if (e.key === 'Escape') {
+      closeList();
+      input.blur();
+    }
+  });
+
+  // prevent input blur firing before the click on an option registers
+  list.addEventListener('mousedown', e => e.preventDefault());
+  list.addEventListener('click', e => {
+    const li = e.target.closest('li[data-val]');
+    if (li) select(li.dataset.val);
+  });
+
+  arrowBtn.addEventListener('click', () => {
+    if (list.hidden) { input.focus(); openList(); } else closeList();
+  });
+
+  clearBtn.addEventListener('click', () => { clear(); input.focus(); });
+
+  document.addEventListener('click', e => {
+    if (!root.contains(e.target)) closeList();
+  });
+
+  return {
+    setOptions,
+    clear,
+    disable: () => { input.disabled = true; arrowBtn.disabled = true; },
+    enable:  () => { input.disabled = false; arrowBtn.disabled = false; },
+  };
+}
 
 // ══════════════════════════════════════════
 //  STATE HELPERS

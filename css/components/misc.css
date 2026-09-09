@@ -71,6 +71,49 @@
 .state-desc  { font-size:0.85rem; color:var(--text-muted); max-width:360px; }
 
 /* ── Filter Tabs ── */
+.search-filter {
+  position:relative; margin-bottom:var(--space-8);
+}
+.search-filter-combo {
+  position:relative; width:min(420px, 100%);
+}
+.search-filter-top {
+  display:grid; grid-template-columns:1fr 36px 36px; align-items:center; gap:var(--space-2);
+}
+.search-filter input {
+  width:100%; min-width:0; padding:10px 14px; border-radius:var(--radius);
+  border:1px solid var(--border); background:var(--bg-card); color:var(--text);
+  font:inherit; outline:none; transition:border-color var(--fast), box-shadow var(--fast);
+}
+.search-filter input:focus {
+  border-color:var(--purple-700); box-shadow:0 0 0 4px rgba(var(--purple-rgb),0.08);
+}
+.search-filter-toggle,
+.search-filter-clear {
+  border:1px solid var(--border); background:var(--bg-card); color:var(--text-muted);
+  border-radius:var(--radius-full); width:36px; height:36px; cursor:pointer;
+  flex-shrink:0; transition:all var(--fast);
+}
+.search-filter-toggle:hover,
+.search-filter-clear:hover { color:var(--purple-700); border-color:var(--border-hover); }
+.search-filter-toggle { font-size:1rem; }
+.search-filter-menu {
+  position:absolute; z-index:20; top:calc(100% + 8px); left:0; right:0;
+  max-height:220px; overflow:auto; background:var(--bg-card); border:1px solid var(--border);
+  border-radius:var(--radius); box-shadow:var(--shadow-sm); padding:var(--space-2);
+  display:flex; flex-direction:column; gap:4px;
+}
+.search-filter-empty {
+  font-size:0.8rem; color:var(--text-muted); padding:8px 10px;
+}
+.filter-option {
+  width:100%; text-align:left; padding:8px 12px; border-radius:8px;
+  font-size:0.83rem; font-weight:600; border:none; background:transparent;
+  color:var(--text-muted); cursor:pointer; transition:all var(--fast);
+}
+.filter-option:hover, .filter-option.active {
+  background:var(--bg-tint); color:var(--purple-700);
+}
 .filter-tabs { display:flex; gap:var(--space-2); flex-wrap:wrap; margin-bottom:var(--space-8); }
 .filter-tab {
   padding:8px 18px; border-radius:var(--radius-full);
@@ -202,3 +245,64 @@
 }
 .pager-top { margin-top: 0; margin-bottom: var(--space-6); }
 .pager-info { font-size: 0.82rem; color: var(--text-muted); }
+/* ── Combobox (searchable dropdown — province/country/city) ── */
+.combobox { position: relative; max-width: 320px; margin-bottom: var(--space-8); }
+
+.combobox-control { position: relative; display: flex; align-items: center; }
+.combobox-control input {
+  width: 100%;
+  padding: 10px 64px 10px 16px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.88rem;
+  font-family: var(--font-body);
+  transition: border-color var(--fast), box-shadow var(--fast);
+}
+.combobox-control input::placeholder { color: var(--text-light); }
+.combobox-control input:focus {
+  outline: none;
+  border-color: var(--gold-500);
+  box-shadow: 0 0 0 3px rgba(154,118,29,0.12);
+}
+.combobox-control input:disabled { opacity: 0.5; cursor: not-allowed; }
+.combobox.open .combobox-control input { border-color: var(--gold-500); }
+
+.combobox-clear, .combobox-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 26px; height: 26px;
+  border-radius: var(--radius-full);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: background var(--fast), color var(--fast), transform var(--fast);
+}
+.combobox-clear { right: 36px; background: var(--bg-tint); }
+.combobox-clear:hover { background: var(--border-hover); color: var(--text); }
+.combobox-arrow { right: 6px; background: transparent; }
+.combobox.open .combobox-arrow { transform: translateY(-50%) rotate(180deg); }
+
+.combobox-list {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  max-height: 260px; overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-2);
+  z-index: 20;
+  list-style: none;
+}
+.combobox-list li[data-val] {
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--fast), color var(--fast);
+}
+.combobox-list li[data-val]:hover,
+.combobox-list li[data-val].active { background: var(--bg-tint); color: var(--purple-700); }
+.combobox-empty { padding: 12px; text-align: center; font-size: 0.8rem; color: var(--text-light); }

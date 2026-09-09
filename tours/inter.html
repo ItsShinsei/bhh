@@ -52,7 +52,7 @@
 <script type="module">
 import { API_BASE } from '../js/config.js';
 import '../js/main.js';
-import { fetchInter, fetchMetaInter, renderCard, paginate, renderPager, showLoading, showError, reObserve, DEMO } from '../js/listings.js';
+import { fetchInter, fetchMetaInter, renderCard, paginate, renderPager, showLoading, showError, reObserve, DEMO, createSearchFilter } from '../js/listings.js';
 
 const useDemo = API_BASE.includes('YOUR_WORKER');
 const PAGE_SIZE = 9;
@@ -63,58 +63,50 @@ let activeCountry = null;
 let activeCity = null;
 let currentPage = 1;
 
-const grid        = document.getElementById('grid');
-const pagerTop    = document.getElementById('pagerTop');
-const pager       = document.getElementById('pager');
-const countryTabs = document.getElementById('countryTabs');
-const cityTabs    = document.getElementById('cityTabs');
-const cityWrap    = document.getElementById('cityFilterWrap');
+const grid     = document.getElementById('grid');
+const pagerTop = document.getElementById('pagerTop');
+const pager    = document.getElementById('pager');
+const cityWrap = document.getElementById('cityFilterWrap');
 
 function splitLocations(str) {
   if (!str) return [];
   return [...new Set(str.split(',').map(s => s.trim()).filter(Boolean))];
 }
 
-function buildCountryTabs() {
-  const countries = [...new Set(allMeta.flatMap(m => splitLocations(m.country)))].sort();
-  countryTabs.innerHTML =
-    `<button class="filter-tab active" data-val="">🌍 Semua</button>` +
-    countries.map(c => `<button class="filter-tab" data-val="${c}">${c}</button>`).join('');
-
-  countryTabs.addEventListener('click', e => {
-    const tab = e.target.closest('.filter-tab');
-    if (!tab) return;
-    countryTabs.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    activeCountry = tab.dataset.val || null;
-    activeCity    = null;
-    buildCityTabs();
+const countryFilter = createSearchFilter(document.getElementById('countryTabs'), {
+  placeholder: 'Cari negara...',
+  onSelect(val) {
+    activeCountry = val;
+    activeCity = null;
+    cityFilter.clear(true);
+    buildCityOptions();
     load();
-  });
+  }
+});
+
+const cityFilter = createSearchFilter(document.getElementById('cityTabs'), {
+  placeholder: 'Cari kota...',
+  onSelect(val) {
+    activeCity = val;
+    currentPage = 1;
+    load();
+  }
+});
+
+function buildCountryOptions() {
+  const countries = [...new Set(allMeta.flatMap(m => splitLocations(m.country)))].sort();
+  countryFilter.setOptions(countries);
 }
 
-function buildCityTabs() {
+function buildCityOptions() {
   if (!activeCountry) { cityWrap.style.display = 'none'; return; }
   const cities = [...new Set(allMeta
     .filter(m => splitLocations(m.country).includes(activeCountry))
     .flatMap(m => splitLocations(m.city)))].sort();
 
   if (!cities.length) { cityWrap.style.display = 'none'; return; }
-
   cityWrap.style.display = '';
-  cityTabs.innerHTML =
-    `<button class="filter-tab active" data-val="">Semua Kota</button>` +
-    cities.map(c => `<button class="filter-tab" data-val="${c}">${c}</button>`).join('');
-
-  cityTabs.addEventListener('click', e => {
-    const tab = e.target.closest('.filter-tab');
-    if (!tab) return;
-    cityTabs.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    activeCity = tab.dataset.val || null;
-    currentPage = 1;
-    load();
-  });
+  cityFilter.setOptions(cities);
 }
 
 function renderPage(page) {
@@ -125,9 +117,7 @@ function renderPage(page) {
     ? pageItems.map((item, i) => renderCard(item, i * 75)).join('')
     : '<div class="state-box"><div class="state-icon">✈️</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket untuk destinasi ini sedang kami siapkan.</p></div>';
 
-  const changePage = newPage => {
-    renderPage(newPage);
-  };
+  const changePage = newPage => renderPage(newPage);
   renderPager(pagerTop, currentPage, totalPages, changePage);
   renderPager(pager, currentPage, totalPages, changePage);
 
@@ -155,7 +145,7 @@ async function init() {
     allMeta = useDemo ? DEMO.inter : await fetchMetaInter();
   } catch { allMeta = []; }
 
-  buildCountryTabs();
+  buildCountryOptions();
   load();
 }
 
