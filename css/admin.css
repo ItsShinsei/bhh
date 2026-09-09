@@ -699,6 +699,10 @@ textarea:focus-visible {
     padding-top: var(--space-4);
   }
 
+  .data-table td.col-actions::before {
+    display: none;
+  }
+
   .data-table td.col-actions .btn {
     width: 100%;
     justify-content: center;
