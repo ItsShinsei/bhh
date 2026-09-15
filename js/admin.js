@@ -339,8 +339,10 @@ RESOURCES.forEach(r => {
           <div class="pagination-controls" id="pagination-${r.key}" hidden>
             <span class="pagination-info" id="paginfo-${r.key}"></span>
             <div class="pagination-btns">
+              <button type="button" class="btn btn-outline btn-sm" data-page-first="${r.key}">« Awal</button>
               <button type="button" class="btn btn-outline btn-sm" data-page-prev="${r.key}">‹ Prev</button>
               <button type="button" class="btn btn-outline btn-sm" data-page-next="${r.key}">Next ›</button>
+              <button type="button" class="btn btn-outline btn-sm" data-page-last="${r.key}">Akhir »</button>
             </div>
           </div>
         </div>
@@ -455,7 +457,7 @@ function openEditModal(r, item) {
       submitBtn.textContent = 'Menyimpan...';
       await apiFetch(`${r.endpoint}/${item.id}`, { method: 'PUT', body: data });
       closeEditModal();
-      loadList(r, { force: true });
+      loadList(r, { force: true, preservePage: true });
     } catch (err) {
       document.getElementById('editResult').innerHTML =
         `<div class="result-error" style="padding:8px; border-radius:4px; font-size:12px; background:rgba(239,68,68,0.1); color:#ef4444;">❌ Error: ${esc(err.message)}</div>`;
@@ -539,12 +541,19 @@ RESOURCES.forEach(r => {
     renderTable(r);
   });
 
+  document.querySelector(`[data-page-first="${r.key}"]`).addEventListener('click', () => {
+    if (r.state.page > 1) { r.state.page = 1; renderTable(r); }
+  });
   document.querySelector(`[data-page-prev="${r.key}"]`).addEventListener('click', () => {
     if (r.state.page > 1) { r.state.page--; renderTable(r); }
   });
   document.querySelector(`[data-page-next="${r.key}"]`).addEventListener('click', () => {
     const totalPages = Math.max(1, Math.ceil(r.state.filtered.length / PAGE_SIZE));
     if (r.state.page < totalPages) { r.state.page++; renderTable(r); }
+  });
+  document.querySelector(`[data-page-last="${r.key}"]`).addEventListener('click', () => {
+    const totalPages = Math.max(1, Math.ceil(r.state.filtered.length / PAGE_SIZE));
+    if (r.state.page !== totalPages) { r.state.page = totalPages; renderTable(r); }
   });
 
   document.getElementById(`tbody-${r.key}`).addEventListener('click', async e => {
@@ -571,7 +580,7 @@ RESOURCES.forEach(r => {
     btn.textContent = 'Menghapus...';
     try {
       await apiFetch(`${r.endpoint}/${id}`, { method: 'DELETE' });
-      loadList(r, { force: true });
+      loadList(r, { force: true, preservePage: true });
     } catch (err) {
       alert(`Gagal menghapus: ${err.message}`);
       btn.disabled = false;
@@ -587,7 +596,7 @@ function showResult(key, message, type) {
 }
 
 // Fetches a resource's full list (once per tab visit, or when forced) and renders it.
-async function loadList(r, { force = false } = {}) {
+async function loadList(r, { force = false, preservePage = false } = {}) {
   if (r.state.loading) return;
   if (r.state.loaded && !force) { renderTable(r); return; }
 
@@ -601,7 +610,7 @@ async function loadList(r, { force = false } = {}) {
     const items = await apiFetch(path);
     r.state.items = items;
     r.state.loaded = true;
-    r.state.page = 1;
+    if (!preservePage) r.state.page = 1;
     document.getElementById(`count-${r.key}`).textContent = items.length ? `(${items.length})` : '';
     renderTable(r);
   } catch (err) {
@@ -671,9 +680,11 @@ function renderTable(r) {
   `).join('');
 
   paginationEl.hidden = false;
-  paginfoEl.textContent = `${start + 1}–${Math.min(start + PAGE_SIZE, totalItems)} dari ${totalItems}${q ? ` (disaring dari ${r.state.items.length})` : ''}`;
+  paginfoEl.textContent = `Halaman ${r.state.page} / ${totalPages} • ${start + 1}–${Math.min(start + PAGE_SIZE, totalItems)} dari ${totalItems}${q ? ` (disaring dari ${r.state.items.length})` : ''}`;
+  document.querySelector(`[data-page-first="${r.key}"]`).disabled = r.state.page <= 1;
   document.querySelector(`[data-page-prev="${r.key}"]`).disabled = r.state.page <= 1;
   document.querySelector(`[data-page-next="${r.key}"]`).disabled = r.state.page >= totalPages;
+  document.querySelector(`[data-page-last="${r.key}"]`).disabled = r.state.page >= totalPages;
 }
 
 // ── Initial load: health check + only the active (first) tab ──
