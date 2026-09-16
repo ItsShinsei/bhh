@@ -48,12 +48,22 @@ export const SOCIALS = {
   email:     { label: 'Email',       handle: 'beehappyholiday@gmail.com', url: 'mailto:beehappyholiday@gmail.com'       },
 };
 
-// ── Image helper: Google Drive share URL → working thumbnail ──
+// ── Image helpers: Google Drive share URL → browser image URLs ──
+function driveFileId(url) {
+  const match = String(url).match(/drive\.google\.com\/(?:file\/d\/|open\?|uc\?|thumbnail\?)(?:[^#]*?&)?id=([a-zA-Z0-9_-]+)|drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  return match?.[1] || match?.[2] || '';
+}
+
 export function driveThumb(url, size = 'w800') {
   if (!url) return '';
-  const m = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=view&)?id=)([a-zA-Z0-9_-]+)/);
-  if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=${size}`;
+  const id = driveFileId(url);
+  if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=${size}`;
   return url;
+}
+
+export function driveOriginal(url) {
+  const id = driveFileId(url);
+  return id ? `https://drive.google.com/uc?export=view&id=${id}` : '';
 }
 
 // ── WhatsApp link builder ──
