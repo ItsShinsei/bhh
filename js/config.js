@@ -66,6 +66,17 @@ export function driveOriginal(url) {
   return id ? `https://drive.google.com/uc?export=view&id=${id}` : '';
 }
 
+export function imageUrl(url) {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.endsWith('.r2.dev')) {
+      return `${API_BASE}/images${parsed.pathname}`;
+    }
+  } catch { }
+  return driveThumb(url);
+}
+
 // ── WhatsApp link builder ──
 export function waLink(msg = WA_DEFAULT) {
   return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;

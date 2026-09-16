@@ -151,6 +151,19 @@ export default {
         return created({ url: publicUrl });
       }
 
+      if (path.startsWith('/images/') && request.method === 'GET') {
+        const key = decodeURIComponent(path.slice('/images/'.length));
+        if (!key || key.includes('..')) return err('Invalid image path', 400);
+        const object = await env.BHH_IMAGES.get(key);
+        if (!object) return new Response('Not found', { status: 404 });
+
+        const headers = new Headers();
+        object.writeHttpMetadata(headers);
+        headers.set('etag', object.httpEtag);
+        headers.set('cache-control', 'public, max-age=31536000, immutable');
+        return new Response(object.body, { headers });
+      }
+
       // ════════════════════════════════════════
       //  LISTINGS — DOMESTIK
       //  ?province=Bali  ?city=Denpasar  ?all=1
