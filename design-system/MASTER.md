@@ -12,21 +12,21 @@ Bee Happy Holiday is a warm, trustworthy travel partner based in Surabaya. The v
 
 Use semantic tokens in components; do not introduce page-level raw hex values.
 
-| Role | Token | Value | Usage |
-| --- | --- | --- | --- |
-| Deep brand | `--purple-900` | `#1E0730` | deepest backgrounds and contrast |
-| Brand dark | `--purple-700` | `#3A0F50` | footer, primary purple surfaces |
-| Brand mid | `--purple-600` | `#4E1A6B` | gradients and elevated purple surfaces |
-| Body text | `--text` / `--purple-800` | `#2A1838` | headings and primary copy |
-| Muted text | `--text-muted` / `--purple-500` | `#6B5A78` | supporting copy and metadata |
-| Soft text | `--text-light` | `#9B89A6` | tertiary labels only |
-| Accent | `--gold-500` | `#9A761D` | primary CTA, eyebrow, active emphasis |
-| Accent hover | `--gold-400` | `#B6942E` | hover and highlighted accent |
-| Accent light | `--gold-300` | `#C9A84C` | decorative gold and light theme detail |
-| Page surface | `--bg` | `#FFFFFF` | main page background |
-| Card surface | `--bg-card` | `#FAF7FC` | cards and quiet surfaces |
-| Soft tint | `--bg-tint` | `#F4EEF7` | hover backgrounds and page tint |
-| Border | `--border` | purple alpha | default separators |
+| Role         | Token                           | Value        | Usage                                  |
+| ------------ | ------------------------------- | ------------ | -------------------------------------- |
+| Deep brand   | `--purple-900`                  | `#1E0730`    | deepest backgrounds and contrast       |
+| Brand dark   | `--purple-700`                  | `#3A0F50`    | footer, primary purple surfaces        |
+| Brand mid    | `--purple-600`                  | `#4E1A6B`    | gradients and elevated purple surfaces |
+| Body text    | `--text` / `--purple-800`       | `#2A1838`    | headings and primary copy              |
+| Muted text   | `--text-muted` / `--purple-500` | `#6B5A78`    | supporting copy and metadata           |
+| Soft text    | `--text-light`                  | `#9B89A6`    | tertiary labels only                   |
+| Accent       | `--gold-500`                    | `#9A761D`    | primary CTA, eyebrow, active emphasis  |
+| Accent hover | `--gold-400`                    | `#B6942E`    | hover and highlighted accent           |
+| Accent light | `--gold-300`                    | `#C9A84C`    | decorative gold and light theme detail |
+| Page surface | `--bg`                          | `#FFFFFF`    | main page background                   |
+| Card surface | `--bg-card`                     | `#FAF7FC`    | cards and quiet surfaces               |
+| Soft tint    | `--bg-tint`                     | `#F4EEF7`    | hover backgrounds and page tint        |
+| Border       | `--border`                      | purple alpha | default separators                     |
 
 `--purple-rgb` (`58, 15, 80`) exists for alpha-based purple surfaces and shadows. Functional colors such as WhatsApp green and destructive red remain explicit because they are external/semantic colors.
 
@@ -38,13 +38,13 @@ Use semantic tokens in components; do not introduce page-level raw hex values.
 - **Heading line-height:** 1.15.
 - **Eyebrow:** Inter, 0.72rem, 600, uppercase, `0.22em` tracking, gold.
 
-| Role | Size | Weight |
-| --- | --- | --- |
-| `h1` | `clamp(2.2rem, 5.5vw, 4rem)` | 900 |
-| `h2` | `clamp(1.7rem, 3.5vw, 2.6rem)` | 700 |
-| `h3` | `clamp(1.2rem, 2vw, 1.5rem)` | 700 |
-| UI text | 0.78–1rem | 500–600 |
-| Body | 0.92rem | 400 |
+| Role    | Size                           | Weight  |
+| ------- | ------------------------------ | ------- |
+| `h1`    | `clamp(2.2rem, 5.5vw, 4rem)`   | 900     |
+| `h2`    | `clamp(1.7rem, 3.5vw, 2.6rem)` | 700     |
+| `h3`    | `clamp(1.2rem, 2vw, 1.5rem)`   | 700     |
+| UI text | 0.78–1rem                      | 500–600 |
+| Body    | 0.92rem                        | 400     |
 
 ## Spacing, shape, and elevation
 

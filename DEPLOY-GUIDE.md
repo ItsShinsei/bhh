@@ -36,6 +36,7 @@ gallery            → foto galeri
 5. Catat URL worker: `https://bhh-api.namaakun.workers.dev`
 
 Test worker (buka di browser):
+
 - `https://bhh-api.namaakun.workers.dev/api/domestik`
 - `https://bhh-api.namaakun.workers.dev/api/inter`
 - `https://bhh-api.namaakun.workers.dev/api/umroh`
@@ -45,8 +46,8 @@ Test worker (buka di browser):
 ## Langkah 3 — Update config.js
 
 ```js
-export const API_BASE = 'https://bhh-api.namaakun.workers.dev';
-export const WA_NUMBER = '6281331978219';
+export const API_BASE = "https://bhh-api.namaakun.workers.dev";
+export const WA_NUMBER = "6281331978219";
 ```
 
 ---
@@ -95,6 +96,7 @@ GET /api/meta/umroh     → daftar package_type
 ## Cara Tambah Paket Baru (Daily)
 
 ### Tambah Paket Domestik
+
 ```sql
 INSERT INTO listings_domestik (province, city, name, duration, price, description, image_url, badge, whatsapp_msg)
 VALUES (
@@ -111,6 +113,7 @@ VALUES (
 ```
 
 ### Tambah Paket Inter
+
 ```sql
 INSERT INTO listings_inter (country, city, name, duration, price, description, image_url, badge, whatsapp_msg)
 VALUES (
@@ -127,6 +130,7 @@ VALUES (
 ```
 
 ### Tambah Paket Cruise
+
 ```sql
 INSERT INTO listings_cruise (route, name, duration, price, description, image_url, badge, whatsapp_msg)
 VALUES (
@@ -142,6 +146,7 @@ VALUES (
 ```
 
 ### Tambah Paket Umroh
+
 ```sql
 INSERT INTO listings_umroh (package_type, name, duration, price, description, image_url, badge, whatsapp_msg)
 VALUES (
@@ -157,6 +162,7 @@ VALUES (
 ```
 
 ### Tambah Penawaran dengan Expiry
+
 ```sql
 INSERT INTO offers (name, description, badge, whatsapp_msg, expires)
 VALUES (
@@ -193,11 +199,11 @@ DELETE FROM listings_domestik WHERE id = 3;
 
 ## Free Tier Cloudflare
 
-| Layanan | Gratis |
-|---------|--------|
-| D1 | 5 juta baca/hari · 100rb tulis/hari · 1GB storage |
-| R2 | 10GB storage · bandwidth gratis |
-| Pages | Unlimited bandwidth |
-| Workers | 100rb request/hari |
+| Layanan | Gratis                                            |
+| ------- | ------------------------------------------------- |
+| D1      | 5 juta baca/hari · 100rb tulis/hari · 1GB storage |
+| R2      | 10GB storage · bandwidth gratis                   |
+| Pages   | Unlimited bandwidth                               |
+| Workers | 100rb request/hari                                |
 
 **Total biaya: Rp 0** — lebih dari cukup untuk BHH.

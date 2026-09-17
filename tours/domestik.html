@@ -1,155 +1,211 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wisata Domestik — Bee Happy Holiday</title>
-  <link rel="icon" type="image/svg+xml" href="../assets/images/BHH.svg" />
-  <link rel="stylesheet" href="../css/main.css" />
-</head>
-<body>
-<div id="page">
-  <div id="nav-placeholder"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wisata Domestik — Bee Happy Holiday</title>
+    <link rel="icon" type="image/svg+xml" href="../assets/images/BHH.svg" />
+    <link rel="stylesheet" href="../css/main.css" />
+  </head>
+  <body>
+    <div id="page">
+      <div id="nav-placeholder"></div>
 
-  <div class="page-hero section">
-    <div class="container">
-      <div class="breadcrumb">
-        <a href="../index.html">Beranda</a><span>›</span>
-        <a href="index.html">Paket Wisata</a><span>›</span>
-        <span>Wisata Domestik</span>
+      <div class="page-hero section">
+        <div class="container">
+          <div class="breadcrumb">
+            <a href="../index.html">Beranda</a><span>›</span>
+            <a href="index.html">Paket Wisata</a><span>›</span>
+            <span>Wisata Domestik</span>
+          </div>
+          <p class="eyebrow mb-2">🇮🇩 Wisata Domestik</p>
+          <h1 class="mb-3">
+            Jelajahi <em class="text-gold">Keindahan Nusantara</em>
+          </h1>
+          <p class="mw-md mx-auto text-base">
+            Dari Sabang sampai Merauke — ribuan destinasi indah menanti di tanah
+            air sendiri.
+          </p>
+        </div>
       </div>
-      <p class="eyebrow mb-2">🇮🇩 Wisata Domestik</p>
-      <h1 class="mb-3">Jelajahi <em class="text-gold">Keindahan Nusantara</em></h1>
-      <p class="mw-md mx-auto text-base">
-        Dari Sabang sampai Merauke — ribuan destinasi indah menanti di tanah air sendiri.
-      </p>
+
+      <section class="section">
+        <div class="container">
+          <!-- Province filter (built dynamically from meta API) -->
+          <div class="mb-4">
+            <p class="text-xs fw-600 uppercase ls-lg text-gold-dim mb-2">
+              Provinsi
+            </p>
+            <div class="filter-tabs" id="provinceTabs"></div>
+          </div>
+
+          <!-- City filter (shown after province is picked) -->
+          <div id="cityFilterWrap" class="mb-8" style="display: none">
+            <p class="text-xs fw-600 uppercase ls-lg text-gold-dim mb-2">
+              Kota / Destinasi
+            </p>
+            <div class="filter-tabs" id="cityTabs"></div>
+          </div>
+
+          <div class="pager pager-top" id="pagerTop"></div>
+          <div class="grid-auto" id="grid"></div>
+          <div class="pager" id="pager"></div>
+        </div>
+      </section>
+
+      <div id="footer-placeholder"></div>
     </div>
-  </div>
 
-  <section class="section">
-    <div class="container">
-      <!-- Province filter (built dynamically from meta API) -->
-      <div class="mb-4">
-        <p class="text-xs fw-600 uppercase ls-lg text-gold-dim mb-2">Provinsi</p>
-        <div class="filter-tabs" id="provinceTabs"></div>
-      </div>
+    <script type="module">
+      import { API_BASE } from "../js/config.js";
+      import "../js/main.js";
+      import {
+        fetchDomestik,
+        fetchMetaDomestik,
+        renderCard,
+        paginate,
+        renderPager,
+        showLoading,
+        showError,
+        reObserve,
+        DEMO,
+        createSearchFilter,
+      } from "../js/listings.js";
 
-      <!-- City filter (shown after province is picked) -->
-      <div id="cityFilterWrap" class="mb-8" style="display:none">
-        <p class="text-xs fw-600 uppercase ls-lg text-gold-dim mb-2">Kota / Destinasi</p>
-        <div class="filter-tabs" id="cityTabs"></div>
-      </div>
+      const useDemo = API_BASE.includes("YOUR_WORKER");
+      const PAGE_SIZE = 9;
 
-      <div class="pager pager-top" id="pagerTop"></div>
-      <div class="grid-auto" id="grid"></div>
-      <div class="pager" id="pager"></div>
-    </div>
-  </section>
+      let allMeta = [];
+      let allData = [];
+      let activeProvince = null;
+      let activeCity = null;
+      let currentPage = 1;
 
-  <div id="footer-placeholder"></div>
-</div>
+      const grid = document.getElementById("grid");
+      const pagerTop = document.getElementById("pagerTop");
+      const pager = document.getElementById("pager");
+      const cityWrap = document.getElementById("cityFilterWrap");
 
-<script type="module">
-import { API_BASE } from '../js/config.js';
-import '../js/main.js';
-import { fetchDomestik, fetchMetaDomestik, renderCard, paginate, renderPager, showLoading, showError, reObserve, DEMO, createSearchFilter } from '../js/listings.js';
+      function splitLocations(str) {
+        if (!str) return [];
+        return [
+          ...new Set(
+            str
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean),
+          ),
+        ];
+      }
 
-const useDemo = API_BASE.includes('YOUR_WORKER');
-const PAGE_SIZE = 9;
+      const provinceFilter = createSearchFilter(
+        document.getElementById("provinceTabs"),
+        {
+          placeholder: "Cari provinsi...",
+          onSelect(val) {
+            activeProvince = val;
+            activeCity = null;
+            cityFilter.clear(true);
+            buildCityOptions();
+            load();
+          },
+        },
+      );
 
-let allMeta = [];
-let allData = [];
-let activeProvince = null;
-let activeCity = null;
-let currentPage = 1;
+      const cityFilter = createSearchFilter(
+        document.getElementById("cityTabs"),
+        {
+          placeholder: "Cari kota...",
+          onSelect(val) {
+            activeCity = val;
+            currentPage = 1;
+            load();
+          },
+        },
+      );
 
-const grid     = document.getElementById('grid');
-const pagerTop = document.getElementById('pagerTop');
-const pager    = document.getElementById('pager');
-const cityWrap = document.getElementById('cityFilterWrap');
+      function buildProvinceOptions() {
+        const provinces = [
+          ...new Set(allMeta.flatMap((m) => splitLocations(m.province))),
+        ].sort();
+        provinceFilter.setOptions(provinces);
+      }
 
-function splitLocations(str) {
-  if (!str) return [];
-  return [...new Set(str.split(',').map(s => s.trim()).filter(Boolean))];
-}
+      function buildCityOptions() {
+        if (!activeProvince) {
+          cityWrap.style.display = "none";
+          return;
+        }
+        const cities = [
+          ...new Set(
+            allMeta
+              .filter((m) =>
+                splitLocations(m.province).includes(activeProvince),
+              )
+              .flatMap((m) => splitLocations(m.city)),
+          ),
+        ].sort();
 
-const provinceFilter = createSearchFilter(document.getElementById('provinceTabs'), {
-  placeholder: 'Cari provinsi...',
-  onSelect(val) {
-    activeProvince = val;
-    activeCity = null;
-    cityFilter.clear(true);
-    buildCityOptions();
-    load();
-  }
-});
+        if (!cities.length) {
+          cityWrap.style.display = "none";
+          return;
+        }
+        cityWrap.style.display = "";
+        cityFilter.setOptions(cities);
+      }
 
-const cityFilter = createSearchFilter(document.getElementById('cityTabs'), {
-  placeholder: 'Cari kota...',
-  onSelect(val) {
-    activeCity = val;
-    currentPage = 1;
-    load();
-  }
-});
+      function renderPage(page) {
+        const {
+          pageItems,
+          page: p,
+          totalPages,
+        } = paginate(allData, page, PAGE_SIZE);
+        currentPage = p;
 
-function buildProvinceOptions() {
-  const provinces = [...new Set(allMeta.flatMap(m => splitLocations(m.province)))].sort();
-  provinceFilter.setOptions(provinces);
-}
+        grid.innerHTML = pageItems.length
+          ? pageItems.map((item, i) => renderCard(item, i * 75)).join("")
+          : '<div class="state-box"><div class="state-icon">🇮🇩</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket untuk destinasi ini sedang kami siapkan.</p></div>';
 
-function buildCityOptions() {
-  if (!activeProvince) { cityWrap.style.display = 'none'; return; }
-  const cities = [...new Set(allMeta
-    .filter(m => splitLocations(m.province).includes(activeProvince))
-    .flatMap(m => splitLocations(m.city)))].sort();
+        const changePage = (newPage) => renderPage(newPage);
+        renderPager(pagerTop, currentPage, totalPages, changePage);
+        renderPager(pager, currentPage, totalPages, changePage);
 
-  if (!cities.length) { cityWrap.style.display = 'none'; return; }
-  cityWrap.style.display = '';
-  cityFilter.setOptions(cities);
-}
+        reObserve();
+      }
 
-function renderPage(page) {
-  const { pageItems, page: p, totalPages } = paginate(allData, page, PAGE_SIZE);
-  currentPage = p;
+      async function load() {
+        showLoading(grid);
+        pagerTop.innerHTML = "";
+        pager.innerHTML = "";
+        try {
+          const data = useDemo ? DEMO.domestik : await fetchDomestik();
+          allData = data.filter(
+            (d) =>
+              (!activeProvince ||
+                splitLocations(d.province).includes(activeProvince)) &&
+              (!activeCity || splitLocations(d.city).includes(activeCity)),
+          );
 
-  grid.innerHTML = pageItems.length
-    ? pageItems.map((item, i) => renderCard(item, i * 75)).join('')
-    : '<div class="state-box"><div class="state-icon">🇮🇩</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket untuk destinasi ini sedang kami siapkan.</p></div>';
+          currentPage = 1;
+          renderPage(currentPage);
+        } catch {
+          showError(grid);
+        }
+      }
 
-  const changePage = newPage => renderPage(newPage);
-  renderPager(pagerTop, currentPage, totalPages, changePage);
-  renderPager(pager, currentPage, totalPages, changePage);
+      async function init() {
+        showLoading(grid);
+        try {
+          allMeta = useDemo ? DEMO.domestik : await fetchMetaDomestik();
+        } catch {
+          allMeta = [];
+        }
 
-  reObserve();
-}
+        buildProvinceOptions();
+        load();
+      }
 
-async function load() {
-  showLoading(grid);
-  pagerTop.innerHTML = '';
-  pager.innerHTML = '';
-  try {
-    const data = useDemo ? DEMO.domestik : await fetchDomestik();
-    allData = data.filter(d =>
-      (!activeProvince || splitLocations(d.province).includes(activeProvince)) &&
-      (!activeCity     || splitLocations(d.city).includes(activeCity)));
-
-    currentPage = 1;
-    renderPage(currentPage);
-  } catch { showError(grid); }
-}
-
-async function init() {
-  showLoading(grid);
-  try {
-    allMeta = useDemo ? DEMO.domestik : await fetchMetaDomestik();
-  } catch { allMeta = []; }
-
-  buildProvinceOptions();
-  load();
-}
-
-init();
-</script>
-</body>
+      init();
+    </script>
+  </body>
 </html>

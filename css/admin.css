@@ -5,7 +5,11 @@
 
 body {
   background:
-    radial-gradient(circle at top left, rgba(154, 118, 29, 0.08), transparent 30%),
+    radial-gradient(
+      circle at top left,
+      rgba(154, 118, 29, 0.08),
+      transparent 30%
+    ),
     linear-gradient(180deg, #f9f5fb 0%, #f4eff7 100%);
 }
 
@@ -125,8 +129,12 @@ body {
   opacity: 0.9;
 }
 
-.admin-panel { display: none; }
-.admin-panel.active { display: block; }
+.admin-panel {
+  display: none;
+}
+.admin-panel.active {
+  display: block;
+}
 
 .panel-grid {
   display: grid;
@@ -190,7 +198,10 @@ body {
   padding: 0.8rem 0.9rem;
   color: var(--text);
   font: inherit;
-  transition: border-color var(--fast), box-shadow var(--fast), background var(--fast);
+  transition:
+    border-color var(--fast),
+    box-shadow var(--fast),
+    background var(--fast);
 }
 
 .form-group input:focus,
@@ -217,7 +228,9 @@ body {
   flex-wrap: wrap;
 }
 
-.list-header h2 { margin: 0; }
+.list-header h2 {
+  margin: 0;
+}
 
 .list-search {
   margin-bottom: var(--space-4);
@@ -236,7 +249,9 @@ body {
   font-size: 0.9rem;
   background: var(--bg);
   color: var(--text);
-  transition: border-color var(--fast), box-shadow var(--fast);
+  transition:
+    border-color var(--fast),
+    box-shadow var(--fast);
 }
 
 .list-sort {
@@ -313,7 +328,9 @@ body {
 }
 
 .data-table tbody tr {
-  transition: background var(--fast), transform var(--fast);
+  transition:
+    background var(--fast),
+    transform var(--fast);
 }
 
 .data-table tbody tr:hover {
@@ -368,7 +385,9 @@ body {
   cursor: zoom-in;
 }
 
-.expired-row td { opacity: 0.6; }
+.expired-row td {
+  opacity: 0.6;
+}
 
 .badge-expired {
   display: inline-block;
@@ -472,7 +491,9 @@ textarea:focus-visible {
   padding: var(--space-6);
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--mid), visibility var(--mid);
+  transition:
+    opacity var(--mid),
+    visibility var(--mid);
 }
 
 .modal-overlay.open {
@@ -491,7 +512,9 @@ textarea:focus-visible {
   background: rgba(20, 12, 25, 0.86);
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--mid), visibility var(--mid);
+  transition:
+    opacity var(--mid),
+    visibility var(--mid);
 }
 
 .image-viewer-overlay.open {
@@ -557,7 +580,9 @@ textarea:focus-visible {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background var(--fast), color var(--fast);
+  transition:
+    background var(--fast),
+    color var(--fast);
 }
 
 .modal-close:hover {
@@ -633,7 +658,9 @@ textarea:focus-visible {
     padding-bottom: var(--space-2);
   }
 
-  .admin-tabs::-webkit-scrollbar { display: none; }
+  .admin-tabs::-webkit-scrollbar {
+    display: none;
+  }
 
   .admin-tab {
     flex-shrink: 0;
@@ -649,7 +676,9 @@ textarea:focus-visible {
     padding: var(--space-4);
   }
 
-  .data-table thead { display: none; }
+  .data-table thead {
+    display: none;
+  }
   .data-table,
   .data-table tbody,
   .data-table tr,
@@ -676,7 +705,9 @@ textarea:focus-visible {
     text-align: right;
   }
 
-  .data-table td:last-child { border-bottom: none; }
+  .data-table td:last-child {
+    border-bottom: none;
+  }
 
   .data-table td[data-label]:not([data-label=""])::before {
     content: attr(data-label);
@@ -689,8 +720,13 @@ textarea:focus-visible {
     flex-shrink: 0;
   }
 
-  .data-table td.col-id { display: none; }
-  .data-table .thumb { width: 64px; height: 64px; }
+  .data-table td.col-id {
+    display: none;
+  }
+  .data-table .thumb {
+    width: 64px;
+    height: 64px;
+  }
 
   .data-table td.col-actions {
     display: grid;
@@ -734,5 +770,3 @@ textarea:focus-visible {
   min-width: 0;
   max-width: 100%;
 }
-
-

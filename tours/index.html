@@ -1,194 +1,290 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Paket Wisata — Bee Happy Holiday</title>
-  <link rel="icon" type="image/svg+xml" href="../assets/images/BHH.svg" />
-  <link rel="stylesheet" href="../css/main.css" />
-  <style>
-    .tour-category-grid { align-items: stretch; }
-    .tour-category-card { min-width: 0; }
-    .tour-listing-grid { min-width: 0; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Paket Wisata — Bee Happy Holiday</title>
+    <link rel="icon" type="image/svg+xml" href="../assets/images/BHH.svg" />
+    <link rel="stylesheet" href="../css/main.css" />
+    <style>
+      .tour-category-grid {
+        align-items: stretch;
+      }
+      .tour-category-card {
+        min-width: 0;
+      }
+      .tour-listing-grid {
+        min-width: 0;
+      }
 
-    @media (max-width: 600px) {
-      .page-hero { padding-block: 2.25rem 2.75rem; }
-      .page-hero h1 { font-size: clamp(1.8rem, 9vw, 2.35rem); overflow-wrap: anywhere; }
-      .page-hero .text-base { font-size: 0.88rem; }
+      @media (max-width: 600px) {
+        .page-hero {
+          padding-block: 2.25rem 2.75rem;
+        }
+        .page-hero h1 {
+          font-size: clamp(1.8rem, 9vw, 2.35rem);
+          overflow-wrap: anywhere;
+        }
+        .page-hero .text-base {
+          font-size: 0.88rem;
+        }
 
-      .section { padding-block: 2.75rem; }
-      .section--flush-bottom { padding-bottom: 0; }
-      .tour-category-grid { gap: var(--space-3); }
-      .tour-category-card { padding: var(--space-5); }
-      .tour-category-card .doc-desc { line-height: 1.55; }
+        .section {
+          padding-block: 2.75rem;
+        }
+        .section--flush-bottom {
+          padding-bottom: 0;
+        }
+        .tour-category-grid {
+          gap: var(--space-3);
+        }
+        .tour-category-card {
+          padding: var(--space-5);
+        }
+        .tour-category-card .doc-desc {
+          line-height: 1.55;
+        }
 
-      .tour-listing-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
-      .card-img { height: 190px; }
-      .card-body { padding: var(--space-4); }
-      .card-footer,
-      .offer-footer { align-items: flex-start; flex-wrap: wrap; }
-      .card-price { font-size: 1.05rem; }
+        .tour-listing-grid {
+          grid-template-columns: minmax(0, 1fr);
+          gap: var(--space-4);
+        }
+        .card-img {
+          height: 190px;
+        }
+        .card-body {
+          padding: var(--space-4);
+        }
+        .card-footer,
+        .offer-footer {
+          align-items: flex-start;
+          flex-wrap: wrap;
+        }
+        .card-price {
+          font-size: 1.05rem;
+        }
 
-      .offers-panel { padding: var(--space-4); }
-      .offers-panel .section-header { margin-bottom: var(--space-5); }
-      .pager { gap: var(--space-2); flex-wrap: wrap; }
-      .pager .btn { flex: 1 1 130px; min-width: 0; }
-      .pager-info { width: 100%; text-align: center; order: -1; }
-    }
-  </style>
-</head>
-<body>
-<div id="page">
-  <div id="nav-placeholder"></div>
+        .offers-panel {
+          padding: var(--space-4);
+        }
+        .offers-panel .section-header {
+          margin-bottom: var(--space-5);
+        }
+        .pager {
+          gap: var(--space-2);
+          flex-wrap: wrap;
+        }
+        .pager .btn {
+          flex: 1 1 130px;
+          min-width: 0;
+        }
+        .pager-info {
+          width: 100%;
+          text-align: center;
+          order: -1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="page">
+      <div id="nav-placeholder"></div>
 
-  <div class="page-hero section">
-    <div class="container">
-      <div class="breadcrumb">
-        <a href="../index.html">Beranda</a><span>›</span><span>Paket Wisata</span>
-      </div>
-      <p class="eyebrow mb-2">🗺 Semua Paket</p>
-      <h1 class="mb-3">Temukan <em class="text-gold">Perjalanan Impianmu</em></h1>
-      <p class="mw-md mx-auto text-base">
-        Pilih kategori di bawah atau jelajahi semua paket unggulan kami.
-      </p>
-    </div>
-  </div>
-
-  <!-- Category cards -->
-  <section class="section section--flush-bottom">
-    <div class="container">
-      <div class="grid-4 tour-category-grid">
-        <a class="doc-card tour-category-card reveal no-underline doc-card--center" href="domestik.html">
-          <div class="doc-icon doc-icon--center">🇮🇩</div>
-          <div class="doc-title">Wisata Domestik</div>
-          <p class="doc-desc">Bali, Lombok, Raja Ampat, Bromo, dan ratusan destinasi Nusantara.</p>
-          <span class="text-gold text-sm fw-600">Lihat Paket →</span>
-        </a>
-        <a class="doc-card tour-category-card reveal no-underline doc-card--center" href="inter.html">
-          <div class="doc-icon doc-icon--center">✈️</div>
-          <div class="doc-title">Mancanegara</div>
-          <p class="doc-desc">Jepang, Korea, Eropa, Timur Tengah, Australia, dan lebih banyak lagi.</p>
-          <span class="text-gold text-sm fw-600">Lihat Paket →</span>
-        </a>
-        <a class="doc-card tour-category-card reveal no-underline doc-card--center" href="cruise.html">
-          <div class="doc-icon doc-icon--center">🚢</div>
-          <div class="doc-title">Cruise</div>
-          <p class="doc-desc">Berlayar mewah melewati Asia, Mediterania, dan belahan dunia lainnya.</p>
-          <span class="text-gold text-sm fw-600">Lihat Paket →</span>
-        </a>
-        <a class="doc-card tour-category-card reveal no-underline doc-card--center" href="umroh.html">
-          <div class="doc-icon doc-icon--center">🕌</div>
-          <div class="doc-title">Umroh & Haji</div>
-          <p class="doc-desc">Paket Reguler, Plus, dan Premium untuk perjalanan ke Tanah Suci.</p>
-          <span class="text-gold text-sm fw-600">Lihat Paket →</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Featured from all categories -->
-  <section class="section">
-    <div class="container">
-      <div class="section-header reveal">
-        <p class="eyebrow">⭐ Unggulan</p>
-        <h2>Paket Terpopuler</h2>
-        <p>Pilihan terbaik dari semua kategori wisata kami.</p>
-      </div>
-      <div class="grid-auto tour-listing-grid" id="featuredGrid"></div>
-    </div>
-  </section>
-
-  <!-- Offers -->
-  <section class="section">
-    <div class="container">
-      <div class="glass-panel offers-panel">
-        <div class="section-header centered reveal">
-          <p class="eyebrow">🎁 Promo</p>
-          <h2>Penawaran Spesial</h2>
-          <p>Dapatkan penawaran terbaik sebelum kehabisan.</p>
+      <div class="page-hero section">
+        <div class="container">
+          <div class="breadcrumb">
+            <a href="../index.html">Beranda</a><span>›</span
+            ><span>Paket Wisata</span>
+          </div>
+          <p class="eyebrow mb-2">🗺 Semua Paket</p>
+          <h1 class="mb-3">
+            Temukan <em class="text-gold">Perjalanan Impianmu</em>
+          </h1>
+          <p class="mw-md mx-auto text-base">
+            Pilih kategori di bawah atau jelajahi semua paket unggulan kami.
+          </p>
         </div>
-        <div class="pager pager-top" id="offersPagerTop"></div>
-        <div class="grid-auto tour-listing-grid" id="offersGrid"></div>
-        <div class="pager" id="offersPager"></div>
       </div>
+
+      <!-- Category cards -->
+      <section class="section section--flush-bottom">
+        <div class="container">
+          <div class="grid-4 tour-category-grid">
+            <a
+              class="doc-card tour-category-card reveal no-underline doc-card--center"
+              href="domestik.html"
+            >
+              <div class="doc-icon doc-icon--center">🇮🇩</div>
+              <div class="doc-title">Wisata Domestik</div>
+              <p class="doc-desc">
+                Bali, Lombok, Raja Ampat, Bromo, dan ratusan destinasi
+                Nusantara.
+              </p>
+              <span class="text-gold text-sm fw-600">Lihat Paket →</span>
+            </a>
+            <a
+              class="doc-card tour-category-card reveal no-underline doc-card--center"
+              href="inter.html"
+            >
+              <div class="doc-icon doc-icon--center">✈️</div>
+              <div class="doc-title">Mancanegara</div>
+              <p class="doc-desc">
+                Jepang, Korea, Eropa, Timur Tengah, Australia, dan lebih banyak
+                lagi.
+              </p>
+              <span class="text-gold text-sm fw-600">Lihat Paket →</span>
+            </a>
+            <a
+              class="doc-card tour-category-card reveal no-underline doc-card--center"
+              href="cruise.html"
+            >
+              <div class="doc-icon doc-icon--center">🚢</div>
+              <div class="doc-title">Cruise</div>
+              <p class="doc-desc">
+                Berlayar mewah melewati Asia, Mediterania, dan belahan dunia
+                lainnya.
+              </p>
+              <span class="text-gold text-sm fw-600">Lihat Paket →</span>
+            </a>
+            <a
+              class="doc-card tour-category-card reveal no-underline doc-card--center"
+              href="umroh.html"
+            >
+              <div class="doc-icon doc-icon--center">🕌</div>
+              <div class="doc-title">Umroh & Haji</div>
+              <p class="doc-desc">
+                Paket Reguler, Plus, dan Premium untuk perjalanan ke Tanah Suci.
+              </p>
+              <span class="text-gold text-sm fw-600">Lihat Paket →</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Featured from all categories -->
+      <section class="section">
+        <div class="container">
+          <div class="section-header reveal">
+            <p class="eyebrow">⭐ Unggulan</p>
+            <h2>Paket Terpopuler</h2>
+            <p>Pilihan terbaik dari semua kategori wisata kami.</p>
+          </div>
+          <div class="grid-auto tour-listing-grid" id="featuredGrid"></div>
+        </div>
+      </section>
+
+      <!-- Offers -->
+      <section class="section">
+        <div class="container">
+          <div class="glass-panel offers-panel">
+            <div class="section-header centered reveal">
+              <p class="eyebrow">🎁 Promo</p>
+              <h2>Penawaran Spesial</h2>
+              <p>Dapatkan penawaran terbaik sebelum kehabisan.</p>
+            </div>
+            <div class="pager pager-top" id="offersPagerTop"></div>
+            <div class="grid-auto tour-listing-grid" id="offersGrid"></div>
+            <div class="pager" id="offersPager"></div>
+          </div>
+        </div>
+      </section>
+
+      <div id="footer-placeholder"></div>
     </div>
-  </section>
 
-  <div id="footer-placeholder"></div>
-</div>
+    <script type="module">
+      import { API_BASE } from "../js/config.js";
+      import "../js/main.js";
+      import {
+        fetchDomestik,
+        fetchInter,
+        fetchCruise,
+        fetchUmroh,
+        fetchOffers,
+        renderCard,
+        renderOfferCard,
+        showLoading,
+        showError,
+        reObserve,
+        DEMO,
+      } from "../js/listings.js";
 
-<script type="module">
-import { API_BASE } from '../js/config.js';
-import '../js/main.js';
-import {
-  fetchDomestik, fetchInter, fetchCruise, fetchUmroh, fetchOffers,
-  renderCard, renderOfferCard,
-  showLoading, showError, reObserve, DEMO
-} from '../js/listings.js';
+      const useDemo = API_BASE.includes("YOUR_WORKER");
+      const featGrid = document.getElementById("featuredGrid");
+      const offGrid = document.getElementById("offersGrid");
 
-const useDemo = API_BASE.includes('YOUR_WORKER');
-const featGrid  = document.getElementById('featuredGrid');
-const offGrid   = document.getElementById('offersGrid');
+      showLoading(featGrid);
+      showLoading(offGrid);
 
-showLoading(featGrid);
-showLoading(offGrid);
+      async function init() {
+        try {
+          let featured, offers;
 
-async function init() {
-  try {
-    let featured, offers;
+          if (useDemo) {
+            featured = [
+              ...DEMO.domestik
+                .slice(0, 2)
+                .map((i) => ({ ...i, _cat: "domestik" })),
+              ...DEMO.inter.slice(0, 2).map((i) => ({ ...i, _cat: "inter" })),
+              ...DEMO.cruise.slice(0, 1).map((i) => ({ ...i, _cat: "cruise" })),
+              ...DEMO.umroh.slice(0, 1).map((i) => ({ ...i, _cat: "umroh" })),
+            ];
+            offers = DEMO.offers;
+          } else {
+            const [dom, inter, cruise, umroh, off] = await Promise.all([
+              fetchDomestik(),
+              fetchInter(),
+              fetchCruise(),
+              fetchUmroh(),
+              fetchOffers(),
+            ]);
+            // 2 from each category, up to 8 total
+            featured = [
+              ...dom.slice(0, 2).map((i) => ({ ...i, _cat: "domestik" })),
+              ...inter.slice(0, 2).map((i) => ({ ...i, _cat: "inter" })),
+              ...cruise.slice(0, 2).map((i) => ({ ...i, _cat: "cruise" })),
+              ...umroh.slice(0, 2).map((i) => ({ ...i, _cat: "umroh" })),
+            ];
+            offers = off;
+          }
 
-    if (useDemo) {
-      featured = [
-        ...DEMO.domestik.slice(0,2).map(i => ({...i, _cat:'domestik'})),
-        ...DEMO.inter.slice(0,2).map(i => ({...i, _cat:'inter'})),
-        ...DEMO.cruise.slice(0,1).map(i => ({...i, _cat:'cruise'})),
-        ...DEMO.umroh.slice(0,1).map(i => ({...i, _cat:'umroh'})),
-      ];
-      offers = DEMO.offers;
-    } else {
-      const [dom, inter, cruise, umroh, off] = await Promise.all([
-        fetchDomestik(), fetchInter(), fetchCruise(), fetchUmroh(), fetchOffers()
-      ]);
-      // 2 from each category, up to 8 total
-      featured = [
-        ...dom.slice(0,2).map(i => ({...i, _cat:'domestik'})),
-        ...inter.slice(0,2).map(i => ({...i, _cat:'inter'})),
-        ...cruise.slice(0,2).map(i => ({...i, _cat:'cruise'})),
-        ...umroh.slice(0,2).map(i => ({...i, _cat:'umroh'})),
-      ];
-      offers = off;
-    }
+          featGrid.innerHTML = featured.length
+            ? featured.map((item, i) => renderCard(item, i * 70)).join("")
+            : '<div class="state-box"><p class="state-desc">Belum ada paket tersedia.</p></div>';
 
-    featGrid.innerHTML = featured.length
-      ? featured.map((item, i) => renderCard(item, i * 70)).join('')
-      : '<div class="state-box"><p class="state-desc">Belum ada paket tersedia.</p></div>';
+          allOffers = offers;
+          renderOffersPage(1);
 
-    allOffers = offers;
-    renderOffersPage(1);
+          reObserve();
+        } catch {
+          showError(featGrid);
+          showError(offGrid);
+        }
+      }
+      import { paginate, renderPager } from "../js/listings.js";
 
-    reObserve();
-  } catch { showError(featGrid); showError(offGrid); }
-}
-import { paginate, renderPager } from '../js/listings.js';
+      const OFFERS_PAGE_SIZE = 6;
+      let allOffers = [];
+      const offersPagerTop = document.getElementById("offersPagerTop");
+      const offersPager = document.getElementById("offersPager");
 
-const OFFERS_PAGE_SIZE = 6;
-let allOffers = [];
-const offersPagerTop = document.getElementById('offersPagerTop');
-const offersPager = document.getElementById('offersPager');
-
-function renderOffersPage(page) {
-  const { pageItems, page: p, totalPages } = paginate(allOffers, page, OFFERS_PAGE_SIZE);
-  offGrid.innerHTML = pageItems.length
-    ? pageItems.map((o, i) => renderOfferCard(o, i * 70)).join('')
-    : '<div class="state-box"><p class="state-desc">Belum ada penawaran aktif.</p></div>';
-  const changePage = newPage => {
-    renderOffersPage(newPage);
-  };
-  renderPager(offersPagerTop, p, totalPages, changePage);
-  renderPager(offersPager, p, totalPages, changePage);
-  reObserve();
-}
-init();
-</script>
-</body>
+      function renderOffersPage(page) {
+        const {
+          pageItems,
+          page: p,
+          totalPages,
+        } = paginate(allOffers, page, OFFERS_PAGE_SIZE);
+        offGrid.innerHTML = pageItems.length
+          ? pageItems.map((o, i) => renderOfferCard(o, i * 70)).join("")
+          : '<div class="state-box"><p class="state-desc">Belum ada penawaran aktif.</p></div>';
+        const changePage = (newPage) => {
+          renderOffersPage(newPage);
+        };
+        renderPager(offersPagerTop, p, totalPages, changePage);
+        renderPager(offersPager, p, totalPages, changePage);
+        reObserve();
+      }
+      init();
+    </script>
+  </body>
 </html>

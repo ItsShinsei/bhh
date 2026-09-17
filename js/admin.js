@@ -6,16 +6,19 @@
    search, and card-style rows on small screens.
    ═══════════════════════════════════════════ */
 
-import { API_BASE, driveThumb } from './config.js';
+import { API_BASE, driveThumb } from "./config.js";
 
-const workerUrl = API_BASE.replace(/\/api$/, '');
+const workerUrl = API_BASE.replace(/\/api$/, "");
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
 const PAGE_SIZE = 15;
 
 async function uploadImage(file) {
   const formData = new FormData();
-  formData.append('image', file);
-  const res = await fetch(`${API_BASE}/api/upload`, { method: 'POST', body: formData });
+  formData.append("image", file);
+  const res = await fetch(`${API_BASE}/api/upload`, {
+    method: "POST",
+    body: formData,
+  });
   if (!res.ok) {
     const errData = await res.json().catch(() => ({}));
     throw new Error(errData.error || `Upload gagal (HTTP ${res.status})`);
@@ -26,139 +29,190 @@ async function uploadImage(file) {
 
 function debounce(fn, ms) {
   let t;
-  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
 }
 
 // ── Resource configuration ──
 const RESOURCES = [
   {
-    key: 'domestik', label: 'Domestik', endpoint: '/api/domestik', listAll: true,
+    key: "domestik",
+    label: "Domestik",
+    endpoint: "/api/domestik",
+    listAll: true,
     fields: [
-      { name: 'province', label: 'Provinsi', type: 'text', required: true },
-      { name: 'city', label: 'Kota', type: 'text', required: true },
-      { name: 'name', label: 'Nama Paket', type: 'text', required: true },
-      { name: 'duration', label: 'Durasi', type: 'text' },
-      { name: 'price', label: 'Harga', type: 'text' },
-      { name: 'price2', label: 'Harga Coret (opsional)', type: 'text' },
-      { name: 'description', label: 'Deskripsi', type: 'textarea' },
-      { name: 'image_url', label: 'Gambar', type: 'image' },
-      { name: 'badge', label: 'Badge', type: 'text' },
-      { name: 'whatsapp_msg', label: 'WhatsApp Msg', type: 'text' },
-      { name: 'expires', label: 'Kadaluarsa (opsional)', type: 'date' },
+      { name: "province", label: "Provinsi", type: "text", required: true },
+      { name: "city", label: "Kota", type: "text", required: true },
+      { name: "name", label: "Nama Paket", type: "text", required: true },
+      { name: "duration", label: "Durasi", type: "text" },
+      { name: "price", label: "Harga", type: "text" },
+      { name: "price2", label: "Harga Coret (opsional)", type: "text" },
+      { name: "description", label: "Deskripsi", type: "textarea" },
+      { name: "image_url", label: "Gambar", type: "image" },
+      { name: "badge", label: "Badge", type: "text" },
+      { name: "whatsapp_msg", label: "WhatsApp Msg", type: "text" },
+      { name: "expires", label: "Kadaluarsa (opsional)", type: "date" },
     ],
   },
   {
-    key: 'inter', label: 'Inter', endpoint: '/api/inter', listAll: true,
+    key: "inter",
+    label: "Inter",
+    endpoint: "/api/inter",
+    listAll: true,
     fields: [
-      { name: 'country', label: 'Negara', type: 'text', required: true },
-      { name: 'city', label: 'Kota', type: 'text', required: true },
-      { name: 'name', label: 'Nama Paket', type: 'text', required: true },
-      { name: 'duration', label: 'Durasi', type: 'text' },
-      { name: 'price', label: 'Harga', type: 'text' },
-      { name: 'price2', label: 'Harga Coret (opsional)', type: 'text' },
-      { name: 'description', label: 'Deskripsi', type: 'textarea' },
-      { name: 'image_url', label: 'Gambar', type: 'image' },
-      { name: 'badge', label: 'Badge', type: 'text' },
-      { name: 'whatsapp_msg', label: 'WhatsApp Msg', type: 'text' },
-      { name: 'expires', label: 'Kadaluarsa (opsional)', type: 'date' },
+      { name: "country", label: "Negara", type: "text", required: true },
+      { name: "city", label: "Kota", type: "text", required: true },
+      { name: "name", label: "Nama Paket", type: "text", required: true },
+      { name: "duration", label: "Durasi", type: "text" },
+      { name: "price", label: "Harga", type: "text" },
+      { name: "price2", label: "Harga Coret (opsional)", type: "text" },
+      { name: "description", label: "Deskripsi", type: "textarea" },
+      { name: "image_url", label: "Gambar", type: "image" },
+      { name: "badge", label: "Badge", type: "text" },
+      { name: "whatsapp_msg", label: "WhatsApp Msg", type: "text" },
+      { name: "expires", label: "Kadaluarsa (opsional)", type: "date" },
     ],
   },
   {
-    key: 'cruise', label: 'Cruise', endpoint: '/api/cruise', listAll: true,
+    key: "cruise",
+    label: "Cruise",
+    endpoint: "/api/cruise",
+    listAll: true,
     fields: [
-      { name: 'route', label: 'Rute', type: 'text', required: true },
-      { name: 'name', label: 'Nama Paket', type: 'text', required: true },
-      { name: 'duration', label: 'Durasi', type: 'text' },
-      { name: 'price', label: 'Harga', type: 'text' },
-      { name: 'price2', label: 'Harga Coret (opsional)', type: 'text' },
-      { name: 'description', label: 'Deskripsi', type: 'textarea' },
-      { name: 'image_url', label: 'Gambar', type: 'image' },
-      { name: 'badge', label: 'Badge', type: 'text' },
-      { name: 'whatsapp_msg', label: 'WhatsApp Msg', type: 'text' },
-      { name: 'expires', label: 'Kadaluarsa (opsional)', type: 'date' },
+      { name: "route", label: "Rute", type: "text", required: true },
+      { name: "name", label: "Nama Paket", type: "text", required: true },
+      { name: "duration", label: "Durasi", type: "text" },
+      { name: "price", label: "Harga", type: "text" },
+      { name: "price2", label: "Harga Coret (opsional)", type: "text" },
+      { name: "description", label: "Deskripsi", type: "textarea" },
+      { name: "image_url", label: "Gambar", type: "image" },
+      { name: "badge", label: "Badge", type: "text" },
+      { name: "whatsapp_msg", label: "WhatsApp Msg", type: "text" },
+      { name: "expires", label: "Kadaluarsa (opsional)", type: "date" },
     ],
   },
   {
-    key: 'umroh', label: 'Umroh', endpoint: '/api/umroh', listAll: true,
+    key: "umroh",
+    label: "Umroh",
+    endpoint: "/api/umroh",
+    listAll: true,
     fields: [
-      { name: 'package_type', label: 'Tipe', type: 'select', required: true, options: ['Reguler', 'Plus', 'Premium'] },
-      { name: 'name', label: 'Nama Paket', type: 'text', required: true },
-      { name: 'duration', label: 'Durasi', type: 'text' },
-      { name: 'price', label: 'Harga', type: 'text' },
-      { name: 'price2', label: 'Harga Coret (opsional)', type: 'text' },
-      { name: 'description', label: 'Deskripsi', type: 'textarea' },
-      { name: 'image_url', label: 'Gambar', type: 'image' },
-      { name: 'badge', label: 'Badge', type: 'text' },
-      { name: 'whatsapp_msg', label: 'WhatsApp Msg', type: 'text' },
-      { name: 'expires', label: 'Kadaluarsa (opsional)', type: 'date' },
+      {
+        name: "package_type",
+        label: "Tipe",
+        type: "select",
+        required: true,
+        options: ["Reguler", "Plus", "Premium"],
+      },
+      { name: "name", label: "Nama Paket", type: "text", required: true },
+      { name: "duration", label: "Durasi", type: "text" },
+      { name: "price", label: "Harga", type: "text" },
+      { name: "price2", label: "Harga Coret (opsional)", type: "text" },
+      { name: "description", label: "Deskripsi", type: "textarea" },
+      { name: "image_url", label: "Gambar", type: "image" },
+      { name: "badge", label: "Badge", type: "text" },
+      { name: "whatsapp_msg", label: "WhatsApp Msg", type: "text" },
+      { name: "expires", label: "Kadaluarsa (opsional)", type: "date" },
     ],
   },
   {
-    key: 'offers', label: 'Promo', endpoint: '/api/offers', listAll: true,
+    key: "offers",
+    label: "Promo",
+    endpoint: "/api/offers",
+    listAll: true,
     fields: [
-      { name: 'name', label: 'Nama Promo', type: 'text', required: true },
-      { name: 'description', label: 'Deskripsi', type: 'textarea' },
-      { name: 'image_url', label: 'Gambar', type: 'image' },
-      { name: 'badge', label: 'Badge', type: 'text' },
-      { name: 'whatsapp_msg', label: 'WhatsApp Msg', type: 'text' },
-      { name: 'expires', label: 'Kadaluarsa (opsional)', type: 'date' },
+      { name: "name", label: "Nama Promo", type: "text", required: true },
+      { name: "description", label: "Deskripsi", type: "textarea" },
+      { name: "image_url", label: "Gambar", type: "image" },
+      { name: "badge", label: "Badge", type: "text" },
+      { name: "whatsapp_msg", label: "WhatsApp Msg", type: "text" },
+      { name: "expires", label: "Kadaluarsa (opsional)", type: "date" },
     ],
   },
   {
-    key: 'reviews', label: 'Ulasan', endpoint: '/api/reviews', listAll: false,
+    key: "reviews",
+    label: "Ulasan",
+    endpoint: "/api/reviews",
+    listAll: false,
     fields: [
-      { name: 'name', label: 'Nama Pelanggan', type: 'text', required: true },
-      { name: 'rating', label: 'Rating (1-5)', type: 'number', min: 1, max: 5, required: true },
-      { name: 'text', label: 'Ulasan', type: 'textarea', required: true },
-      { name: 'photo_url', label: 'Photo URL (opsional)', type: 'text' },
+      { name: "name", label: "Nama Pelanggan", type: "text", required: true },
+      {
+        name: "rating",
+        label: "Rating (1-5)",
+        type: "number",
+        min: 1,
+        max: 5,
+        required: true,
+      },
+      { name: "text", label: "Ulasan", type: "textarea", required: true },
+      { name: "photo_url", label: "Photo URL (opsional)", type: "text" },
     ],
   },
   {
-    key: 'gallery', label: 'Galeri', endpoint: '/api/gallery', listAll: false,
+    key: "gallery",
+    label: "Galeri",
+    endpoint: "/api/gallery",
+    listAll: false,
     fields: [
-      { name: 'title', label: 'Judul', type: 'text', required: true },
-      { name: 'category', label: 'Kategori', type: 'select', required: true, options: ['domestik', 'inter', 'cruise', 'umroh'] },
-      { name: 'image_url', label: 'Gambar', type: 'image', required: true },
+      { name: "title", label: "Judul", type: "text", required: true },
+      {
+        name: "category",
+        label: "Kategori",
+        type: "select",
+        required: true,
+        options: ["domestik", "inter", "cruise", "umroh"],
+      },
+      { name: "image_url", label: "Gambar", type: "image", required: true },
     ],
   },
 ];
 
 // ── Helpers ──
 function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  return String(s ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
 }
-function escAttr(s) { return esc(s).replace(/\n/g, ' '); }
+function escAttr(s) {
+  return esc(s).replace(/\n/g, " ");
+}
 
 function formatRupiahInput(value) {
-  const raw = String(value ?? '').trim();
-  if (!raw) return '';
-  const digits = raw.replace(/[^\d-]/g, '');
-  if (!digits) return '';
-  const isNegative = digits.startsWith('-');
-  const absDigits = digits.replace(/-/g, '');
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  const digits = raw.replace(/[^\d-]/g, "");
+  if (!digits) return "";
+  const isNegative = digits.startsWith("-");
+  const absDigits = digits.replace(/-/g, "");
   const numeric = Number(absDigits);
-  if (!Number.isFinite(numeric) || absDigits === '') return raw;
-  const formatted = new Intl.NumberFormat('id-ID').format(Math.trunc(numeric));
-  return `${isNegative ? '-' : ''}RP ${formatted}`;
+  if (!Number.isFinite(numeric) || absDigits === "") return raw;
+  const formatted = new Intl.NumberFormat("id-ID").format(Math.trunc(numeric));
+  return `${isNegative ? "-" : ""}RP ${formatted}`;
 }
 
 function normalizePriceField(value) {
   const formatted = formatRupiahInput(value);
-  return formatted || '';
+  return formatted || "";
 }
 
 function thumbCell(url) {
-  const src = driveThumb(url, 'w200');
+  const src = driveThumb(url, "w200");
   if (!src) return `<span class="list-state" style="padding:0;">—</span>`;
-  const fullImage = driveThumb(url, 'w2000');
+  const fullImage = driveThumb(url, "w2000");
   return `<img class="thumb table-image-preview" src="${esc(src)}" data-full-image="${escAttr(fullImage)}" title="Klik untuk melihat gambar penuh" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`;
 }
 
 function expiresCell(expires) {
-  if (!expires) return '-';
+  if (!expires) return "-";
   const d = new Date(expires);
   const expired = !isNaN(d) && d < new Date(new Date().toDateString());
-  return `${esc(expires)}${expired ? '<span class="badge-expired">Kadaluarsa</span>' : ''}`;
+  return `${esc(expires)}${expired ? '<span class="badge-expired">Kadaluarsa</span>' : ""}`;
 }
 
 function isRowExpired(item) {
@@ -168,7 +222,7 @@ function isRowExpired(item) {
 }
 
 function isImageField(f) {
-  return f.type === 'image' || f.name === 'photo_url';
+  return f.type === "image" || f.name === "photo_url";
 }
 
 // Builds table columns from `fields` — every field is visible except raw
@@ -176,75 +230,112 @@ function isImageField(f) {
 function buildColumns(fields) {
   const cols = [];
   const imgField = fields.find(isImageField);
-  if (imgField) cols.push({ label: 'Gambar', render: i => thumbCell(i[imgField.name]) });
-  fields.forEach(f => {
+  if (imgField)
+    cols.push({ label: "Gambar", render: (i) => thumbCell(i[imgField.name]) });
+  fields.forEach((f) => {
     if (isImageField(f)) return;
-    if (f.name === 'expires') { cols.push({ label: f.label, render: i => expiresCell(i.expires) }); return; }
-    if (f.name === 'rating')  { cols.push({ label: f.label, render: i => '⭐'.repeat(Number(i.rating) || 0) }); return; }
-    if (f.name === 'name' || f.name === 'title') {
-      cols.push({ label: f.label, render: i => `<strong>${esc(i[f.name] || '')}</strong>` }); return;
+    if (f.name === "expires") {
+      cols.push({ label: f.label, render: (i) => expiresCell(i.expires) });
+      return;
     }
-    if (f.type === 'textarea' || f.name === 'whatsapp_msg') {
-      cols.push({ label: f.label, render: i => `<span class="cell-truncate" title="${escAttr(i[f.name])}">${esc(i[f.name] || '')}</span>` }); return;
+    if (f.name === "rating") {
+      cols.push({
+        label: f.label,
+        render: (i) => "⭐".repeat(Number(i.rating) || 0),
+      });
+      return;
     }
-    cols.push({ label: f.label, render: i => esc(i[f.name] || '-') });
+    if (f.name === "name" || f.name === "title") {
+      cols.push({
+        label: f.label,
+        render: (i) => `<strong>${esc(i[f.name] || "")}</strong>`,
+      });
+      return;
+    }
+    if (f.type === "textarea" || f.name === "whatsapp_msg") {
+      cols.push({
+        label: f.label,
+        render: (i) =>
+          `<span class="cell-truncate" title="${escAttr(i[f.name])}">${esc(i[f.name] || "")}</span>`,
+      });
+      return;
+    }
+    cols.push({ label: f.label, render: (i) => esc(i[f.name] || "-") });
   });
   return cols;
 }
 
-RESOURCES.forEach(r => {
+RESOURCES.forEach((r) => {
   r.columns = buildColumns(r.fields);
   // Per-resource UI state: lazy-loaded items, pagination, search
-  r.state = { items: [], filtered: [], page: 1, search: '', sortKey: 'id', sortDirection: 'desc', loaded: false, loading: false };
+  r.state = {
+    items: [],
+    filtered: [],
+    page: 1,
+    search: "",
+    sortKey: "id",
+    sortDirection: "desc",
+    loaded: false,
+    loading: false,
+  };
 });
 
 function fieldsHtml(fields) {
-  return fields.map(f => {
-    const req = f.required ? 'required' : '';
-    let control;
-    if (f.type === 'textarea') {
-      control = `<textarea name="${f.name}" ${req}></textarea>`;
-    } else if (f.type === 'select') {
-      const opts = f.options.map(o => `<option value="${esc(o)}">${esc(o)}</option>`).join('');
-      control = `<select name="${f.name}" ${req}>${opts}</select>`;
-    } else if (f.type === 'number') {
-      control = `<input type="number" name="${f.name}" ${f.min != null ? `min="${f.min}"` : ''} ${f.max != null ? `max="${f.max}"` : ''} ${req}>`;
-    } else if (f.type === 'image') {
-      control = `
+  return fields
+    .map((f) => {
+      const req = f.required ? "required" : "";
+      let control;
+      if (f.type === "textarea") {
+        control = `<textarea name="${f.name}" ${req}></textarea>`;
+      } else if (f.type === "select") {
+        const opts = f.options
+          .map((o) => `<option value="${esc(o)}">${esc(o)}</option>`)
+          .join("");
+        control = `<select name="${f.name}" ${req}>${opts}</select>`;
+      } else if (f.type === "number") {
+        control = `<input type="number" name="${f.name}" ${f.min != null ? `min="${f.min}"` : ""} ${f.max != null ? `max="${f.max}"` : ""} ${req}>`;
+      } else if (f.type === "image") {
+        control = `
         <input type="file" name="${f.name}" accept="image/*" data-image-input>
         <div class="form-hint">Maks 5MB · JPG, PNG, atau WebP</div>
         <div class="image-preview" data-image-preview></div>
       `;
-    } else if (f.name === 'price' || f.name === 'price2') {
-      control = `<input type="text" name="${f.name}" inputmode="numeric" autocomplete="off" data-rupiah-input ${req}>`;
-    } else {
-      control = `<input type="${f.type}" name="${f.name}" ${req}>`;
-    }
-    return `<div class="form-group"><label>${esc(f.label)}</label>${control}</div>`;
-  }).join('');
+      } else if (f.name === "price" || f.name === "price2") {
+        control = `<input type="text" name="${f.name}" inputmode="numeric" autocomplete="off" data-rupiah-input ${req}>`;
+      } else {
+        control = `<input type="${f.type}" name="${f.name}" ${req}>`;
+      }
+      return `<div class="form-group"><label>${esc(f.label)}</label>${control}</div>`;
+    })
+    .join("");
 }
 
 function wirePriceFormatting(form) {
-  form.querySelectorAll('[data-rupiah-input]').forEach(input => {
-    input.addEventListener('input', () => {
+  form.querySelectorAll("[data-rupiah-input]").forEach((input) => {
+    input.addEventListener("input", () => {
       input.value = formatRupiahInput(input.value);
     });
   });
 }
 
 function wireImagePreviews(form) {
-  form.querySelectorAll('[data-image-input]').forEach(input => {
-    input.addEventListener('change', () => {
-      const preview = input.closest('.form-group').querySelector('[data-image-preview]');
+  form.querySelectorAll("[data-image-input]").forEach((input) => {
+    input.addEventListener("change", () => {
+      const preview = input
+        .closest(".form-group")
+        .querySelector("[data-image-preview]");
       const file = input.files[0];
-      preview.innerHTML = '';
+      preview.innerHTML = "";
       if (!file) return;
-      if (!file.type.startsWith('image/') || file.size > MAX_IMAGE_BYTES) return;
-      const img = document.createElement('img');
+      if (!file.type.startsWith("image/") || file.size > MAX_IMAGE_BYTES)
+        return;
+      const img = document.createElement("img");
       img.src = URL.createObjectURL(file);
       img.dataset.fullImage = img.src;
-      img.title = 'Klik untuk melihat gambar penuh';
-      img.addEventListener('click', () => openImageViewer(img.dataset.fullImage));
+      img.title = "Klik untuk melihat gambar penuh";
+      img.addEventListener("click", () =>
+        openImageViewer(img.dataset.fullImage),
+      );
       preview.appendChild(img);
     });
   });
@@ -254,8 +345,8 @@ async function apiFetch(path, options = {}) {
   const url = `${API_BASE}${path}`;
   const body = options.body ? JSON.stringify(options.body) : undefined;
   const res = await fetch(url, {
-    method: options.method || 'GET',
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    method: options.method || "GET",
+    headers: body ? { "Content-Type": "application/json" } : undefined,
     body,
   });
   if (!res.ok) {
@@ -266,30 +357,34 @@ async function apiFetch(path, options = {}) {
 }
 
 // ── Build tabs ──
-const tabsEl = document.getElementById('adminTabs');
-const mainEl = document.getElementById('adminMain');
+const tabsEl = document.getElementById("adminTabs");
+const mainEl = document.getElementById("adminMain");
 
 RESOURCES.forEach((r, idx) => {
-  const tab = document.createElement('button');
-  tab.type = 'button';
-  tab.className = 'admin-tab' + (idx === 0 ? ' active' : '');
+  const tab = document.createElement("button");
+  tab.type = "button";
+  tab.className = "admin-tab" + (idx === 0 ? " active" : "");
   tab.dataset.key = r.key;
   tab.innerHTML = `${esc(r.label)} <span class="count" id="count-${r.key}"></span>`;
-  tab.addEventListener('click', () => activateTab(r.key));
+  tab.addEventListener("click", () => activateTab(r.key));
   tabsEl.appendChild(tab);
 });
 
 function activateTab(key) {
-  document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t.dataset.key === key));
-  document.querySelectorAll('.admin-panel').forEach(p => p.classList.toggle('active', p.dataset.key === key));
-  const r = RESOURCES.find(x => x.key === key);
+  document
+    .querySelectorAll(".admin-tab")
+    .forEach((t) => t.classList.toggle("active", t.dataset.key === key));
+  document
+    .querySelectorAll(".admin-panel")
+    .forEach((p) => p.classList.toggle("active", p.dataset.key === key));
+  const r = RESOURCES.find((x) => x.key === key);
   if (r && !r.state.loaded && !r.state.loading) loadList(r);
 }
 
 // ── Build panels ──
-RESOURCES.forEach(r => {
-  const panel = document.createElement('section');
-  panel.className = 'admin-panel';
+RESOURCES.forEach((r) => {
+  const panel = document.createElement("section");
+  panel.className = "admin-panel";
   panel.dataset.key = r.key;
 
   panel.innerHTML = `
@@ -316,7 +411,13 @@ RESOURCES.forEach(r => {
               <label for="sort-${r.key}">Urutkan:</label>
               <select id="sort-${r.key}" data-sort="${r.key}">
                 <option value="id">ID</option>
-                ${r.fields.filter(f => !isImageField(f)).map(f => `<option value="${esc(f.name)}">${esc(f.label)}</option>`).join('')}
+                ${r.fields
+                  .filter((f) => !isImageField(f))
+                  .map(
+                    (f) =>
+                      `<option value="${esc(f.name)}">${esc(f.label)}</option>`,
+                  )
+                  .join("")}
               </select>
               <select data-sort-direction="${r.key}" aria-label="Arah urutan">
                 <option value="asc">Naik</option>
@@ -328,7 +429,7 @@ RESOURCES.forEach(r => {
             <table class="data-table">
               <thead><tr>
                 <th>ID</th>
-                ${r.columns.map(c => `<th>${esc(c.label)}</th>`).join('')}
+                ${r.columns.map((c) => `<th>${esc(c.label)}</th>`).join("")}
                 <th></th>
               </tr></thead>
               <tbody id="tbody-${r.key}">
@@ -352,11 +453,11 @@ RESOURCES.forEach(r => {
 
   mainEl.appendChild(panel);
 });
-mainEl.querySelector('.admin-panel').classList.add('active');
+mainEl.querySelector(".admin-panel").classList.add("active");
 
 // ── Edit modal ──
-const editModal = document.createElement('div');
-editModal.className = 'modal-overlay';
+const editModal = document.createElement("div");
+editModal.className = "modal-overlay";
 editModal.innerHTML = `
   <div class="modal-box">
     <button type="button" class="modal-close" aria-label="Tutup">&times;</button>
@@ -367,8 +468,8 @@ editModal.innerHTML = `
 `;
 document.body.appendChild(editModal);
 
-const imageViewer = document.createElement('div');
-imageViewer.className = 'image-viewer-overlay';
+const imageViewer = document.createElement("div");
+imageViewer.className = "image-viewer-overlay";
 imageViewer.innerHTML = `
   <button type="button" class="modal-close image-viewer-close" aria-label="Tutup gambar">&times;</button>
   <img class="image-viewer-image" alt="Pratinjau gambar penuh">
@@ -376,59 +477,76 @@ imageViewer.innerHTML = `
 document.body.appendChild(imageViewer);
 
 function closeImageViewer() {
-  imageViewer.classList.remove('open');
-  imageViewer.querySelector('.image-viewer-image').removeAttribute('src');
+  imageViewer.classList.remove("open");
+  imageViewer.querySelector(".image-viewer-image").removeAttribute("src");
 }
 
 function openImageViewer(src) {
   if (!src) return;
-  imageViewer.querySelector('.image-viewer-image').src = src;
-  imageViewer.classList.add('open');
+  imageViewer.querySelector(".image-viewer-image").src = src;
+  imageViewer.classList.add("open");
 }
 
-imageViewer.querySelector('.image-viewer-close').addEventListener('click', closeImageViewer);
-imageViewer.addEventListener('click', e => { if (e.target === imageViewer) closeImageViewer(); });
+imageViewer
+  .querySelector(".image-viewer-close")
+  .addEventListener("click", closeImageViewer);
+imageViewer.addEventListener("click", (e) => {
+  if (e.target === imageViewer) closeImageViewer();
+});
 
 function closeEditModal() {
-  editModal.classList.remove('open');
-  document.getElementById('editForm').innerHTML = '';
-  document.getElementById('editResult').innerHTML = '';
+  editModal.classList.remove("open");
+  document.getElementById("editForm").innerHTML = "";
+  document.getElementById("editResult").innerHTML = "";
 }
-editModal.querySelector('.modal-close').addEventListener('click', closeEditModal);
-editModal.addEventListener('click', e => { if (e.target === editModal) closeEditModal(); });
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Escape') return;
-  if (imageViewer.classList.contains('open')) closeImageViewer();
-  else if (editModal.classList.contains('open')) closeEditModal();
+editModal
+  .querySelector(".modal-close")
+  .addEventListener("click", closeEditModal);
+editModal.addEventListener("click", (e) => {
+  if (e.target === editModal) closeEditModal();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (imageViewer.classList.contains("open")) closeImageViewer();
+  else if (editModal.classList.contains("open")) closeEditModal();
 });
 
 function openEditModal(r, item) {
-  document.getElementById('editModalTitle').textContent = `Edit ${r.label}`;
-  const form = document.getElementById('editForm');
-  form.innerHTML = fieldsHtml(r.fields) + `<button type="submit" class="btn btn-primary">Simpan Perubahan</button>`;
+  document.getElementById("editModalTitle").textContent = `Edit ${r.label}`;
+  const form = document.getElementById("editForm");
+  form.innerHTML =
+    fieldsHtml(r.fields) +
+    `<button type="submit" class="btn btn-primary">Simpan Perubahan</button>`;
 
-  r.fields.forEach(f => {
-    if (f.type === 'image') return;
+  r.fields.forEach((f) => {
+    if (f.type === "image") return;
     const el = form.elements[f.name];
     if (!el) return;
-    el.value = (f.name === 'price' || f.name === 'price2') ? normalizePriceField(item[f.name] ?? '') : (item[f.name] ?? '');
+    el.value =
+      f.name === "price" || f.name === "price2"
+        ? normalizePriceField(item[f.name] ?? "")
+        : (item[f.name] ?? "");
   });
 
-  const imgField = r.fields.find(f => f.type === 'image');
+  const imgField = r.fields.find((f) => f.type === "image");
   if (imgField) {
     const current = item[imgField.name];
-    const preview = form.querySelector('[data-image-preview]');
+    const preview = form.querySelector("[data-image-preview]");
     if (preview && current) {
-      const fullImage = escAttr(driveThumb(current, 'w2000'));
-      preview.innerHTML = `<img src="${esc(driveThumb(current, 'w200'))}" data-full-image="${fullImage}" title="Klik untuk melihat gambar penuh" alt="">`;
-      preview.querySelector('img').addEventListener('click', () => openImageViewer(preview.querySelector('img').dataset.fullImage));
+      const fullImage = escAttr(driveThumb(current, "w2000"));
+      preview.innerHTML = `<img src="${esc(driveThumb(current, "w200"))}" data-full-image="${fullImage}" title="Klik untuk melihat gambar penuh" alt="">`;
+      preview
+        .querySelector("img")
+        .addEventListener("click", () =>
+          openImageViewer(preview.querySelector("img").dataset.fullImage),
+        );
     }
   }
 
   wirePriceFormatting(form);
   wireImagePreviews(form);
 
-  form.onsubmit = async e => {
+  form.onsubmit = async (e) => {
     e.preventDefault();
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
@@ -437,29 +555,32 @@ function openEditModal(r, item) {
     const data = {};
     try {
       for (const f of r.fields) {
-        if (f.type === 'image') {
+        if (f.type === "image") {
           const file = form.elements[f.name].files[0];
           if (file) {
-            if (!file.type.startsWith('image/')) throw new Error(`${f.label}: file harus berupa gambar.`);
-            if (file.size > MAX_IMAGE_BYTES) throw new Error(`${f.label}: ukuran maksimal 5MB.`);
-            submitBtn.textContent = 'Mengunggah gambar...';
+            if (!file.type.startsWith("image/"))
+              throw new Error(`${f.label}: file harus berupa gambar.`);
+            if (file.size > MAX_IMAGE_BYTES)
+              throw new Error(`${f.label}: ukuran maksimal 5MB.`);
+            submitBtn.textContent = "Mengunggah gambar...";
             data[f.name] = await uploadImage(file);
           }
           continue;
         }
         let v = form.elements[f.name].value;
-        if (typeof v === 'string') v = v.trim();
-        if (f.type === 'number' && v !== '') v = Number(v);
-        if ((f.name === 'price' || f.name === 'price2') && v !== '') v = normalizePriceField(v);
+        if (typeof v === "string") v = v.trim();
+        if (f.type === "number" && v !== "") v = Number(v);
+        if ((f.name === "price" || f.name === "price2") && v !== "")
+          v = normalizePriceField(v);
         data[f.name] = v;
       }
 
-      submitBtn.textContent = 'Menyimpan...';
-      await apiFetch(`${r.endpoint}/${item.id}`, { method: 'PUT', body: data });
+      submitBtn.textContent = "Menyimpan...";
+      await apiFetch(`${r.endpoint}/${item.id}`, { method: "PUT", body: data });
       closeEditModal();
       loadList(r, { force: true, preservePage: true });
     } catch (err) {
-      document.getElementById('editResult').innerHTML =
+      document.getElementById("editResult").innerHTML =
         `<div class="result-error" style="padding:8px; border-radius:4px; font-size:12px; background:rgba(239,68,68,0.1); color:#ef4444;">❌ Error: ${esc(err.message)}</div>`;
     } finally {
       submitBtn.disabled = false;
@@ -467,13 +588,13 @@ function openEditModal(r, item) {
     }
   };
 
-  editModal.classList.add('open');
+  editModal.classList.add("open");
 }
 
 // ── Wire up add forms, search, pagination, refresh, edit/delete ──
-RESOURCES.forEach(r => {
+RESOURCES.forEach((r) => {
   const form = document.getElementById(`form-${r.key}`);
-  form.addEventListener('submit', async e => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalBtnText = submitBtn.textContent;
@@ -482,34 +603,43 @@ RESOURCES.forEach(r => {
     const data = {};
     try {
       for (const f of r.fields) {
-        if (f.type === 'image') {
+        if (f.type === "image") {
           const fileInput = form.elements[f.name];
           const file = fileInput.files[0];
           if (!file) {
             if (f.required) throw new Error(`${f.label} wajib diisi.`);
             continue;
           }
-          if (!file.type.startsWith('image/')) throw new Error(`${f.label}: file harus berupa gambar.`);
-          if (file.size > MAX_IMAGE_BYTES) throw new Error(`${f.label}: ukuran maksimal 5MB.`);
-          submitBtn.textContent = 'Mengunggah gambar...';
+          if (!file.type.startsWith("image/"))
+            throw new Error(`${f.label}: file harus berupa gambar.`);
+          if (file.size > MAX_IMAGE_BYTES)
+            throw new Error(`${f.label}: ukuran maksimal 5MB.`);
+          submitBtn.textContent = "Mengunggah gambar...";
           data[f.name] = await uploadImage(file);
           continue;
         }
         let v = form.elements[f.name].value;
-        if (typeof v === 'string') v = v.trim();
-        if (f.type === 'number' && v !== '') v = Number(v);
-        if ((f.name === 'price' || f.name === 'price2') && v !== '') v = normalizePriceField(v);
-        if (v !== '') data[f.name] = v;
+        if (typeof v === "string") v = v.trim();
+        if (f.type === "number" && v !== "") v = Number(v);
+        if ((f.name === "price" || f.name === "price2") && v !== "")
+          v = normalizePriceField(v);
+        if (v !== "") data[f.name] = v;
       }
 
-      submitBtn.textContent = 'Menyimpan...';
-      const result = await apiFetch(r.endpoint, { method: 'POST', body: data });
-      showResult(r.key, `✅ ${r.label} ditambahkan (ID: ${result.id})`, 'success');
+      submitBtn.textContent = "Menyimpan...";
+      const result = await apiFetch(r.endpoint, { method: "POST", body: data });
+      showResult(
+        r.key,
+        `✅ ${r.label} ditambahkan (ID: ${result.id})`,
+        "success",
+      );
       form.reset();
-      form.querySelectorAll('[data-image-preview]').forEach(el => el.innerHTML = '');
+      form
+        .querySelectorAll("[data-image-preview]")
+        .forEach((el) => (el.innerHTML = ""));
       loadList(r, { force: true });
     } catch (err) {
-      showResult(r.key, `❌ Error: ${err.message}`, 'error');
+      showResult(r.key, `❌ Error: ${err.message}`, "error");
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = originalBtnText;
@@ -519,86 +649,127 @@ RESOURCES.forEach(r => {
   wirePriceFormatting(form);
   wireImagePreviews(form);
 
-  document.querySelector(`[data-refresh="${r.key}"]`).addEventListener('click', () => loadList(r, { force: true }));
+  document
+    .querySelector(`[data-refresh="${r.key}"]`)
+    .addEventListener("click", () => loadList(r, { force: true }));
 
   const searchInput = document.querySelector(`[data-search="${r.key}"]`);
-  searchInput.addEventListener('input', debounce(() => {
-    r.state.search = searchInput.value.trim().toLowerCase();
-    r.state.page = 1;
-    renderTable(r);
-  }, 250));
+  searchInput.addEventListener(
+    "input",
+    debounce(() => {
+      r.state.search = searchInput.value.trim().toLowerCase();
+      r.state.page = 1;
+      renderTable(r);
+    }, 250),
+  );
 
   const sortInput = document.querySelector(`[data-sort="${r.key}"]`);
-  const sortDirectionInput = document.querySelector(`[data-sort-direction="${r.key}"]`);
-  sortInput.addEventListener('change', () => {
+  const sortDirectionInput = document.querySelector(
+    `[data-sort-direction="${r.key}"]`,
+  );
+  sortInput.addEventListener("change", () => {
     r.state.sortKey = sortInput.value;
     r.state.page = 1;
     renderTable(r);
   });
-  sortDirectionInput.addEventListener('change', () => {
+  sortDirectionInput.addEventListener("change", () => {
     r.state.sortDirection = sortDirectionInput.value;
     r.state.page = 1;
     renderTable(r);
   });
 
-  document.querySelector(`[data-page-first="${r.key}"]`).addEventListener('click', () => {
-    if (r.state.page > 1) { r.state.page = 1; renderTable(r); }
-  });
-  document.querySelector(`[data-page-prev="${r.key}"]`).addEventListener('click', () => {
-    if (r.state.page > 1) { r.state.page--; renderTable(r); }
-  });
-  document.querySelector(`[data-page-next="${r.key}"]`).addEventListener('click', () => {
-    const totalPages = Math.max(1, Math.ceil(r.state.filtered.length / PAGE_SIZE));
-    if (r.state.page < totalPages) { r.state.page++; renderTable(r); }
-  });
-  document.querySelector(`[data-page-last="${r.key}"]`).addEventListener('click', () => {
-    const totalPages = Math.max(1, Math.ceil(r.state.filtered.length / PAGE_SIZE));
-    if (r.state.page !== totalPages) { r.state.page = totalPages; renderTable(r); }
-  });
+  document
+    .querySelector(`[data-page-first="${r.key}"]`)
+    .addEventListener("click", () => {
+      if (r.state.page > 1) {
+        r.state.page = 1;
+        renderTable(r);
+      }
+    });
+  document
+    .querySelector(`[data-page-prev="${r.key}"]`)
+    .addEventListener("click", () => {
+      if (r.state.page > 1) {
+        r.state.page--;
+        renderTable(r);
+      }
+    });
+  document
+    .querySelector(`[data-page-next="${r.key}"]`)
+    .addEventListener("click", () => {
+      const totalPages = Math.max(
+        1,
+        Math.ceil(r.state.filtered.length / PAGE_SIZE),
+      );
+      if (r.state.page < totalPages) {
+        r.state.page++;
+        renderTable(r);
+      }
+    });
+  document
+    .querySelector(`[data-page-last="${r.key}"]`)
+    .addEventListener("click", () => {
+      const totalPages = Math.max(
+        1,
+        Math.ceil(r.state.filtered.length / PAGE_SIZE),
+      );
+      if (r.state.page !== totalPages) {
+        r.state.page = totalPages;
+        renderTable(r);
+      }
+    });
 
-  document.getElementById(`tbody-${r.key}`).addEventListener('click', async e => {
-    const imagePreview = e.target.closest('[data-full-image]');
-    if (imagePreview) {
-      openImageViewer(imagePreview.dataset.fullImage);
-      return;
-    }
+  document
+    .getElementById(`tbody-${r.key}`)
+    .addEventListener("click", async (e) => {
+      const imagePreview = e.target.closest("[data-full-image]");
+      if (imagePreview) {
+        openImageViewer(imagePreview.dataset.fullImage);
+        return;
+      }
 
-    const editBtn = e.target.closest('[data-edit]');
-    if (editBtn) {
-      const id = Number(editBtn.dataset.edit);
-      const item = r.state.items.find(it => it.id === id);
-      if (item) openEditModal(r, item);
-      return;
-    }
+      const editBtn = e.target.closest("[data-edit]");
+      if (editBtn) {
+        const id = Number(editBtn.dataset.edit);
+        const item = r.state.items.find((it) => it.id === id);
+        if (item) openEditModal(r, item);
+        return;
+      }
 
-    const btn = e.target.closest('[data-delete]');
-    if (!btn) return;
-    const id = btn.dataset.delete;
-    const label = btn.dataset.label || `#${id}`;
-    if (!confirm(`Hapus "${label}"? Tindakan ini tidak bisa dibatalkan.`)) return;
-    btn.disabled = true;
-    btn.textContent = 'Menghapus...';
-    try {
-      await apiFetch(`${r.endpoint}/${id}`, { method: 'DELETE' });
-      loadList(r, { force: true, preservePage: true });
-    } catch (err) {
-      alert(`Gagal menghapus: ${err.message}`);
-      btn.disabled = false;
-      btn.textContent = '🗑️ Hapus';
-    }
-  });
+      const btn = e.target.closest("[data-delete]");
+      if (!btn) return;
+      const id = btn.dataset.delete;
+      const label = btn.dataset.label || `#${id}`;
+      if (!confirm(`Hapus "${label}"? Tindakan ini tidak bisa dibatalkan.`))
+        return;
+      btn.disabled = true;
+      btn.textContent = "Menghapus...";
+      try {
+        await apiFetch(`${r.endpoint}/${id}`, { method: "DELETE" });
+        loadList(r, { force: true, preservePage: true });
+      } catch (err) {
+        alert(`Gagal menghapus: ${err.message}`);
+        btn.disabled = false;
+        btn.textContent = "🗑️ Hapus";
+      }
+    });
 });
 
 function showResult(key, message, type) {
   const container = document.getElementById(`result-${key}`);
-  container.innerHTML = `<div class="result-${type}" style="padding:8px; margin-top:8px; border-radius:4px; font-size:12px; ${type === 'success' ? 'background:rgba(34,197,94,0.1); color:#16a34a;' : 'background:rgba(239,68,68,0.1); color:#ef4444;'}">${esc(message)}</div>`;
-  setTimeout(() => { container.innerHTML = ''; }, 5000);
+  container.innerHTML = `<div class="result-${type}" style="padding:8px; margin-top:8px; border-radius:4px; font-size:12px; ${type === "success" ? "background:rgba(34,197,94,0.1); color:#16a34a;" : "background:rgba(239,68,68,0.1); color:#ef4444;"}">${esc(message)}</div>`;
+  setTimeout(() => {
+    container.innerHTML = "";
+  }, 5000);
 }
 
 // Fetches a resource's full list (once per tab visit, or when forced) and renders it.
 async function loadList(r, { force = false, preservePage = false } = {}) {
   if (r.state.loading) return;
-  if (r.state.loaded && !force) { renderTable(r); return; }
+  if (r.state.loaded && !force) {
+    renderTable(r);
+    return;
+  }
 
   const tbody = document.getElementById(`tbody-${r.key}`);
   const colspan = r.columns.length + 2;
@@ -606,12 +777,14 @@ async function loadList(r, { force = false, preservePage = false } = {}) {
   tbody.innerHTML = `<tr><td colspan="${colspan}" class="list-state">Memuat...</td></tr>`;
 
   try {
-    const path = r.endpoint + (r.listAll ? '?all=1' : '');
+    const path = r.endpoint + (r.listAll ? "?all=1" : "");
     const items = await apiFetch(path);
     r.state.items = items;
     r.state.loaded = true;
     if (!preservePage) r.state.page = 1;
-    document.getElementById(`count-${r.key}`).textContent = items.length ? `(${items.length})` : '';
+    document.getElementById(`count-${r.key}`).textContent = items.length
+      ? `(${items.length})`
+      : "";
     renderTable(r);
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="${colspan}" class="list-state">❌ Gagal memuat: ${esc(err.message)}</td></tr>`;
@@ -629,24 +802,40 @@ function renderTable(r) {
 
   const q = r.state.search;
   r.state.filtered = q
-    ? r.state.items.filter(item => JSON.stringify(item).toLowerCase().includes(q))
+    ? r.state.items.filter((item) =>
+        JSON.stringify(item).toLowerCase().includes(q),
+      )
     : r.state.items;
 
-  const direction = r.state.sortDirection === 'desc' ? -1 : 1;
-  const sortField = r.fields.find(f => f.name === r.state.sortKey);
-  const numericSort = r.state.sortKey === 'id' || sortField?.type === 'number' || sortField?.name === 'price' || sortField?.name === 'price2';
+  const direction = r.state.sortDirection === "desc" ? -1 : 1;
+  const sortField = r.fields.find((f) => f.name === r.state.sortKey);
+  const numericSort =
+    r.state.sortKey === "id" ||
+    sortField?.type === "number" ||
+    sortField?.name === "price" ||
+    sortField?.name === "price2";
   r.state.filtered = [...r.state.filtered].sort((left, right) => {
     const leftValue = left[r.state.sortKey];
     const rightValue = right[r.state.sortKey];
-    if (leftValue == null || leftValue === '') return rightValue == null || rightValue === '' ? 0 : 1;
-    if (rightValue == null || rightValue === '') return -1;
+    if (leftValue == null || leftValue === "")
+      return rightValue == null || rightValue === "" ? 0 : 1;
+    if (rightValue == null || rightValue === "") return -1;
 
-    const leftNumber = Number(String(leftValue).replace(/[^\d-]/g, ''));
-    const rightNumber = Number(String(rightValue).replace(/[^\d-]/g, ''));
-    if (numericSort && Number.isFinite(leftNumber) && Number.isFinite(rightNumber)) {
+    const leftNumber = Number(String(leftValue).replace(/[^\d-]/g, ""));
+    const rightNumber = Number(String(rightValue).replace(/[^\d-]/g, ""));
+    if (
+      numericSort &&
+      Number.isFinite(leftNumber) &&
+      Number.isFinite(rightNumber)
+    ) {
       return (leftNumber - rightNumber) * direction;
     }
-    return String(leftValue).localeCompare(String(rightValue), 'id', { numeric: true, sensitivity: 'base' }) * direction;
+    return (
+      String(leftValue).localeCompare(String(rightValue), "id", {
+        numeric: true,
+        sensitivity: "base",
+      }) * direction
+    );
   });
 
   const totalItems = r.state.filtered.length;
@@ -654,7 +843,7 @@ function renderTable(r) {
   r.state.page = Math.min(Math.max(1, r.state.page), totalPages);
 
   if (!totalItems) {
-    tbody.innerHTML = `<tr><td colspan="${colspan}" class="list-state">${q ? 'Tidak ada hasil pencarian.' : 'Belum ada data.'}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${colspan}" class="list-state">${q ? "Tidak ada hasil pencarian." : "Belum ada data."}</td></tr>`;
     paginationEl.hidden = true;
     return;
   }
@@ -662,40 +851,53 @@ function renderTable(r) {
   const start = (r.state.page - 1) * PAGE_SIZE;
   const pageItems = r.state.filtered.slice(start, start + PAGE_SIZE);
 
-  tbody.innerHTML = pageItems.map(item => `
-    <tr class="${isRowExpired(item) ? 'expired-row' : ''}">
+  tbody.innerHTML = pageItems
+    .map(
+      (item) => `
+    <tr class="${isRowExpired(item) ? "expired-row" : ""}">
       <td class="col-id" data-label="ID">${esc(item.id)}</td>
-      ${r.columns.map(c => `<td data-label="${esc(c.label)}">${c.render(item)}</td>`).join('')}
+      ${r.columns.map((c) => `<td data-label="${esc(c.label)}">${c.render(item)}</td>`).join("")}
       <td class="col-actions" data-label="Aksi">
-        <button type="button" class="btn btn-action btn-edit" data-edit="${item.id}" title="Edit data" aria-label="Edit data ${escAttr(item.name || item.title || item.text || ('#' + item.id))}">
+        <button type="button" class="btn btn-action btn-edit" data-edit="${item.id}" title="Edit data" aria-label="Edit data ${escAttr(item.name || item.title || item.text || "#" + item.id)}">
           <span aria-hidden="true">✏️</span>
           <span>Edit</span>
         </button>
-        <button type="button" class="btn btn-action btn-delete" data-delete="${item.id}" data-label="${escAttr(item.name || item.title || item.text || ('#' + item.id))}" title="Hapus data" aria-label="Hapus data ${escAttr(item.name || item.title || item.text || ('#' + item.id))}">
+        <button type="button" class="btn btn-action btn-delete" data-delete="${item.id}" data-label="${escAttr(item.name || item.title || item.text || "#" + item.id)}" title="Hapus data" aria-label="Hapus data ${escAttr(item.name || item.title || item.text || "#" + item.id)}">
           <span aria-hidden="true">🗑️</span>
           <span>Delete</span>
         </button>
       </td>
     </tr>
-  `).join('');
+  `,
+    )
+    .join("");
 
   paginationEl.hidden = false;
-  paginfoEl.textContent = `Halaman ${r.state.page} / ${totalPages} • ${start + 1}–${Math.min(start + PAGE_SIZE, totalItems)} dari ${totalItems}${q ? ` (disaring dari ${r.state.items.length})` : ''}`;
-  document.querySelector(`[data-page-first="${r.key}"]`).disabled = r.state.page <= 1;
-  document.querySelector(`[data-page-prev="${r.key}"]`).disabled = r.state.page <= 1;
-  document.querySelector(`[data-page-next="${r.key}"]`).disabled = r.state.page >= totalPages;
-  document.querySelector(`[data-page-last="${r.key}"]`).disabled = r.state.page >= totalPages;
+  paginfoEl.textContent = `Halaman ${r.state.page} / ${totalPages} • ${start + 1}–${Math.min(start + PAGE_SIZE, totalItems)} dari ${totalItems}${q ? ` (disaring dari ${r.state.items.length})` : ""}`;
+  document.querySelector(`[data-page-first="${r.key}"]`).disabled =
+    r.state.page <= 1;
+  document.querySelector(`[data-page-prev="${r.key}"]`).disabled =
+    r.state.page <= 1;
+  document.querySelector(`[data-page-next="${r.key}"]`).disabled =
+    r.state.page >= totalPages;
+  document.querySelector(`[data-page-last="${r.key}"]`).disabled =
+    r.state.page >= totalPages;
 }
 
 // ── Initial load: health check + only the active (first) tab ──
-const apiStatus = document.getElementById('apiStatus');
+const apiStatus = document.getElementById("apiStatus");
 function setApiStatus(isConnected) {
-  apiStatus.textContent = isConnected ? '✅ API Terhubung' : '❌ API Tidak Tersambung';
-  apiStatus.style.color = isConnected ? '#22c55e' : '#ef4444';
+  apiStatus.textContent = isConnected
+    ? "✅ API Terhubung"
+    : "❌ API Tidak Tersambung";
+  apiStatus.style.color = isConnected ? "#22c55e" : "#ef4444";
 }
 
 fetch(`${workerUrl}/health`)
-  .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+  .then((r) => {
+    if (!r.ok) throw new Error();
+    return r.json();
+  })
   .then(() => setApiStatus(true))
   .catch(() => setApiStatus(false));
 
