@@ -12,6 +12,60 @@ const workerUrl = API_BASE.replace(/\/api$/, "");
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
 const PAGE_SIZE = 15;
 
+const DESTINATION_PRESETS = [
+  {
+    name: "Jepang",
+    type: "country",
+    continent: "Asia",
+    lat: 36.2048,
+    lng: 138.2529,
+    badge: "Terfavorit",
+    description:
+      "Jepang memadukan tradisi kuno, kota modern, dan keindahan alam seperti sakura dan gunung.",
+  },
+  {
+    name: "Swiss",
+    type: "country",
+    continent: "Eropa",
+    lat: 46.8182,
+    lng: 8.2275,
+    badge: "Populer",
+    description:
+      "Swiss dikenal dengan Alpen, danau, kota bersih, dan pengalaman alam yang tenang serta elegan.",
+  },
+  {
+    name: "Dubai",
+    type: "country",
+    continent: "Timur Tengah",
+    lat: 25.2048,
+    lng: 55.2708,
+    badge: "Mewah",
+    description:
+      "Dubai menawarkan skyline modern, resort mewah, dan pengalaman gurun yang spektakuler.",
+  },
+  {
+    name: "Australia",
+    type: "country",
+    continent: "Oseania",
+    lat: -25.2744,
+    lng: 133.7751,
+    badge: "Eksotis",
+    description:
+      "Australia terkenal dengan outback, pantai ikonik, fauna unik, dan pengalaman outdoor yang luas.",
+  },
+  {
+    name: "Paris",
+    type: "city",
+    continent: "Eropa",
+    country: "Perancis",
+    lat: 48.8566,
+    lng: 2.3522,
+    badge: "Ikonik",
+    description:
+      "Paris adalah kota seni, fashion, sejarah, dan landmark ikonik seperti Menara Eiffel.",
+  },
+];
+
 async function uploadImage(file) {
   const formData = new FormData();
   formData.append("image", file);
@@ -167,6 +221,101 @@ const RESOURCES = [
       { name: "image_url", label: "Gambar", type: "image", required: true },
     ],
   },
+  // ── NEW: Destination Guide ──
+  {
+    key: "destinations",
+    label: "Destinasi",
+    endpoint: "/api/destinations",
+    listAll: false,
+    fields: [
+      {
+        name: "name",
+        label: "Nama Destinasi",
+        type: "text",
+        required: true,
+        hint: "e.g. Swiss, Tokyo, Santorini",
+      },
+      {
+        name: "slug",
+        label: "Slug (URL ID)",
+        type: "text",
+        required: true,
+        hint: "huruf kecil, tanpa spasi, e.g. swiss · tokyo · santorini",
+      },
+      {
+        name: "type",
+        label: "Tipe",
+        type: "select",
+        required: true,
+        options: ["country", "city"],
+      },
+      {
+        name: "continent",
+        label: "Benua",
+        type: "select",
+        required: true,
+        options: [
+          "Asia",
+          "Eropa",
+          "Timur Tengah",
+          "Oseania",
+          "Amerika",
+          "Afrika",
+        ],
+      },
+      {
+        name: "country",
+        label: "Negara Induk",
+        type: "text",
+        hint: "Isi jika tipe = city, e.g. Jepang",
+      },
+      {
+        name: "lat",
+        label: "Latitude",
+        type: "text",
+        required: true,
+        hint: "e.g. 35.6762 (Tokyo)",
+      },
+      {
+        name: "lng",
+        label: "Longitude",
+        type: "text",
+        required: true,
+        hint: "e.g. 139.6503 (Tokyo)",
+      },
+      { name: "description", label: "Deskripsi (blog)", type: "textarea" },
+      { name: "image_url", label: "Foto Hero", type: "image" },
+      {
+        name: "badge",
+        label: "Badge",
+        type: "text",
+        hint: "e.g. Populer, Baru, Terfavorit",
+      },
+    ],
+  },
+  {
+    key: "destination-photos",
+    label: "Foto Destinasi",
+    endpoint: "/api/destination-photos",
+    listAll: false,
+    fields: [
+      {
+        name: "destination_id",
+        label: "ID Destinasi",
+        type: "number",
+        required: true,
+        hint: "Cek tab Destinasi untuk melihat ID-nya",
+      },
+      { name: "image_url", label: "Foto", type: "image", required: true },
+      { name: "caption", label: "Keterangan", type: "text" },
+      {
+        name: "sort_order",
+        label: "Urutan",
+        type: "number",
+        hint: "Angka lebih kecil tampil lebih dulu",
+      },
+    ],
+  },
 ];
 
 // ── Helpers ──
@@ -181,6 +330,90 @@ function esc(s) {
 }
 function escAttr(s) {
   return esc(s).replace(/\n/g, " ");
+}
+
+function slugify(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+function cleanCoordinate(value, type) {
+  const raw = String(value ?? "")
+    .trim()
+    .replace(",", ".");
+  if (!raw) return "";
+  const num = Number(raw);
+  if (!Number.isFinite(num)) return "";
+  if (type === "lat" && (num < -90 || num > 90)) return "invalid";
+  if (type === "lng" && (num < -180 || num > 180)) return "invalid";
+  return Number(num.toFixed(6));
+}
+
+function validateDestinationCoords(form) {
+  const latInput = form.elements.lat;
+  const lngInput = form.elements.lng;
+  if (!latInput || !lngInput) return true;
+
+  const latStatus = form.querySelector('[data-coordinate-status="lat"]');
+  const lngStatus = form.querySelector('[data-coordinate-status="lng"]');
+  const check = (input, status, type) => {
+    const value = cleanCoordinate(input.value, type);
+    if (!input.value.trim()) {
+      status.textContent =
+        type === "lat"
+          ? "Latitude wajib diisi (-90 sampai 90)"
+          : "Longitude wajib diisi (-180 sampai 180)";
+      status.style.color = "#b91c1c";
+      input.setAttribute("aria-invalid", "true");
+      return false;
+    }
+    if (value === "invalid" || value === "") {
+      status.textContent =
+        type === "lat"
+          ? "Latitude harus antara -90 sampai 90"
+          : "Longitude harus antara -180 sampai 180";
+      status.style.color = "#b91c1c";
+      input.setAttribute("aria-invalid", "true");
+      return false;
+    }
+    input.value = value;
+    status.textContent = `OK • ${type === "lat" ? "Latitude" : "Longitude"}: ${value}`;
+    status.style.color = "#166534";
+    input.removeAttribute("aria-invalid");
+    return true;
+  };
+
+  const okLat = check(latInput, latStatus, "lat");
+  const okLng = check(lngInput, lngStatus, "lng");
+  return okLat && okLng;
+}
+
+function applyDestinationPreset(form, preset) {
+  if (!preset) return;
+  const fields = {
+    name: preset.name || "",
+    slug: slugify(preset.name || ""),
+    type: preset.type || "country",
+    continent: preset.continent || "Asia",
+    country: preset.country || "",
+    lat: preset.lat ?? "",
+    lng: preset.lng ?? "",
+    badge: preset.badge || "",
+    description: preset.description || "",
+  };
+
+  Object.entries(fields).forEach(([key, value]) => {
+    const input = form.elements[key];
+    if (!input) return;
+    input.value = value;
+  });
+
+  validateDestinationCoords(form);
 }
 
 function formatRupiahInput(value) {
@@ -225,8 +458,6 @@ function isImageField(f) {
   return f.type === "image" || f.name === "photo_url";
 }
 
-// Builds table columns from `fields` — every field is visible except raw
-// image URLs, which render as a thumbnail instead.
 function buildColumns(fields) {
   const cols = [];
   const imgField = fields.find(isImageField);
@@ -252,6 +483,14 @@ function buildColumns(fields) {
       });
       return;
     }
+    if (f.name === "description") {
+      cols.push({
+        label: f.label,
+        render: (i) =>
+          `<span class="cell-truncate" title="${escAttr(i[f.name])}">${esc((i[f.name] || "").slice(0, 80))}${(i[f.name] || "").length > 80 ? "…" : ""}</span>`,
+      });
+      return;
+    }
     if (f.type === "textarea" || f.name === "whatsapp_msg") {
       cols.push({
         label: f.label,
@@ -260,14 +499,13 @@ function buildColumns(fields) {
       });
       return;
     }
-    cols.push({ label: f.label, render: (i) => esc(i[f.name] || "-") });
+    cols.push({ label: f.label, render: (i) => esc(i[f.name] ?? "-") });
   });
   return cols;
 }
 
 RESOURCES.forEach((r) => {
   r.columns = buildColumns(r.fields);
-  // Per-resource UI state: lazy-loaded items, pagination, search
   r.state = {
     items: [],
     filtered: [],
@@ -302,10 +540,20 @@ function fieldsHtml(fields) {
       `;
       } else if (f.name === "price" || f.name === "price2") {
         control = `<input type="text" name="${f.name}" inputmode="numeric" autocomplete="off" data-rupiah-input ${req}>`;
+      } else if (f.name === "lat" || f.name === "lng") {
+        const axis = f.name === "lat" ? "lat" : "lng";
+        const minmax = axis === "lat" ? "-90 sampai 90" : "-180 sampai 180";
+        control = `
+          <input type="text" name="${f.name}" data-coordinate-input="${axis}" ${req}>
+          <div class="form-hint" data-coordinate-status="${axis}">Validasi: ${minmax}</div>
+        `;
       } else {
         control = `<input type="${f.type}" name="${f.name}" ${req}>`;
       }
-      return `<div class="form-group"><label>${esc(f.label)}</label>${control}</div>`;
+      const hintHtml = f.hint
+        ? `<div class="form-hint">${esc(f.hint)}</div>`
+        : "";
+      return `<div class="form-group"><label>${esc(f.label)}</label>${control}${hintHtml}</div>`;
     })
     .join("");
 }
@@ -339,6 +587,39 @@ function wireImagePreviews(form) {
       preview.appendChild(img);
     });
   });
+}
+
+function wireDestinationSlug(form) {
+  const nameField = form.elements.name;
+  const slugField = form.elements.slug;
+  if (!nameField || !slugField) return;
+
+  const syncSlug = () => {
+    if (!slugField.value.trim()) slugField.value = slugify(nameField.value);
+  };
+
+  nameField.addEventListener("input", syncSlug);
+  slugField.addEventListener("blur", () => {
+    if (!slugField.value.trim()) slugField.value = slugify(nameField.value);
+  });
+  syncSlug();
+}
+
+function wireDestinationCoordinateValidation(form) {
+  const latInput = form.elements.lat;
+  const lngInput = form.elements.lng;
+  if (!latInput || !lngInput) return;
+
+  [latInput, lngInput].forEach((input) => {
+    input.addEventListener("input", () => {
+      validateDestinationCoords(form);
+    });
+    input.addEventListener("blur", () => {
+      validateDestinationCoords(form);
+    });
+  });
+
+  validateDestinationCoords(form);
 }
 
 async function apiFetch(path, options = {}) {
@@ -392,6 +673,21 @@ RESOURCES.forEach((r) => {
       <div class="panel-form-col">
         <div class="admin-card">
           <h2>Tambah ${esc(r.label)}</h2>
+          ${
+            r.key === "destinations"
+              ? `
+                <div class="destination-presets" style="display:flex; flex-wrap:wrap; gap:8px; margin:0 0 16px;">
+                  ${DESTINATION_PRESETS.map(
+                    (preset) => `
+                      <button type="button" class="btn btn-outline btn-sm" data-destination-preset="${esc(preset.name)}">
+                        ${esc(preset.name)}
+                      </button>
+                    `,
+                  ).join("")}
+                </div>
+              `
+              : ""
+          }
           <form id="form-${r.key}">
             ${fieldsHtml(r.fields)}
             <button type="submit" class="btn btn-primary">Tambah ${esc(r.label)}</button>
@@ -545,6 +841,8 @@ function openEditModal(r, item) {
 
   wirePriceFormatting(form);
   wireImagePreviews(form);
+  wireDestinationSlug(form);
+  wireDestinationCoordinateValidation(form);
 
   form.onsubmit = async (e) => {
     e.preventDefault();
@@ -575,6 +873,10 @@ function openEditModal(r, item) {
         data[f.name] = v;
       }
 
+      if (r.key === "destinations" && !validateDestinationCoords(form)) {
+        throw new Error("Latitude dan longitude harus valid sebelum disimpan.");
+      }
+
       submitBtn.textContent = "Menyimpan...";
       await apiFetch(`${r.endpoint}/${item.id}`, { method: "PUT", body: data });
       closeEditModal();
@@ -602,6 +904,10 @@ RESOURCES.forEach((r) => {
 
     const data = {};
     try {
+      if (r.key === "destinations" && !validateDestinationCoords(form)) {
+        throw new Error("Latitude dan longitude harus valid sebelum disimpan.");
+      }
+
       for (const f of r.fields) {
         if (f.type === "image") {
           const fileInput = form.elements[f.name];
@@ -648,6 +954,19 @@ RESOURCES.forEach((r) => {
 
   wirePriceFormatting(form);
   wireImagePreviews(form);
+  wireDestinationSlug(form);
+  wireDestinationCoordinateValidation(form);
+
+  if (r.key === "destinations") {
+    document.querySelectorAll("[data-destination-preset]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const preset = DESTINATION_PRESETS.find(
+          (item) => item.name === btn.dataset.destinationPreset,
+        );
+        applyDestinationPreset(form, preset);
+      });
+    });
+  }
 
   document
     .querySelector(`[data-refresh="${r.key}"]`)
@@ -763,7 +1082,6 @@ function showResult(key, message, type) {
   }, 5000);
 }
 
-// Fetches a resource's full list (once per tab visit, or when forced) and renders it.
 async function loadList(r, { force = false, preservePage = false } = {}) {
   if (r.state.loading) return;
   if (r.state.loaded && !force) {
@@ -793,7 +1111,6 @@ async function loadList(r, { force = false, preservePage = false } = {}) {
   }
 }
 
-// Applies search + pagination to already-loaded items and renders the current page.
 function renderTable(r) {
   const tbody = document.getElementById(`tbody-${r.key}`);
   const colspan = r.columns.length + 2;
@@ -858,13 +1175,11 @@ function renderTable(r) {
       <td class="col-id" data-label="ID">${esc(item.id)}</td>
       ${r.columns.map((c) => `<td data-label="${esc(c.label)}">${c.render(item)}</td>`).join("")}
       <td class="col-actions" data-label="Aksi">
-        <button type="button" class="btn btn-action btn-edit" data-edit="${item.id}" title="Edit data" aria-label="Edit data ${escAttr(item.name || item.title || item.text || "#" + item.id)}">
-          <span aria-hidden="true">✏️</span>
-          <span>Edit</span>
+        <button type="button" class="btn btn-action btn-edit" data-edit="${item.id}" aria-label="Edit ${escAttr(item.name || item.title || item.text || "#" + item.id)}">
+          <span aria-hidden="true">✏️</span><span>Edit</span>
         </button>
-        <button type="button" class="btn btn-action btn-delete" data-delete="${item.id}" data-label="${escAttr(item.name || item.title || item.text || "#" + item.id)}" title="Hapus data" aria-label="Hapus data ${escAttr(item.name || item.title || item.text || "#" + item.id)}">
-          <span aria-hidden="true">🗑️</span>
-          <span>Delete</span>
+        <button type="button" class="btn btn-action btn-delete" data-delete="${item.id}" data-label="${escAttr(item.name || item.title || item.text || "#" + item.id)}" aria-label="Hapus ${escAttr(item.name || item.title || item.text || "#" + item.id)}">
+          <span aria-hidden="true">🗑️</span><span>Delete</span>
         </button>
       </td>
     </tr>
@@ -884,7 +1199,7 @@ function renderTable(r) {
     r.state.page >= totalPages;
 }
 
-// ── Initial load: health check + only the active (first) tab ──
+// ── Initial load ──
 const apiStatus = document.getElementById("apiStatus");
 function setApiStatus(isConnected) {
   apiStatus.textContent = isConnected

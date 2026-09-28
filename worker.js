@@ -11,17 +11,23 @@
      GET    /api/reviews
      GET    /api/gallery   ?category=domestik|inter|cruise|umroh
 
+     GET    /api/destinations           ?continent=Asia ?type=country
+     GET    /api/destinations/:slug     → destination + its photos combined
+     GET    /api/destination-photos     ?destination_id=5
+     POST   /api/destination-photos
+     PUT    /api/destination-photos/:id
+     DELETE /api/destination-photos/:id
+
      POST   /api/domestik | /api/inter | /api/cruise | /api/umroh
-            /api/offers | /api/reviews | /api/gallery
+            /api/offers | /api/reviews | /api/gallery | /api/destinations
 
      PUT    /api/domestik/:id | /api/inter/:id | /api/cruise/:id
             /api/umroh/:id | /api/offers/:id | /api/reviews/:id
-            /api/gallery/:id
-            → body: any subset of that table's editable columns
+            /api/gallery/:id | /api/destinations/:id
 
      DELETE /api/domestik/:id | /api/inter/:id | /api/cruise/:id
             /api/umroh/:id | /api/offers/:id | /api/reviews/:id
-            /api/gallery/:id
+            /api/gallery/:id | /api/destinations/:id
 
      GET /api/meta/domestik  → distinct province+city list
      GET /api/meta/inter     → distinct country+city list
@@ -55,7 +61,6 @@ const created = (d) =>
   new Response(JSON.stringify(d), { status: 201, headers: CORS });
 
 // ── Shared expiry filter clause ──
-// Listings with no expires or expires >= today are shown.
 const ALIVE = `(expires IS NULL OR expires = '' OR date(expires) >= date('now'))`;
 
 // ── Resource → D1 table map (used by PUT/DELETE) ──
@@ -67,6 +72,8 @@ const TABLES = {
   offers: "offers",
   reviews: "reviews",
   gallery: "gallery",
+  destinations: "destinations",
+  "destination-photos": "destination_photos",
 };
 
 // ── Resource → editable columns (used by PUT) ──
@@ -131,6 +138,24 @@ const EDITABLE_COLUMNS = {
   ],
   reviews: ["name", "photo_url", "rating", "text"],
   gallery: ["title", "image_url", "category"],
+  destinations: [
+    "slug",
+    "name",
+    "type",
+    "country",
+    "continent",
+    "lat",
+    "lng",
+    "description",
+    "image_url",
+    "badge",
+  ],
+  "destination-photos": [
+    "destination_id",
+    "image_url",
+    "caption",
+    "sort_order",
+  ],
 };
 
 export default {
@@ -141,16 +166,15 @@ export default {
       return err("Method not allowed", 405);
 
     const url = new URL(request.url);
-    const path = url.pathname.replace(/\/$/, ""); // strip trailing slash
+    const path = url.pathname.replace(/\/$/, "");
     const p = url.searchParams;
 
     try {
       // ════════════════════════════════════════
       //  PUT — /api/{resource}/{id}
-      //  Updates any subset of the resource's editable columns
       // ════════════════════════════════════════
       if (request.method === "PUT") {
-        const m = path.match(/^\/api\/([a-z]+)\/(\d+)$/);
+        const m = path.match(/^\/api\/([\w-]+)\/(\d+)$/);
         if (!m) return err("Endpoint tidak ditemukan", 404);
         const [, resource, idStr] = m;
         const table = TABLES[resource];
@@ -184,7 +208,7 @@ export default {
       //  DELETE — /api/{resource}/{id}
       // ════════════════════════════════════════
       if (request.method === "DELETE") {
-        const m = path.match(/^\/api\/([a-z]+)\/(\d+)$/);
+        const m = path.match(/^\/api\/([\w-]+)\/(\d+)$/);
         if (!m) return err("Endpoint tidak ditemukan", 404);
         const [, resource, idStr] = m;
         const table = TABLES[resource];
@@ -200,8 +224,6 @@ export default {
 
       // ════════════════════════════════════════
       //  UPLOAD — /api/upload
-      //  Accepts multipart/form-data with field "image"
-      //  Stores in R2, returns public URL
       // ════════════════════════════════════════
       if (path === "/api/upload" && request.method === "POST") {
         const formData = await request.formData();
@@ -233,8 +255,132 @@ export default {
       }
 
       // ════════════════════════════════════════
+      //  DESTINATIONS
+      //  GET  /api/destinations            ?continent=Asia ?type=country
+      //  GET  /api/destinations/:slug      → dest + photos
+      //  POST /api/destinations
+      // ════════════════════════════════════════
+      if (path === "/api/destinations") {
+        if (request.method === "POST") {
+          const body = await request.json();
+          const {
+            slug,
+            name,
+            type,
+            country,
+            continent,
+            lat,
+            lng,
+            description,
+            image_url,
+            badge,
+          } = body;
+          if (!slug || !name || !continent || lat == null || lng == null)
+            return err(
+              "Missing required fields: slug, name, continent, lat, lng",
+              400,
+            );
+          const res = await env.DB.prepare(
+            `INSERT INTO destinations (slug, name, type, country, continent, lat, lng, description, image_url, badge)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          )
+            .bind(
+              slug,
+              name,
+              type || "country",
+              country || null,
+              continent,
+              Number(lat),
+              Number(lng),
+              description || "",
+              image_url || "",
+              badge || "",
+            )
+            .run();
+          return created({ id: res.meta.last_row_id, ...body });
+        }
+
+        // GET list
+        let q = `SELECT * FROM destinations WHERE 1=1`;
+        const args = [];
+        if (p.get("continent")) {
+          q += ` AND continent = ?`;
+          args.push(p.get("continent"));
+        }
+        if (p.get("type")) {
+          q += ` AND type = ?`;
+          args.push(p.get("type"));
+        }
+        q += ` ORDER BY name ASC`;
+        const { results } = await env.DB.prepare(q)
+          .bind(...args)
+          .all();
+        return ok(results);
+      }
+
+      // GET /api/destinations/:slug — single destination + its photos
+      const slugMatch = path.match(/^\/api\/destinations\/([a-z0-9-]+)$/);
+      if (slugMatch && request.method === "GET") {
+        const slug = slugMatch[1];
+        const dest = await env.DB.prepare(
+          `SELECT * FROM destinations WHERE slug = ?`,
+        )
+          .bind(slug)
+          .first();
+        if (!dest) return err("Destinasi tidak ditemukan", 404);
+
+        const { results: photos } = await env.DB.prepare(
+          `SELECT * FROM destination_photos WHERE destination_id = ? ORDER BY sort_order ASC, id ASC`,
+        )
+          .bind(dest.id)
+          .all();
+
+        return ok({ ...dest, photos });
+      }
+
+      // ════════════════════════════════════════
+      //  DESTINATION PHOTOS
+      //  GET  /api/destination-photos  ?destination_id=5
+      //  POST /api/destination-photos
+      // ════════════════════════════════════════
+      if (path === "/api/destination-photos") {
+        if (request.method === "POST") {
+          const body = await request.json();
+          const { destination_id, image_url, caption, sort_order } = body;
+          if (!destination_id || !image_url)
+            return err(
+              "Missing required fields: destination_id, image_url",
+              400,
+            );
+          const res = await env.DB.prepare(
+            `INSERT INTO destination_photos (destination_id, image_url, caption, sort_order) VALUES (?, ?, ?, ?)`,
+          )
+            .bind(
+              Number(destination_id),
+              image_url,
+              caption || "",
+              Number(sort_order) || 0,
+            )
+            .run();
+          return created({ id: res.meta.last_row_id, ...body });
+        }
+
+        // GET
+        let q = `SELECT * FROM destination_photos WHERE 1=1`;
+        const args = [];
+        if (p.get("destination_id")) {
+          q += ` AND destination_id = ?`;
+          args.push(Number(p.get("destination_id")));
+        }
+        q += ` ORDER BY destination_id ASC, sort_order ASC, id ASC`;
+        const { results } = await env.DB.prepare(q)
+          .bind(...args)
+          .all();
+        return ok(results);
+      }
+
+      // ════════════════════════════════════════
       //  LISTINGS — DOMESTIK
-      //  ?province=Bali  ?city=Denpasar  ?all=1
       // ════════════════════════════════════════
       if (path === "/api/domestik") {
         if (request.method === "POST") {
@@ -295,7 +441,6 @@ export default {
 
       // ════════════════════════════════════════
       //  LISTINGS — INTER
-      //  ?country=Jepang  ?city=Tokyo  ?all=1
       // ════════════════════════════════════════
       if (path === "/api/inter") {
         if (request.method === "POST") {
@@ -356,7 +501,6 @@ export default {
 
       // ════════════════════════════════════════
       //  LISTINGS — CRUISE
-      //  ?all=1
       // ════════════════════════════════════════
       if (path === "/api/cruise") {
         if (request.method === "POST") {
@@ -403,7 +547,6 @@ export default {
 
       // ════════════════════════════════════════
       //  LISTINGS — UMROH
-      //  ?type=Reguler|Plus|Premium  ?all=1
       // ════════════════════════════════════════
       if (path === "/api/umroh") {
         if (request.method === "POST") {
@@ -458,7 +601,6 @@ export default {
 
       // ════════════════════════════════════════
       //  OFFERS
-      //  ?all=1
       // ════════════════════════════════════════
       if (path === "/api/offers") {
         if (request.method === "POST") {
@@ -512,7 +654,6 @@ export default {
 
       // ════════════════════════════════════════
       //  GALLERY
-      //  ?category=domestik|inter|cruise|umroh
       // ════════════════════════════════════════
       if (path === "/api/gallery") {
         if (request.method === "POST") {
@@ -544,30 +685,26 @@ export default {
       }
 
       // ════════════════════════════════════════
-      //  META — distinct filter values
+      //  META
       // ════════════════════════════════════════
-
       if (path === "/api/meta/domestik") {
         const { results } = await env.DB.prepare(
           `SELECT DISTINCT province, city FROM listings_domestik WHERE ${ALIVE} ORDER BY province, city`,
         ).all();
         return ok(results);
       }
-
       if (path === "/api/meta/inter") {
         const { results } = await env.DB.prepare(
           `SELECT DISTINCT country, city FROM listings_inter WHERE ${ALIVE} ORDER BY country, city`,
         ).all();
         return ok(results);
       }
-
       if (path === "/api/meta/umroh") {
         const { results } = await env.DB.prepare(
           `SELECT DISTINCT package_type FROM listings_umroh WHERE ${ALIVE} ORDER BY package_type`,
         ).all();
         return ok(results);
       }
-
       if (path === "/api/meta/cruise") {
         const { results } = await env.DB.prepare(
           `SELECT DISTINCT route FROM listings_cruise WHERE ${ALIVE} ORDER BY route`,
@@ -580,7 +717,7 @@ export default {
         return ok({
           status: "ok",
           service: "Bee Happy Holiday API",
-          version: "2.3",
+          version: "2.4",
         });
       }
 

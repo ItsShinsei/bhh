@@ -622,40 +622,45 @@ textarea:focus-visible {
   transform: none !important;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .admin-layout {
-    padding: var(--space-4);
+    padding: 0.9rem;
   }
 
   .admin-header {
+    position: sticky;
+    top: 0;
+    z-index: 25;
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: var(--space-5);
-    padding: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.9rem 1rem;
     border-radius: 18px;
   }
 
   .header-actions {
     width: 100%;
     justify-content: space-between;
-  }
-
-  .header-actions .btn {
-    flex: 1;
-    justify-content: center;
-    min-height: 42px;
+    gap: 0.5rem;
   }
 
   .status-badge {
     flex: 1;
+    justify-content: center;
+    min-height: 40px;
   }
 
   .admin-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 20;
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    padding-bottom: var(--space-2);
+    padding: 0.35rem 0.2rem 0.5rem;
+    margin-bottom: 1rem;
+    border-radius: 18px;
   }
 
   .admin-tabs::-webkit-scrollbar {
@@ -664,16 +669,51 @@ textarea:focus-visible {
 
   .admin-tab {
     flex-shrink: 0;
+    min-height: 44px;
     white-space: nowrap;
-    padding: 0.75rem 0.9rem;
+    padding: 0.8rem 0.9rem;
+    font-size: 0.78rem;
   }
 
   .panel-form-col .admin-card form {
     grid-template-columns: 1fr;
+    gap: 0.9rem;
   }
 
   .admin-card {
-    padding: var(--space-4);
+    padding: 1rem;
+    border-radius: 20px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea,
+  .list-search input,
+  .list-sort select {
+    min-height: 46px;
+    font-size: 16px;
+  }
+
+  .list-search {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .list-search input {
+    width: 100%;
+  }
+
+  .list-sort {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .list-sort select {
+    flex: 1 1 140px;
+    min-width: 0;
   }
 
   .data-table thead {
@@ -688,21 +728,23 @@ textarea:focus-visible {
   }
 
   .data-table tr {
-    margin-bottom: var(--space-4);
+    margin-bottom: 0.9rem;
     border: 1px solid var(--border);
     border-radius: 18px;
-    padding: var(--space-3) var(--space-4);
-    background: var(--bg-card);
+    padding: 0.65rem 0.8rem;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 4px 14px rgba(58, 15, 80, 0.03);
   }
 
   .data-table td {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3) 0;
-    border-bottom: 1px solid var(--border);
+    gap: 0.75rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid rgba(58, 15, 80, 0.06);
     text-align: right;
+    min-height: 44px;
   }
 
   .data-table td:last-child {
@@ -712,7 +754,7 @@ textarea:focus-visible {
   .data-table td[data-label]:not([data-label=""])::before {
     content: attr(data-label);
     font-weight: 700;
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--text-muted);
@@ -723,6 +765,7 @@ textarea:focus-visible {
   .data-table td.col-id {
     display: none;
   }
+
   .data-table .thumb {
     width: 64px;
     height: 64px;
@@ -731,8 +774,8 @@ textarea:focus-visible {
   .data-table td.col-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-2);
-    padding-top: var(--space-4);
+    gap: 0.5rem;
+    padding-top: 0.8rem;
   }
 
   .data-table td.col-actions::before {
@@ -742,8 +785,9 @@ textarea:focus-visible {
   .data-table td.col-actions .btn {
     width: 100%;
     justify-content: center;
-    padding: 0.8rem 0.9rem;
-    font-size: 0.78rem;
+    padding: 0.8rem 0.75rem;
+    min-height: 42px;
+    font-size: 0.75rem;
   }
 
   .pagination-controls {
@@ -756,8 +800,28 @@ textarea:focus-visible {
     text-align: center;
   }
 
+  .pagination-btns {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
   .pagination-btns .btn {
     flex: 1;
+    min-height: 42px;
+  }
+
+  .modal-box {
+    width: calc(100vw - 1.2rem);
+    max-width: none;
+    border-radius: 20px;
+    padding: 1rem;
+  }
+
+  .modal-close {
+    width: 40px;
+    height: 40px;
   }
 }
 

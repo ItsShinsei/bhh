@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Penjuru Dunia — Bee Happy Holiday</title>
+    <link rel="icon" type="image/svg+xml" href="assets/images/BHH.svg" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/destination.css" />
+
+    <!-- Leaflet -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  </head>
+  <body>
+    <div id="page">
+      <div id="nav-placeholder"></div>
+
+      <!-- Page hero -->
+      <div
+        class="page-hero section"
+        style="padding-block: clamp(2rem, 5vw, 3.5rem)"
+      >
+        <div class="container">
+          <div class="breadcrumb">
+            <a href="index.html">Beranda</a><span>›</span
+            ><span>Penjuru Dunia</span>
+          </div>
+          <p class="eyebrow mb-2">🌍 Penjuru Dunia</p>
+          <h1 class="mb-3">
+            Jelajahi <em class="text-gold">Setiap Sudut Bumi</em>
+          </h1>
+          <p class="mw-md mx-auto text-base">
+            Klik destinasi di peta atau pilih dari daftar — temukan cerita,
+            foto, dan inspirasi perjalanan untuk setiap penjuru dunia.
+          </p>
+        </div>
+      </div>
+
+      <section class="dest-intro section">
+        <div class="container">
+          <div class="dest-intro-grid">
+            <div class="dest-intro-copy">
+              <p class="eyebrow mb-2">📚 Kenali Dunia Lebih Dalam</p>
+              <h2>
+                Jelajahi negara dan destinasi tanpa harus langsung booking.
+              </h2>
+              <p>
+                Halaman ini berfungsi sebagai panduan inspirasi perjalanan:
+                menggali budaya, pemandangan alam, dan pengalaman unik dari
+                berbagai negara di dunia. Di sini, pengunjung bisa mengenal
+                karakter tiap destinasi sebelum memutuskan untuk menelusuri
+                lebih jauh.
+              </p>
+            </div>
+            <div class="dest-intro-cards">
+              <div class="dest-info-card">
+                <span>🏛️</span>
+                <div>
+                  <strong>Budaya</strong>
+                  <p>Sejarah, tradisi, dan kota ikonik.</p>
+                </div>
+              </div>
+              <div class="dest-info-card">
+                <span>🌄</span>
+                <div>
+                  <strong>Alam</strong>
+                  <p>Pegunungan, danau, pantai, dan lanskap luar biasa.</p>
+                </div>
+              </div>
+              <div class="dest-info-card">
+                <span>🧭</span>
+                <div>
+                  <strong>Persiapan</strong>
+                  <p>Waktu terbaik, vibe, dan rekomendasi singkat.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main layout -->
+      <div class="dest-layout">
+        <!-- Sidebar -->
+        <aside class="dest-sidebar">
+          <div class="dest-sidebar-head">
+            <h2>Destinasi</h2>
+            <p id="destCount">Memuat...</p>
+          </div>
+
+          <div class="dest-continent-filter" id="continentFilter">
+            <button class="cont-btn active" data-cont="">🌍 Semua</button>
+            <button class="cont-btn" data-cont="Asia">Asia</button>
+            <button class="cont-btn" data-cont="Eropa">Eropa</button>
+            <button class="cont-btn" data-cont="Timur Tengah">Timteng</button>
+            <button class="cont-btn" data-cont="Oseania">Oseania</button>
+            <button class="cont-btn" data-cont="Amerika">Amerika</button>
+            <button class="cont-btn" data-cont="Afrika">Afrika</button>
+          </div>
+
+          <div class="dest-search-wrap">
+            <input
+              class="dest-search"
+              type="search"
+              placeholder="Cari destinasi..."
+              id="destSearch"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="dest-list" id="destList">
+            <div class="dest-list-empty">Memuat destinasi...</div>
+          </div>
+        </aside>
+
+        <!-- Map -->
+        <div class="dest-map-wrap">
+          <div id="destMap"></div>
+
+          <!-- Detail panel -->
+          <div class="dest-detail" id="destDetail">
+            <div class="dest-detail-loader" id="detailLoader">
+              <div class="spinner"></div>
+            </div>
+
+            <div class="dest-detail-hero" id="detailHero">
+              <div class="dest-detail-hero-placeholder">🌍</div>
+            </div>
+
+            <button
+              class="dest-detail-close"
+              id="detailClose"
+              aria-label="Tutup"
+            >
+              ✕
+            </button>
+
+            <div class="dest-detail-body" id="detailBody">
+              <!-- filled by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lightbox -->
+      <div class="dest-lightbox" id="destLightbox">
+        <button class="dest-lightbox-close" id="lightboxClose">✕</button>
+        <img id="lightboxImg" src="" alt="" />
+        <div class="dest-lightbox-caption" id="lightboxCaption"></div>
+      </div>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <script type="module">
+      import { API_BASE, driveThumb, waLink } from "./js/config.js";
+      import "./js/main.js";
+
+      // ── Config ──
+      const WA_NUMBER = "6281331978219";
+      const useDemo = API_BASE.includes("YOUR_WORKER");
+
+      // ── Demo data ──
+      const DEMO_DESTINATIONS = [
+        {
+          id: 1,
+          slug: "switzerland",
+          name: "Swiss",
+          type: "country",
+          continent: "Eropa",
+          lat: 46.8182,
+          lng: 8.2275,
+          description:
+            "Swiss adalah negara kecil di jantung Eropa yang menyimpan keindahan alam yang luar biasa. Pegunungan Alpen yang megah, danau biru jernih, dan padang rumput hijau menjadi pemandangan sehari-hari di sini.",
+          tagline: "Alpen, danau, dan kota yang tenang dengan nuansa elegan.",
+          best_time: "Juni–September",
+          highlights: [
+            "Pegunungan Alpen",
+            "Danau dan hiking",
+            "Kota bersih & tenang",
+          ],
+          image_url:
+            "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&auto=format&fit=crop",
+          badge: "Populer",
+          photos: [
+            {
+              id: 1,
+              image_url:
+                "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&auto=format&fit=crop",
+              caption: "Pegunungan Alpen Swiss",
+            },
+            {
+              id: 2,
+              image_url:
+                "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&auto=format&fit=crop",
+              caption: "Interlaken",
+            },
+            {
+              id: 3,
+              image_url:
+                "https://images.unsplash.com/photo-1580674684081-7617fbf3d745?w=800&auto=format&fit=crop",
+              caption: "Danau Geneva",
+            },
+          ],
+        },
+        {
+          id: 2,
+          slug: "jepang",
+          name: "Jepang",
+          type: "country",
+          continent: "Asia",
+          lat: 36.2048,
+          lng: 138.2529,
+          description:
+            "Jepang adalah negara yang berhasil memadukan tradisi ribuan tahun dengan teknologi masa depan secara harmonis. Musim semi menghadirkan keajaiban bunga sakura yang memenuhi setiap sudut kota.",
+          tagline:
+            "Kombinasi budaya klasik, teknologi modern, dan alam yang memikat.",
+          best_time: "Maret–April & Oktober–November",
+          highlights: [
+            "Sakura musim semi",
+            "Kota Tokyo & Kyoto",
+            "Onsen & kuliner khas",
+          ],
+          image_url:
+            "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=1200&auto=format&fit=crop",
+          badge: "Terfavorit",
+          photos: [
+            {
+              id: 4,
+              image_url:
+                "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800&auto=format&fit=crop",
+              caption: "Bunga sakura Tokyo",
+            },
+            {
+              id: 5,
+              image_url:
+                "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&auto=format&fit=crop",
+              caption: "Fushimi Inari Kyoto",
+            },
+            {
+              id: 6,
+              image_url:
+                "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&auto=format&fit=crop",
+              caption: "Gunung Fuji",
+            },
+          ],
+        },
+        {
+          id: 3,
+          slug: "turki",
+          name: "Turki",
+          type: "country",
+          continent: "Eropa",
+          lat: 38.9637,
+          lng: 35.2433,
+          description:
+            "Turki adalah jembatan antara dua dunia — Eropa dan Asia — dengan kekayaan sejarah dan budaya yang tak ternilai. Istanbul dan Cappadocia menawarkan pengalaman yang tak terlupakan.",
+          tagline:
+            "Sejarah, bazar, dan lanskap unik yang menyatu dalam satu negara.",
+          best_time: "April–Juni & September–Oktober",
+          highlights: [
+            "Istanbul & Hagia Sophia",
+            "Cappadocia",
+            "Kuliner khas dan bazar",
+          ],
+          image_url:
+            "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=1200&auto=format&fit=crop",
+          badge: "Populer",
+          photos: [
+            {
+              id: 7,
+              image_url:
+                "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800&auto=format&fit=crop",
+              caption: "Cappadocia dari udara",
+            },
+            {
+              id: 8,
+              image_url:
+                "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&auto=format&fit=crop",
+              caption: "Hagia Sophia Istanbul",
+            },
+          ],
+        },
+        {
+          id: 4,
+          slug: "korea-selatan",
+          name: "Korea Selatan",
+          type: "country",
+          continent: "Asia",
+          lat: 35.9078,
+          lng: 127.7669,
+          description:
+            "Korea Selatan menawarkan kehidupan kota Seoul yang modern berpadu dengan kuil-kuil berusia ratusan tahun dan alam yang indah di setiap musim.",
+          tagline:
+            "Kota modern yang tetap menjaga tradisi dan kehangatan budaya.",
+          best_time: "April–Mei & September–Oktober",
+          highlights: [
+            "Seoul & hanok",
+            "Korean food culture",
+            "Gunung & taman kota",
+          ],
+          image_url:
+            "https://images.unsplash.com/photo-1480796927426-f609979314bd?w=1200&auto=format&fit=crop",
+          badge: "",
+          photos: [
+            {
+              id: 9,
+              image_url:
+                "https://images.unsplash.com/photo-1480796927426-f609979314bd?w=800&auto=format&fit=crop",
+              caption: "Seoul city skyline",
+            },
+            {
+              id: 10,
+              image_url:
+                "https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=800&auto=format&fit=crop",
+              caption: "Gyeongbokgung Palace",
+            },
+          ],
+        },
+        {
+          id: 5,
+          slug: "perancis",
+          name: "Perancis",
+          type: "country",
+          continent: "Eropa",
+          lat: 46.2276,
+          lng: 2.2137,
+          description:
+            "Perancis adalah personifikasi dari keindahan, seni, dan kuliner terbaik dunia. Paris memikat dengan Menara Eiffel dan museum Louvre yang legendaris.",
+          tagline:
+            "Seni, kuliner, dan kota-kota yang memikat dari Paris hingga Provence.",
+          best_time: "April–Juni & September–Oktober",
+          highlights: [
+            "Paris & museum",
+            "Kuliner kelas dunia",
+            "Pesisir & desa indah",
+          ],
+          image_url:
+            "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200&auto=format&fit=crop",
+          badge: "",
+          photos: [
+            {
+              id: 11,
+              image_url:
+                "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&auto=format&fit=crop",
+              caption: "Menara Eiffel Paris",
+            },
+          ],
+        },
+        {
+          id: 6,
+          slug: "dubai",
+          name: "Dubai",
+          type: "country",
+          continent: "Timur Tengah",
+          lat: 25.2048,
+          lng: 55.2708,
+          description:
+            "Dubai adalah kota di mana mimpi menjadi kenyataan. Burj Khalifa, Palm Jumeirah, dan desert safari menjadikannya salah satu destinasi paling menakjubkan di dunia.",
+          tagline: "Modern luxury, desert adventure, dan skyline yang iconic.",
+          best_time: "November–Maret",
+          highlights: [
+            "Burj Khalifa",
+            "Desert safari",
+            "Resort mewah & shopping",
+          ],
+          image_url:
+            "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1200&auto=format&fit=crop",
+          badge: "Mewah",
+          photos: [
+            {
+              id: 12,
+              image_url:
+                "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&auto=format&fit=crop",
+              caption: "Dubai skyline",
+            },
+            {
+              id: 13,
+              image_url:
+                "https://images.unsplash.com/photo-1582672060674-bc2bd808a8b5?w=800&auto=format&fit=crop",
+              caption: "Burj Khalifa",
+            },
+          ],
+        },
+        {
+          id: 7,
+          slug: "singapura",
+          name: "Singapura",
+          type: "country",
+          continent: "Asia",
+          lat: 1.3521,
+          lng: 103.8198,
+          description:
+            "Singapura membuktikan bahwa ukuran bukan segalanya. Gardens by the Bay, Marina Bay Sands, dan Sentosa Island menjadikannya tak pernah membosankan.",
+          tagline:
+            "Kota yang efisien, bersih, dan penuh inspirasi urban modern.",
+          best_time: "Februari–April & Juli–September",
+          highlights: ["Marina Bay", "Garden by the Bay", "Kuliner jalanan"],
+          image_url:
+            "https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=1200&auto=format&fit=crop",
+          badge: "",
+          photos: [
+            {
+              id: 14,
+              image_url:
+                "https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=800&auto=format&fit=crop",
+              caption: "Marina Bay Sands",
+            },
+          ],
+        },
+        {
+          id: 8,
+          slug: "australia",
+          name: "Australia",
+          type: "country",
+          continent: "Oseania",
+          lat: -25.2744,
+          lng: 133.7751,
+          description:
+            "Australia menawarkan keragaman alam yang luar biasa — dari Sydney Opera House hingga Great Barrier Reef dan keajaiban Uluru di tengah outback.",
+          tagline:
+            "Lanskap liar, kota ikonik, dan pengalaman outdoor yang megah.",
+          best_time: "Juni–Agustus & Oktober–Desember",
+          highlights: [
+            "Sydney Opera House",
+            "Great Barrier Reef",
+            "Outback & wildlife",
+          ],
+          image_url:
+            "https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=1200&auto=format&fit=crop",
+          badge: "",
+          photos: [
+            {
+              id: 15,
+              image_url:
+                "https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=800&auto=format&fit=crop",
+              caption: "Sydney Opera House",
+            },
+          ],
+        },
+      ];
+
+      // ── State ──
+      let allDestinations = [];
+      let activeContinent = "";
+      let activeSlug = null;
+      let markers = {};
+      let map;
+
+      // ── Helpers ──
+      const thumb = (url) => driveThumb(url, "w400") || url;
+      const waMsg = (name) =>
+        `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`Halo! Saya tertarik untuk mengunjungi ${name}. Bisa bantu rekomendasikan paket wisatanya?`)}`;
+
+      // ── Init map ──
+      function initMap() {
+        map = L.map("destMap", {
+          center: [20, 20],
+          zoom: 2,
+          zoomControl: true,
+          attributionControl: true,
+        });
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "© OpenStreetMap contributors",
+          maxZoom: 18,
+        }).addTo(map);
+      }
+
+      // ── Custom marker icon ──
+      function makeIcon(active = false) {
+        return L.divIcon({
+          className: "",
+          html: `<div style="
+            width:28px; height:28px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            background: ${active ? "#9a761d" : "#3a0f50"};
+            border: 3px solid #fff;
+            box-shadow: 0 3px 10px rgba(58,15,80,0.35);
+            transition: background 0.15s;
+          "></div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 28],
+          popupAnchor: [0, -32],
+        });
+      }
+
+      // ── Place markers ──
+      function placeMarkers(destinations) {
+        Object.values(markers).forEach((m) => map.removeLayer(m));
+        markers = {};
+
+        destinations.forEach((d) => {
+          const marker = L.marker([d.lat, d.lng], { icon: makeIcon(false) })
+            .addTo(map)
+            .bindTooltip(d.name, { direction: "top", className: "" });
+
+          marker.on("click", () => selectDestination(d.slug));
+          markers[d.slug] = marker;
+        });
+      }
+
+      // ── Filter & render list ──
+      function filtered() {
+        const q = document
+          .getElementById("destSearch")
+          .value.trim()
+          .toLowerCase();
+        return allDestinations.filter((d) => {
+          const matchCont = !activeContinent || d.continent === activeContinent;
+          const matchQ =
+            !q ||
+            d.name.toLowerCase().includes(q) ||
+            (d.continent || "").toLowerCase().includes(q);
+          return matchCont && matchQ;
+        });
+      }
+
+      function renderList() {
+        const list = document.getElementById("destList");
+        const items = filtered();
+
+        document.getElementById("destCount").textContent =
+          `${items.length} destinasi${activeContinent ? " · " + activeContinent : ""}`;
+
+        if (!items.length) {
+          list.innerHTML = `<div class="dest-list-empty">Tidak ada destinasi ditemukan.</div>`;
+          return;
+        }
+
+        if (!activeSlug || !items.some((d) => d.slug === activeSlug)) {
+          activeSlug = items[0].slug;
+        }
+
+        list.innerHTML = items
+          .map((d) => {
+            const imgUrl = thumb(d.image_url);
+            const isActive = d.slug === activeSlug;
+            return `
+            <div class="dest-list-item${isActive ? " active" : ""}" data-slug="${d.slug}">
+              ${
+                imgUrl
+                  ? `<img class="dest-list-thumb" src="${imgUrl}" alt="${d.name}" loading="lazy" onerror="this.outerHTML='<div class=dest-list-thumb-placeholder>🌍</div>'">`
+                  : `<div class="dest-list-thumb-placeholder">🌍</div>`
+              }
+              <div class="dest-list-info">
+                <div class="dest-list-name">${d.name}</div>
+                <div class="dest-list-meta">${d.continent}${d.country ? " · " + d.country : ""}</div>
+              </div>
+              ${d.badge ? `<span class="dest-list-badge">${d.badge}</span>` : ""}
+            </div>`;
+          })
+          .join("");
+
+        list.querySelectorAll(".dest-list-item").forEach((el) => {
+          el.addEventListener("click", () =>
+            selectDestination(el.dataset.slug),
+          );
+        });
+
+        // Update markers visibility
+        placeMarkers(items);
+        if (activeSlug && markers[activeSlug]) {
+          markers[activeSlug].setIcon(makeIcon(true));
+          const panel = document.getElementById("destDetail");
+          const loader = document.getElementById("detailLoader");
+          panel.classList.add("open");
+          loader.classList.add("show");
+          const selectedDest =
+            items.find((d) => d.slug === activeSlug) || items[0];
+          renderDetail(selectedDest);
+          loader.classList.remove("show");
+        }
+      }
+
+      // ── Select destination ──
+      async function selectDestination(slug) {
+        if (activeSlug === slug) return;
+
+        // Reset previous marker
+        if (activeSlug && markers[activeSlug]) {
+          markers[activeSlug].setIcon(makeIcon(false));
+        }
+        activeSlug = slug;
+
+        // Highlight new marker
+        if (markers[slug]) {
+          markers[slug].setIcon(makeIcon(true));
+          map.flyTo(markers[slug].getLatLng(), Math.max(map.getZoom(), 5), {
+            duration: 0.8,
+          });
+        }
+
+        // Update list active state
+        document.querySelectorAll(".dest-list-item").forEach((el) => {
+          el.classList.toggle("active", el.dataset.slug === slug);
+        });
+
+        // Open panel + show loader
+        const panel = document.getElementById("destDetail");
+        const loader = document.getElementById("detailLoader");
+        panel.classList.remove("closed");
+        panel.classList.add("open");
+        loader.classList.add("show");
+
+        try {
+          let dest;
+          if (useDemo) {
+            dest = DEMO_DESTINATIONS.find((d) => d.slug === slug);
+          } else {
+            dest = await fetch(`${API_BASE}/api/destinations/${slug}`).then(
+              (r) => r.json(),
+            );
+          }
+          if (dest) renderDetail(dest);
+        } catch {
+          document.getElementById("detailBody").innerHTML =
+            `<p style="color:var(--text-muted);font-size:.85rem">Gagal memuat detail destinasi.</p>`;
+        } finally {
+          loader.classList.remove("show");
+        }
+      }
+
+      // ── Render detail panel ──
+      function renderDetail(dest) {
+        // Hero image
+        const heroEl = document.getElementById("detailHero");
+        const heroUrl = thumb(dest.image_url);
+        heroEl.innerHTML = heroUrl
+          ? `<img src="${heroUrl}" alt="${dest.name}" onerror="this.outerHTML='<div class=dest-detail-hero-placeholder>🌍</div>'">`
+          : `<div class="dest-detail-hero-placeholder">🌍</div>`;
+        if (dest.badge) {
+          heroEl.insertAdjacentHTML(
+            "beforeend",
+            `<span class="dest-detail-badge">${dest.badge}</span>`,
+          );
+        }
+        // Re-insert close button (heroEl was overwritten)
+        heroEl.insertAdjacentHTML(
+          "beforeend",
+          `<button class="dest-detail-close" id="detailClose" aria-label="Tutup">✕</button>`,
+        );
+        document
+          .getElementById("detailClose")
+          .addEventListener("click", closeDetail);
+
+        // Body
+        const photos = dest.photos || [];
+        const highlights = Array.isArray(dest.highlights)
+          ? dest.highlights
+          : typeof dest.highlights === "string"
+            ? dest.highlights
+                .split(/[|,]/)
+                .map((item) => item.trim())
+                .filter(Boolean)
+            : [];
+
+        document.getElementById("detailBody").innerHTML = `
+          <div>
+            <div class="dest-detail-name">${dest.name}</div>
+            <div class="dest-detail-meta">
+              <span class="dest-detail-pill">${dest.continent}</span>
+              ${dest.country ? `<span class="dest-detail-pill">${dest.country}</span>` : ""}
+              <span class="dest-detail-pill">${dest.type === "city" ? "Kota" : "Negara"}</span>
+            </div>
+          </div>
+
+          ${dest.description ? `<p class="dest-detail-desc">${dest.description}</p>` : ""}
+
+          ${dest.tagline ? `<p class="dest-detail-tagline">${dest.tagline}</p>` : ""}
+
+          ${
+            highlights.length
+              ? `
+            <div class="dest-detail-group">
+              <div class="dest-photos-label">✨ Yang bikin menarik</div>
+              <div class="dest-detail-highlights">
+                ${highlights.map((item) => `<span>${item}</span>`).join("")}
+              </div>
+            </div>
+          `
+              : ""
+          }
+
+          ${
+            dest.best_time || dest.type
+              ? `
+            <div class="dest-detail-facts">
+              ${dest.best_time ? `<div class="dest-detail-fact"><span>Waktu terbaik</span><strong>${dest.best_time}</strong></div>` : ""}
+              <div class="dest-detail-fact"><span>Jenis</span><strong>${dest.type === "city" ? "Kota" : "Negara"}</strong></div>
+            </div>
+          `
+              : ""
+          }
+
+          ${
+            photos.length
+              ? `
+            <div>
+              <div class="dest-photos-label">📷 Foto Destinasi</div>
+              <div class="dest-photos-grid">
+                ${photos
+                  .map((ph) => {
+                    const url =
+                      driveThumb(ph.image_url, "w600") || ph.image_url;
+                    return `
+                    <div class="dest-photo-item" data-full="${driveThumb(ph.image_url, "w1600") || ph.image_url}" data-caption="${ph.caption || ""}">
+                      <img src="${url}" alt="${ph.caption || dest.name}" loading="lazy"
+                        onerror="this.parentElement.style.display='none'">
+                    </div>`;
+                  })
+                  .join("")}
+              </div>
+            </div>
+          `
+              : ""
+          }
+
+          <div class="dest-detail-cta">
+            <a class="btn btn-wa btn--block" href="${waMsg(dest.name)}" target="_blank" rel="noopener">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Tanya Paket ke ${dest.name}
+            </a>
+          </div>
+        `;
+
+        // Wire photo clicks → lightbox
+        document.querySelectorAll(".dest-photo-item").forEach((el) => {
+          el.addEventListener("click", () =>
+            openLightbox(el.dataset.full, el.dataset.caption),
+          );
+        });
+      }
+
+      // ── Close detail ──
+      function closeDetail() {
+        const detail = document.getElementById("destDetail");
+        const isMobile = window.innerWidth <= 768;
+
+        if (isMobile) {
+          detail.classList.add("closed");
+          detail.classList.remove("open");
+          if (activeSlug && markers[activeSlug]) {
+            markers[activeSlug].setIcon(makeIcon(false));
+          }
+          activeSlug = null;
+          document
+            .querySelectorAll(".dest-list-item")
+            .forEach((el) => el.classList.remove("active"));
+          return;
+        }
+
+        detail.classList.remove("open");
+        if (activeSlug && markers[activeSlug]) {
+          markers[activeSlug].setIcon(makeIcon(false));
+        }
+        activeSlug = null;
+        document
+          .querySelectorAll(".dest-list-item")
+          .forEach((el) => el.classList.remove("active"));
+      }
+
+      // ── Lightbox ──
+      function openLightbox(src, caption) {
+        document.getElementById("lightboxImg").src = src;
+        document.getElementById("lightboxCaption").textContent = caption || "";
+        document.getElementById("lightboxCaption").style.display = caption
+          ? ""
+          : "none";
+        document.getElementById("destLightbox").classList.add("open");
+        document.body.style.overflow = "hidden";
+      }
+      function closeLightbox() {
+        document.getElementById("destLightbox").classList.remove("open");
+        document.body.style.overflow = "";
+      }
+      document
+        .getElementById("lightboxClose")
+        .addEventListener("click", closeLightbox);
+      document.getElementById("destLightbox").addEventListener("click", (e) => {
+        if (e.target === document.getElementById("destLightbox"))
+          closeLightbox();
+      });
+
+      // ── Close detail button (initial) ──
+      document
+        .getElementById("detailClose")
+        .addEventListener("click", closeDetail);
+
+      // ── Continent filter ──
+      document
+        .getElementById("continentFilter")
+        .addEventListener("click", (e) => {
+          const btn = e.target.closest(".cont-btn");
+          if (!btn) return;
+          document
+            .querySelectorAll(".cont-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          activeContinent = btn.dataset.cont;
+          renderList();
+        });
+
+      // ── Search ──
+      document
+        .getElementById("destSearch")
+        .addEventListener("input", () => renderList());
+
+      // ── Keyboard ──
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          if (
+            document.getElementById("destLightbox").classList.contains("open")
+          )
+            closeLightbox();
+          else closeDetail();
+        }
+      });
+
+      // ── Load data ──
+      async function init() {
+        initMap();
+        try {
+          if (useDemo) {
+            allDestinations = DEMO_DESTINATIONS;
+          } else {
+            allDestinations = await fetch(`${API_BASE}/api/destinations`).then(
+              (r) => r.json(),
+            );
+          }
+        } catch {
+          allDestinations = DEMO_DESTINATIONS;
+        }
+        renderList();
+      }
+
+      init();
+    </script>
+  </body>
+</html>
