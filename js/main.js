@@ -54,6 +54,9 @@ function injectNav() {
         </span>
       </li>
       <li>
+        <a class="nav-link ${isActive("destinations") ? "active" : ""}" href="${R}destinations.html">Destinasi</a>
+      </li>
+      <li>
         <a class="nav-link ${isActive("dokumen") ? "active" : ""}" href="${R}dokumen/dokumen.html">Dokumen</a>
       </li>
       <li>
@@ -172,6 +175,7 @@ function injectFooter() {
         <div>
           <div class="footer-col-title">Layanan</div>
           <div class="footer-links">
+            <a href="${R}destinations.html"><span class="footer-link-icon">${icon("mapPin", 16)}</span> Destinasi</a>
             <a href="${R}dokumen/visa.html"><span class="footer-link-icon">${icon("fileText", 16)}</span> Pengurusan Visa</a>
             <a href="${R}dokumen/paspor.html"><span class="footer-link-icon">${icon("idCard", 16)}</span> Pengurusan Paspor</a>
             <a href="${R}galeri.html"><span class="footer-link-icon">${icon("image", 16)}</span> Galeri</a>
