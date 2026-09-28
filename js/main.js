@@ -91,6 +91,7 @@ function injectNav() {
         <a href="${R}tours/umroh.html"><span class="mobile-nav-icon">${icon("mosque", 15)}</span> Umroh & Haji</a>
       </div>
     </div>
+    <a class="mobile-nav-link" href="${R}destinations.html"><span class="mobile-nav-icon">${icon("mapPin", 18)}</span> Destinasi</a>
     <a class="mobile-nav-link" href="${R}dokumen/dokumen.html"><span class="mobile-nav-icon">${icon("fileText", 18)}</span> Dokumen</a>
     <a class="mobile-nav-link" href="${R}galeri.html"><span class="mobile-nav-icon">${icon("image", 18)}</span> Galeri</a>
     <a class="mobile-nav-link" href="${R}about.html"><span class="mobile-nav-icon">${icon("info", 18)}</span> Tentang Kami</a>
