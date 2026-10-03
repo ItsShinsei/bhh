@@ -184,7 +184,7 @@ export function renderReviewCard(r, delay = 0) {
         <div class="review-avatar">
           ${
             r.photo_url
-              ? `<img src="${r.photo_url}" alt="${r.name}" />`
+              ? `<img src="${r.photo_url}" alt="${r.name}" loading="lazy" />`
               : r.name.charAt(0).toUpperCase()
           }
         </div>

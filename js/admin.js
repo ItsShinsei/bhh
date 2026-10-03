@@ -830,7 +830,7 @@ function openEditModal(r, item) {
     const preview = form.querySelector("[data-image-preview]");
     if (preview && current) {
       const fullImage = escAttr(driveThumb(current, "w2000"));
-      preview.innerHTML = `<img src="${esc(driveThumb(current, "w200"))}" data-full-image="${fullImage}" title="Klik untuk melihat gambar penuh" alt="">`;
+      preview.innerHTML = `<img src="${esc(driveThumb(current, "w200"))}" data-full-image="${fullImage}" title="Klik untuk melihat gambar penuh" alt="" loading="lazy">`;
       preview
         .querySelector("img")
         .addEventListener("click", () =>

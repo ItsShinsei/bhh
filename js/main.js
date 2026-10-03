@@ -143,7 +143,7 @@ function injectFooter() {
       <div class="footer-grid">
         <div>
           <div class="footer-brand-logo">
-            <img src="${R}assets/images/BHH.svg" alt="Bee Happy Holiday" />
+            <img src="${R}assets/images/BHH.svg" alt="Bee Happy Holiday" loading="lazy" />
             <div class="footer-brand-name">
               Bee Happy Holiday
               <small>Trip everywhere, Spread Happiness</small>

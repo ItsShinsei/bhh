@@ -632,7 +632,7 @@
         const heroEl = document.getElementById("detailHero");
         const heroUrl = thumb(dest.image_url);
         heroEl.innerHTML = heroUrl
-          ? `<img src="${heroUrl}" alt="${dest.name}" onerror="this.outerHTML='<div class=dest-detail-hero-placeholder>🌍</div>'">`
+          ? `<img src="${heroUrl}" alt="${dest.name}" loading="lazy" onerror="this.outerHTML='<div class=dest-detail-hero-placeholder>🌍</div>'">`
           : `<div class="dest-detail-hero-placeholder">🌍</div>`;
         if (dest.badge) {
           heroEl.insertAdjacentHTML(

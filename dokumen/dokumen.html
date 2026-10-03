@@ -6,6 +6,36 @@
     <title>Dokumen Perjalanan — Bee Happy Holiday</title>
     <link rel="icon" type="image/svg+xml" href="../assets/images/BHH.svg" />
     <link rel="stylesheet" href="../css/main.css" />
+    <style>
+      .document-service-card {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+      .document-service-card::before {
+        position: absolute;
+        z-index: 1;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(14, 24, 31, 0.2),
+          rgba(14, 24, 31, 0.72)
+        );
+        content: "";
+      }
+      .document-service-card > img {
+        position: absolute;
+        z-index: 0;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .document-service-card > span {
+        position: relative;
+        z-index: 2;
+      }
+    </style>
   </head>
   <body>
     <div id="page">
@@ -32,7 +62,7 @@
         <div class="container">
           <div class="grid-2" style="max-width: 680px; margin: 0 auto">
             <a
-              class="btn btn-lg btn--block"
+              class="btn btn-lg btn--block document-service-card"
               id="btnPaspor"
               href="#"
               target="_blank"
@@ -47,18 +77,11 @@
                 min-height: 220px;
                 color: #f7f4ee;
                 text-align: center;
-                background:
-                  linear-gradient(
-                    180deg,
-                    rgba(14, 24, 31, 0.2),
-                    rgba(14, 24, 31, 0.72)
-                  ),
-                  url(&quot;../assets/images/paspor.png&quot;) center/cover
-                    no-repeat;
                 border-radius: 1.25rem;
                 box-shadow: 0 14px 32px rgba(0, 0, 0, 0.14);
               "
             >
+              <img src="../assets/images/paspor.png" alt="" loading="lazy" />
               <span
                 style="
                   font-size: 1.25rem;
@@ -73,7 +96,7 @@
               >
             </a>
             <a
-              class="btn btn-lg btn--block"
+              class="btn btn-lg btn--block document-service-card"
               id="btnVisa"
               href="#"
               target="_blank"
@@ -88,18 +111,11 @@
                 min-height: 220px;
                 color: #f7f4ee;
                 text-align: center;
-                background:
-                  linear-gradient(
-                    180deg,
-                    rgba(14, 24, 31, 0.2),
-                    rgba(14, 24, 31, 0.72)
-                  ),
-                  url(&quot;../assets/images/visa.png&quot;) center/cover
-                    no-repeat;
                 border-radius: 1.25rem;
                 box-shadow: 0 14px 32px rgba(0, 0, 0, 0.14);
               "
             >
+              <img src="../assets/images/visa.png" alt="" loading="lazy" />
               <span
                 style="
                   font-size: 1.25rem;
