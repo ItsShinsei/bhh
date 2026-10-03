@@ -32,8 +32,16 @@ gallery            → foto galeri
 3. **Settings → Bindings → Add → D1 Database**
    - Variable name: `DB`
    - D1 database: `bee-happy-holiday`
-4. **Save**
-5. Catat URL worker: `https://bhh-api.namaakun.workers.dev`
+4. **Settings → Bindings → Add → R2 Bucket**
+   - Variable name: `BHH_IMAGES`
+   - R2 bucket: pilih bucket yang dipakai untuk gambar BHH
+5. **Save**
+6. Catat URL worker: `https://bhh-api.namaakun.workers.dev`
+
+Pastikan binding R2 `BHH_IMAGES` tetap terpasang saat Worker diperbarui. Saat
+baris yang memakai gambar hasil upload BHH dihapus dari admin, objeknya ikut
+dihapus dari bucket jika tidak dipakai oleh baris lain. URL gambar eksternal
+dan gambar yang masih dipakai baris lain tidak dihapus.
 
 Test worker (buka di browser):
 

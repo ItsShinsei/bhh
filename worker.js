@@ -43,7 +43,8 @@
    DEPLOY:
      1. Workers & Pages → Create Worker → paste this file → Deploy
      2. Settings → Bindings → D1 Database → variable: DB → select bee-happy-holiday
-     3. Copy the worker URL → paste into js/config.js as API_BASE
+     3. Settings → Bindings → R2 Bucket → variable: BHH_IMAGES → select the image bucket
+     4. Copy the worker URL → paste into js/config.js as API_BASE
    ═══════════════════════════════════════════ */
 
 const CORS = {
@@ -52,6 +53,9 @@ const CORS = {
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
+
+const R2_PUBLIC_BASE_URL =
+  "https://pub-5effb5342cd94102a9ddd904b038efb4.r2.dev";
 
 const ok = (d) =>
   new Response(JSON.stringify(d), { status: 200, headers: CORS });
@@ -75,6 +79,42 @@ const TABLES = {
   destinations: "destinations",
   "destination-photos": "destination_photos",
 };
+
+const IMAGE_COLUMNS = {
+  domestik: "image_url",
+  inter: "image_url",
+  cruise: "image_url",
+  umroh: "image_url",
+  offers: "image_url",
+  reviews: "photo_url",
+  gallery: "image_url",
+  destinations: "image_url",
+  "destination-photos": "image_url",
+};
+
+function getR2ObjectKey(imageUrl) {
+  if (typeof imageUrl !== "string" || !imageUrl) return null;
+
+  let url;
+  try {
+    url = new URL(imageUrl);
+  } catch {
+    return null;
+  }
+
+  if (url.origin !== R2_PUBLIC_BASE_URL || url.search || url.hash) return null;
+
+  let key;
+  try {
+    key = decodeURIComponent(url.pathname.slice(1));
+  } catch {
+    return null;
+  }
+
+  if (!key || key.includes("/") || key.includes("\\") || key.includes(".."))
+    return null;
+  return key;
+}
 
 // ── Resource → editable columns (used by PUT) ──
 const EDITABLE_COLUMNS = {
@@ -214,12 +254,65 @@ export default {
         const table = TABLES[resource];
         if (!table) return err("Resource tidak dikenal", 404);
         const id = Number(idStr);
+
+        const imageColumn = IMAGE_COLUMNS[resource];
+        let imageDeleted = false;
+        let imagePreserved;
+        if (imageColumn) {
+          const row = await env.DB.prepare(
+            `SELECT ${imageColumn} FROM ${table} WHERE id = ?`,
+          )
+            .bind(id)
+            .first();
+          if (!row) return err("Data tidak ditemukan", 404);
+
+          const imageUrl = row[imageColumn];
+          const key = getR2ObjectKey(imageUrl);
+          if (key) {
+            let isShared = false;
+            for (const [otherResource, otherImageColumn] of Object.entries(
+              IMAGE_COLUMNS,
+            )) {
+              const otherTable = TABLES[otherResource];
+              let query = `SELECT id FROM ${otherTable} WHERE ${otherImageColumn} = ?`;
+              const args = [imageUrl];
+              if (otherResource === resource) {
+                query += " AND id != ?";
+                args.push(id);
+              }
+              query += " LIMIT 1";
+              if (
+                await env.DB.prepare(query)
+                  .bind(...args)
+                  .first()
+              ) {
+                isShared = true;
+                break;
+              }
+            }
+
+            if (isShared) {
+              imagePreserved = "shared";
+            } else {
+              await env.BHH_IMAGES.delete(key);
+              imageDeleted = true;
+            }
+          } else if (imageUrl) {
+            imagePreserved = "external";
+          }
+        }
+
         const res = await env.DB.prepare(`DELETE FROM ${table} WHERE id = ?`)
           .bind(id)
           .run();
         if (!res.meta || res.meta.changes === 0)
           return err("Data tidak ditemukan", 404);
-        return ok({ deleted: true, id });
+        return ok({
+          deleted: true,
+          id,
+          imageDeleted,
+          ...(imagePreserved ? { imagePreserved } : {}),
+        });
       }
 
       // ════════════════════════════════════════
@@ -237,7 +330,7 @@ export default {
           httpMetadata: { contentType: file.type },
         });
 
-        const publicUrl = `https://pub-5effb5342cd94102a9ddd904b038efb4.r2.dev/${key}`;
+        const publicUrl = `${R2_PUBLIC_BASE_URL}/${key}`;
         return created({ url: publicUrl });
       }
 
