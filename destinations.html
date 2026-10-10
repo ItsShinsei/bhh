@@ -92,24 +92,8 @@
             <p id="destCount">Memuat...</p>
           </div>
 
-          <div class="dest-continent-filter" id="continentFilter">
-            <button class="cont-btn active" data-cont="">🌍 Semua</button>
-            <button class="cont-btn" data-cont="Asia">Asia</button>
-            <button class="cont-btn" data-cont="Eropa">Eropa</button>
-            <button class="cont-btn" data-cont="Timur Tengah">Timteng</button>
-            <button class="cont-btn" data-cont="Oseania">Oseania</button>
-            <button class="cont-btn" data-cont="Amerika">Amerika</button>
-            <button class="cont-btn" data-cont="Afrika">Afrika</button>
-          </div>
-
           <div class="dest-search-wrap">
-            <input
-              class="dest-search"
-              type="search"
-              placeholder="Cari destinasi..."
-              id="destSearch"
-              autocomplete="off"
-            />
+            <div class="dest-search-field" id="destSearch"></div>
           </div>
 
           <div class="dest-list" id="destList">
@@ -159,6 +143,7 @@
     <script type="module">
       import { API_BASE, driveThumb, waLink } from "./js/config.js";
       import "./js/main.js";
+      import { createSearchFilter } from "./js/listings.js";
 
       // ── Config ──
       const WA_NUMBER = "6281331978219";
@@ -446,10 +431,21 @@
 
       // ── State ──
       let allDestinations = [];
-      let activeContinent = "";
+      let activeSearch = "";
       let activeSlug = null;
       let markers = {};
       let map;
+
+      const destSearch = createSearchFilter(
+        document.getElementById("destSearch"),
+        {
+          placeholder: "Cari destinasi...",
+          onSelect(value) {
+            activeSearch = value || "";
+            renderList();
+          },
+        },
+      );
 
       // ── Helpers ──
       const thumb = (url) => driveThumb(url, "w400") || url;
@@ -507,17 +503,12 @@
 
       // ── Filter & render list ──
       function filtered() {
-        const q = document
-          .getElementById("destSearch")
-          .value.trim()
-          .toLowerCase();
         return allDestinations.filter((d) => {
-          const matchCont = !activeContinent || d.continent === activeContinent;
           const matchQ =
-            !q ||
-            d.name.toLowerCase().includes(q) ||
-            (d.continent || "").toLowerCase().includes(q);
-          return matchCont && matchQ;
+            !activeSearch ||
+            d.name === activeSearch ||
+            d.continent === activeSearch;
+          return matchQ;
         });
       }
 
@@ -526,7 +517,7 @@
         const items = filtered();
 
         document.getElementById("destCount").textContent =
-          `${items.length} destinasi${activeContinent ? " · " + activeContinent : ""}`;
+          `${items.length} destinasi`;
 
         if (!items.length) {
           list.innerHTML = `<div class="dest-list-empty">Tidak ada destinasi ditemukan.</div>`;
@@ -792,25 +783,6 @@
         .getElementById("detailClose")
         .addEventListener("click", closeDetail);
 
-      // ── Continent filter ──
-      document
-        .getElementById("continentFilter")
-        .addEventListener("click", (e) => {
-          const btn = e.target.closest(".cont-btn");
-          if (!btn) return;
-          document
-            .querySelectorAll(".cont-btn")
-            .forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
-          activeContinent = btn.dataset.cont;
-          renderList();
-        });
-
-      // ── Search ──
-      document
-        .getElementById("destSearch")
-        .addEventListener("input", () => renderList());
-
       // ── Keyboard ──
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
@@ -836,6 +808,16 @@
         } catch {
           allDestinations = DEMO_DESTINATIONS;
         }
+        destSearch.setOptions(
+          [
+            ...new Set([
+              ...allDestinations.map((destination) => destination.name),
+              ...allDestinations.map((destination) => destination.continent),
+            ]),
+          ]
+            .filter(Boolean)
+            .sort(),
+        );
         renderList();
       }
 

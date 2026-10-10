@@ -14,6 +14,10 @@
         margin-bottom: 2rem;
       }
 
+      .gallery-search {
+        margin-bottom: 1.25rem;
+      }
+
       .masonry {
         columns: 3;
         column-gap: 1rem;
@@ -57,7 +61,7 @@
         font-family: var(--font-display);
         font-size: 0.9rem;
         font-weight: 700;
-        color: var(--text);
+        color: var(--text-light);
       }
 
       @media (max-width: 768px) {
@@ -94,14 +98,7 @@
 
       <section class="section">
         <div class="container">
-          <div class="filter-tabs" id="filterTabs">
-            <button class="filter-tab active" data-cat="all">🌍 Semua</button>
-            <button class="filter-tab" data-cat="domestik">🇮🇩 Domestik</button>
-            <button class="filter-tab" data-cat="inter">✈️ Mancanegara</button>
-            <button class="filter-tab" data-cat="cruise">🚢 Cruise</button>
-            <button class="filter-tab" data-cat="umroh">🕌 Umroh</button>
-          </div>
-
+          <div id="gallerySearch"></div>
           <div class="masonry" id="galleryGrid"></div>
         </div>
       </section>
@@ -120,7 +117,7 @@
     <script type="module">
       import { API_BASE, driveThumb } from "./js/config.js";
       import "./js/main.js";
-      import { fetchGallery } from "./js/listings.js";
+      import { createSearchFilter, fetchGallery } from "./js/listings.js";
 
       const DEMO_GALLERY = [
         {
@@ -199,6 +196,18 @@
 
       let allGallery = [];
       let currentCat = "all";
+      const galleryCategories = ["inter", "cruise", "domestik", "umroh"];
+
+      const gallerySearch = createSearchFilter(
+        document.getElementById("gallerySearch"),
+        {
+          placeholder: "Cari kategori...",
+          onSelect(category) {
+            currentCat = category || "all";
+            render();
+          },
+        },
+      );
 
       function render() {
         const grid = document.getElementById("galleryGrid");
@@ -213,6 +222,7 @@
           return;
         }
 
+        grid.style.display = "";
         grid.innerHTML = items
           .map((g) => {
             const url = driveThumb(g.image_url);
@@ -235,18 +245,7 @@
           });
         });
       }
-
-      document.getElementById("filterTabs").addEventListener("click", (e) => {
-        const tab = e.target.closest(".filter-tab");
-        if (!tab) return;
-        document
-          .querySelectorAll(".filter-tab")
-          .forEach((t) => t.classList.remove("active"));
-        tab.classList.add("active");
-        currentCat = tab.dataset.cat;
-        render();
-      });
-
+      
       function closeLightbox() {
         document.getElementById("lightbox").classList.remove("open");
         document.body.style.overflow = "";
@@ -268,6 +267,7 @@
         } catch {
           allGallery = DEMO_GALLERY;
         }
+        gallerySearch.setOptions(galleryCategories);
         render();
       }
 
