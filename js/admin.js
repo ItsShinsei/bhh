@@ -177,6 +177,33 @@ const RESOURCES = [
     endpoint: "/api/offers",
     listAll: true,
     fields: [
+      {
+        name: "category",
+        label: "Kategori Promo",
+        type: "select",
+        required: true,
+        placeholder: "Pilih kategori",
+        options: ["domestik", "inter", "cruise"],
+        hint: "Promo akan tampil di halaman kategori yang dipilih. Promo Umroh tidak menggunakan tag.",
+      },
+      {
+        name: "province",
+        label: "Provinsi (Domestik)",
+        type: "text",
+        hint: "Opsional. Isi jika promo hanya berlaku untuk provinsi tertentu.",
+      },
+      {
+        name: "country",
+        label: "Negara (Mancanegara/Cruise)",
+        type: "text",
+        hint: "Opsional. Untuk beberapa negara, pisahkan dengan koma (contoh: Malaysia, Singapore, Thailand).",
+      },
+      {
+        name: "city",
+        label: "Kota",
+        type: "text",
+        hint: "Opsional. Isi jika promo hanya berlaku untuk kota tertentu.",
+      },
       { name: "name", label: "Nama Promo", type: "text", required: true },
       { name: "description", label: "Deskripsi", type: "textarea" },
       { name: "image_url", label: "Gambar", type: "image" },
@@ -526,9 +553,13 @@ function fieldsHtml(fields) {
       if (f.type === "textarea") {
         control = `<textarea name="${f.name}" ${req}></textarea>`;
       } else if (f.type === "select") {
-        const opts = f.options
-          .map((o) => `<option value="${esc(o)}">${esc(o)}</option>`)
-          .join("");
+        const opts = [
+          ...(f.placeholder
+            ? [`<option value="" disabled selected>${esc(f.placeholder)}</option>`]
+            : []),
+          ...f.options
+            .map((o) => `<option value="${esc(o)}">${esc(o)}</option>`)
+        ].join("");
         control = `<select name="${f.name}" ${req}>${opts}</select>`;
       } else if (f.type === "number") {
         control = `<input type="number" name="${f.name}" ${f.min != null ? `min="${f.min}"` : ""} ${f.max != null ? `max="${f.max}"` : ""} ${req}>`;

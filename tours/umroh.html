@@ -31,18 +31,54 @@
 
       <section class="section">
         <div class="container">
+          <label class="listing-search">
+            <input
+              class="listing-search-input"
+              id="tourSearch"
+              type="search"
+              aria-label="Cari paket umroh dan haji"
+              placeholder="Cari paket..."
+              autocomplete="off"
+            />
+          </label>
           <!-- Package type filter -->
           <div class="mb-8">
             <p class="text-xs fw-600 uppercase ls-lg text-gold-dim mb-2">
               Jenis Paket
             </p>
             <div class="filter-tabs" id="typeTabs">
-              <button class="filter-tab active" data-val="">
+              <button
+                class="filter-tab active"
+                type="button"
+                data-val=""
+                aria-pressed="true"
+              >
                 🕌 Semua Paket
               </button>
-              <button class="filter-tab" data-val="Reguler">Reguler</button>
-              <button class="filter-tab" data-val="Plus">✨ Plus</button>
-              <button class="filter-tab" data-val="Premium">⭐ Premium</button>
+              <button
+                class="filter-tab"
+                type="button"
+                data-val="Reguler"
+                aria-pressed="false"
+              >
+                Reguler
+              </button>
+              <button
+                class="filter-tab"
+                type="button"
+                data-val="Plus"
+                aria-pressed="false"
+              >
+                ✨ Plus
+              </button>
+              <button
+                class="filter-tab"
+                type="button"
+                data-val="Premium"
+                aria-pressed="false"
+              >
+                ⭐ Premium
+              </button>
             </div>
           </div>
 
@@ -107,41 +143,60 @@
 
       const useDemo = API_BASE.includes("YOUR_WORKER");
       let activeType = null;
+      let allPackages = [];
 
       const grid = document.getElementById("grid");
       const typeTabs = document.getElementById("typeTabs");
+      const tourSearch = document.getElementById("tourSearch");
 
       typeTabs.addEventListener("click", (e) => {
         const tab = e.target.closest(".filter-tab");
         if (!tab) return;
         typeTabs
           .querySelectorAll(".filter-tab")
-          .forEach((t) => t.classList.remove("active"));
+          .forEach((t) => {
+            const active = t === tab;
+            t.classList.toggle("active", active);
+            t.setAttribute("aria-pressed", String(active));
+          });
         tab.classList.add("active");
         activeType = tab.dataset.val || null;
-        load();
+        render();
       });
 
-      async function load() {
+      function render() {
+        const query = tourSearch.value.trim().toLowerCase();
+        const packages = allPackages.filter(
+          (item) =>
+            (!activeType || item.package_type === activeType) &&
+            (!query ||
+              Object.values(item)
+                .filter((value) => typeof value === "string")
+                .join(" ")
+                .toLowerCase()
+                .includes(query)),
+        );
+
+        grid.innerHTML = packages.length
+          ? packages.map((item, i) => renderCard(item, i * 80)).join("")
+          : '<div class="state-box"><div class="state-icon">🕌</div><p class="state-title">Tidak Ada Paket</p><p class="state-desc">Coba ubah kata kunci pencarian atau filter kategori.</p></div>';
+
+        reObserve();
+      }
+
+      tourSearch.addEventListener("input", render);
+
+      async function init() {
         showLoading(grid);
         try {
-          const data = useDemo
-            ? DEMO.umroh.filter(
-                (d) => !activeType || d.package_type === activeType,
-              )
-            : await fetchUmroh(activeType);
-
-          grid.innerHTML = data.length
-            ? data.map((item, i) => renderCard(item, i * 80)).join("")
-            : '<div class="state-box"><div class="state-icon">🕌</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket untuk kategori ini sedang kami siapkan.</p></div>';
-
-          reObserve();
+          allPackages = useDemo ? DEMO.umroh : await fetchUmroh();
+          render();
         } catch {
           showError(grid);
         }
       }
 
-      load();
+      init();
     </script>
   </body>
 </html>

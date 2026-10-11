@@ -7,7 +7,7 @@
      GET    /api/inter     ?country=Jepang ?city=Tokyo     ?all=1
      GET    /api/cruise                                    ?all=1
      GET    /api/umroh     ?type=Reguler|Plus|Premium       ?all=1
-     GET    /api/offers                                    ?all=1
+     GET    /api/offers       ?category=domestik|inter|cruise ?all=1
      GET    /api/reviews
      GET    /api/gallery   ?category=domestik|inter|cruise|umroh
 
@@ -169,6 +169,10 @@ const EDITABLE_COLUMNS = {
     "expires",
   ],
   offers: [
+    "category",
+    "province",
+    "country",
+    "city",
     "name",
     "description",
     "image_url",
@@ -225,6 +229,12 @@ export default {
         const body = await request.json().catch(() => null);
         if (!body || typeof body !== "object")
           return err("Body JSON tidak valid", 400);
+        if (
+          resource === "offers" &&
+          body.category !== undefined &&
+          !["domestik", "inter", "cruise"].includes(body.category)
+        )
+          return err("Kategori promo harus domestik, inter, atau cruise", 400);
 
         const setCols = allowed.filter((c) => body[c] !== undefined);
         if (!setCols.length) return err("Tidak ada field untuk diupdate", 400);
@@ -698,13 +708,31 @@ export default {
       if (path === "/api/offers") {
         if (request.method === "POST") {
           const body = await request.json();
-          const { name, description, image_url, badge, whatsapp_msg, expires } =
-            body;
-          if (!name) return err("Missing required field: name", 400);
+          const {
+            category,
+            province,
+            country,
+            city,
+            name,
+            description,
+            image_url,
+            badge,
+            whatsapp_msg,
+            expires,
+          } = body;
+          if (!name || !category)
+            return err("Missing required fields: name, category", 400);
+          if (!["domestik", "inter", "cruise"].includes(category))
+            return err("Kategori promo harus domestik, inter, atau cruise", 400);
           const res = await env.DB.prepare(
-            `INSERT INTO offers (name, description, image_url, badge, whatsapp_msg, expires) VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO offers (category, province, country, city, name, description, image_url, badge, whatsapp_msg, expires)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           )
             .bind(
+              category,
+              province || "",
+              country || "",
+              city || "",
               name,
               description || "",
               image_url || "",
@@ -715,11 +743,21 @@ export default {
             .run();
           return created({ id: res.meta.last_row_id, ...body });
         }
-        const q =
+        let q =
           p.get("all") === "1"
-            ? `SELECT * FROM offers ORDER BY created_at DESC`
-            : `SELECT * FROM offers WHERE ${ALIVE} ORDER BY created_at DESC`;
-        const { results } = await env.DB.prepare(q).all();
+            ? `SELECT * FROM offers WHERE 1=1`
+            : `SELECT * FROM offers WHERE ${ALIVE}`;
+        const args = [];
+        for (const field of ["category", "province", "country", "city"]) {
+          if (p.get(field)) {
+            q += ` AND ${field} = ?`;
+            args.push(p.get(field));
+          }
+        }
+        q += ` ORDER BY created_at DESC`;
+        const { results } = await env.DB.prepare(q)
+          .bind(...args)
+          .all();
         return ok(results);
       }
 

@@ -15,7 +15,29 @@
       }
 
       .gallery-search {
+        display: block;
         margin-bottom: 1.25rem;
+        width: min(420px, 100%);
+      }
+
+      .gallery-search input {
+        width: 100%;
+        min-width: 0;
+        padding: 10px 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-card);
+        color: var(--text);
+        font: inherit;
+        outline: none;
+        transition:
+          border-color var(--fast),
+          box-shadow var(--fast);
+      }
+
+      .gallery-search input:focus {
+        border-color: var(--purple-700);
+        box-shadow: 0 0 0 4px rgba(var(--purple-rgb), 0.08);
       }
 
       .masonry {
@@ -98,7 +120,61 @@
 
       <section class="section">
         <div class="container">
-          <div id="gallerySearch"></div>
+          <label class="gallery-search">
+            <input
+              id="gallerySearch"
+              type="search"
+              aria-label="Cari foto galeri"
+              placeholder="Cari foto..."
+              autocomplete="off"
+            />
+          </label>
+          <div
+            class="filter-tabs gallery-filter"
+            id="galleryTabs"
+            aria-label="Filter kategori galeri"
+          >
+            <button
+              class="filter-tab active"
+              type="button"
+              data-cat="all"
+              aria-pressed="true"
+            >
+              Semua
+            </button>
+            <button
+              class="filter-tab"
+              type="button"
+              data-cat="inter"
+              aria-pressed="false"
+            >
+              Internasional
+            </button>
+            <button
+              class="filter-tab"
+              type="button"
+              data-cat="cruise"
+              aria-pressed="false"
+            >
+              Cruise
+            </button>
+            <button
+              class="filter-tab"
+              type="button"
+              data-cat="domestik"
+              aria-pressed="false"
+            >
+              Domestik
+            </button>
+            <button
+              class="filter-tab"
+              type="button"
+              data-cat="umroh"
+              aria-pressed="false"
+            >
+              Umroh
+            </button>
+          </div>
           <div class="masonry" id="galleryGrid"></div>
         </div>
       </section>
@@ -117,7 +193,7 @@
     <script type="module">
       import { API_BASE, driveThumb } from "./js/config.js";
       import "./js/main.js";
-      import { createSearchFilter, fetchGallery } from "./js/listings.js";
+      import { fetchGallery } from "./js/listings.js";
 
       const DEMO_GALLERY = [
         {
@@ -196,29 +272,31 @@
 
       let allGallery = [];
       let currentCat = "all";
-      const galleryCategories = ["inter", "cruise", "domestik", "umroh"];
-
-      const gallerySearch = createSearchFilter(
-        document.getElementById("gallerySearch"),
-        {
-          placeholder: "Cari kategori...",
-          onSelect(category) {
-            currentCat = category || "all";
-            render();
-          },
-        },
-      );
+      const galleryCategoryLabels = {
+        inter: "internasional",
+        cruise: "cruise",
+        domestik: "domestik",
+        umroh: "umroh",
+      };
+      const gallerySearch = document.getElementById("gallerySearch");
+      const galleryTabs = document.getElementById("galleryTabs");
 
       function render() {
         const grid = document.getElementById("galleryGrid");
+        const query = gallerySearch.value.trim().toLowerCase();
         const items = allGallery.filter(
-          (g) => currentCat === "all" || g.category === currentCat,
+          (g) =>
+            (currentCat === "all" || g.category === currentCat) &&
+            (!query ||
+              `${g.title || ""} ${galleryCategoryLabels[g.category] || g.category || ""}`
+                .toLowerCase()
+                .includes(query)),
         );
 
         if (!items.length) {
           grid.style.display = "block";
           grid.innerHTML =
-            '<div class="state-box"><div class="state-icon">📷</div><p class="state-desc">Belum ada foto untuk kategori ini.</p></div>';
+            `<div class="state-box"><div class="state-icon">📷</div><p class="state-desc">${query ? "Tidak ada foto yang cocok." : "Belum ada foto untuk kategori ini."}</p></div>`;
           return;
         }
 
@@ -245,6 +323,20 @@
           });
         });
       }
+
+      gallerySearch.addEventListener("input", render);
+      galleryTabs.addEventListener("click", (event) => {
+        const tab = event.target.closest(".filter-tab");
+        if (!tab) return;
+
+        currentCat = tab.dataset.cat;
+        galleryTabs.querySelectorAll(".filter-tab").forEach((button) => {
+          const active = button === tab;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+        render();
+      });
       
       function closeLightbox() {
         document.getElementById("lightbox").classList.remove("open");
@@ -267,7 +359,6 @@
         } catch {
           allGallery = DEMO_GALLERY;
         }
-        gallerySearch.setOptions(galleryCategories);
         render();
       }
 

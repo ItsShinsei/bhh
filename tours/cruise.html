@@ -31,8 +31,23 @@
 
       <section class="section">
         <div class="container">
+          <label class="listing-search">
+            <input
+              class="listing-search-input"
+              id="cruiseSearch"
+              type="search"
+              aria-label="Cari paket cruise"
+              placeholder="Cari paket cruise..."
+              autocomplete="off"
+            />
+          </label>
           <div class="grid-auto" id="grid"></div>
           <div class="pager" id="pager"></div>
+          <div class="section-header reveal mt-8">
+            <p class="eyebrow">🎁 Promo</p>
+            <h2>Promo Cruise</h2>
+          </div>
+          <div class="grid-auto" id="offersGrid"></div>
         </div>
       </section>
 
@@ -89,20 +104,74 @@
         showError,
         reObserve,
         DEMO,
+        fetchOffers,
+        renderOfferCard,
       } from "../js/listings.js";
+
+      const search = document.getElementById("cruiseSearch");
+      const offersGrid = document.getElementById("offersGrid");
+      let allCruise = [];
+      let allOffers = [];
+      let offersError = false;
+
+      function render() {
+        const query = search.value.trim().toLowerCase();
+        const items = allCruise.filter(
+          (item) =>
+            !query ||
+            Object.values(item)
+              .filter((value) => typeof value === "string")
+              .join(" ")
+              .toLowerCase()
+              .includes(query),
+        );
+        const grid = document.getElementById("grid");
+        grid.innerHTML = items.length
+          ? items.map((item, i) => renderCard(item, i * 80)).join("")
+          : !query
+            ? '<div class="state-box"><div class="state-icon">🚢</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket cruise sedang kami siapkan. Hubungi kami untuk info lebih lanjut.</p></div>'
+            : '<div class="state-box"><div class="state-icon">🚢</div><p class="state-title">Tidak Ada Paket</p><p class="state-desc">Coba ubah kata kunci pencarian.</p></div>';
+        const matchingOffers = allOffers.filter(
+          (offer) =>
+            !query ||
+            Object.values(offer)
+              .filter((value) => typeof value === "string")
+              .join(" ")
+              .toLowerCase()
+              .includes(query),
+        );
+        if (!offersError) {
+          offersGrid.innerHTML = matchingOffers.length
+            ? matchingOffers
+                .map((offer, i) => renderOfferCard(offer, i * 80))
+                .join("")
+            : `<div class="state-box"><p class="state-desc">${query ? "Tidak ada promo yang cocok dengan pencarian ini." : "Belum ada promo cruise."}</p></div>`;
+        }
+        reObserve();
+      }
+
+      search.addEventListener("input", render);
 
       async function init() {
         const grid = document.getElementById("grid");
         showLoading(grid);
+        showLoading(offersGrid);
         const useDemo = API_BASE.includes("YOUR_WORKER");
         try {
-          const data = useDemo ? DEMO.cruise : await fetchCruise();
-          grid.innerHTML = data.length
-            ? data.map((item, i) => renderCard(item, i * 80)).join("")
-            : '<div class="state-box"><div class="state-icon">🚢</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket cruise sedang kami siapkan. Hubungi kami untuk info lebih lanjut.</p></div>';
-          reObserve();
+          allCruise = useDemo ? DEMO.cruise : await fetchCruise();
+          render();
         } catch {
           showError(grid);
+          return;
+        }
+        if (!useDemo) {
+          try {
+            allOffers = await fetchOffers("cruise");
+            render();
+          } catch {
+            offersError = true;
+            showError(offersGrid);
+          }
         }
       }
 

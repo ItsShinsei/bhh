@@ -43,7 +43,12 @@ export const fetchInter = (country, city) => {
 export const fetchCruise = () => get("/api/cruise");
 export const fetchUmroh = (type) =>
   get(type ? `/api/umroh?type=${encodeURIComponent(type)}` : "/api/umroh");
-export const fetchOffers = () => get("/api/offers");
+export const fetchOffers = (category) => {
+  const params = new URLSearchParams();
+  if (category) params.set("category", category);
+  const qs = params.toString();
+  return get(qs ? `/api/offers?${qs}` : "/api/offers");
+};
 export const fetchReviews = () => get("/api/reviews");
 export const fetchGallery = (cat) =>
   get(cat ? `/api/gallery?category=${cat}` : "/api/gallery");
@@ -144,6 +149,7 @@ export function renderCard(item, delay = 0) {
 // ══════════════════════════════════════════
 export function renderOfferCard(o, delay = 0) {
   const imgUrl = imageUrl(o.image_url);
+  const destination = [o.province || o.country, o.city].filter(Boolean).join(" · ");
   const msg =
     o.whatsapp_msg ||
     `Halo! Saya tertarik dengan penawaran ${o.name}. Bisa info lebih lanjut?`;
@@ -160,6 +166,7 @@ export function renderOfferCard(o, delay = 0) {
           <div class="offer-name">${o.name}</div>
           ${o.badge ? `<span class="offer-pill">${o.badge}</span>` : ""}
         </div>
+        ${destination ? `<div class="card-dest">${destination}</div>` : ""}
         ${o.description ? `<p class="offer-desc">${o.description}</p>` : ""}
         <div class="offer-footer">
           <span class="offer-expiry">${expiryLabel(o.expires)}</span>

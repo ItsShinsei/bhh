@@ -31,6 +31,16 @@
 
       <section class="section">
         <div class="container">
+          <label class="listing-search">
+            <input
+              class="listing-search-input"
+              id="tourSearch"
+              type="search"
+              aria-label="Cari paket domestik"
+              placeholder="Cari paket..."
+              autocomplete="off"
+            />
+          </label>
           <!-- Province filter (built dynamically from meta API) -->
           <div class="mb-4">
             <p class="text-xs fw-600 uppercase ls-lg text-gold-dim mb-2">
@@ -50,6 +60,11 @@
           <div class="pager pager-top" id="pagerTop"></div>
           <div class="grid-auto" id="grid"></div>
           <div class="pager" id="pager"></div>
+          <div class="section-header reveal mt-8">
+            <p class="eyebrow">🎁 Promo</p>
+            <h2>Promo Domestik</h2>
+          </div>
+          <div class="grid-auto" id="offersGrid"></div>
         </div>
       </section>
 
@@ -69,7 +84,8 @@
         showError,
         reObserve,
         DEMO,
-        createSearchFilter,
+        fetchOffers,
+        renderOfferCard,
       } from "../js/listings.js";
 
       const useDemo = API_BASE.includes("YOUR_WORKER");
@@ -84,7 +100,38 @@
       const grid = document.getElementById("grid");
       const pagerTop = document.getElementById("pagerTop");
       const pager = document.getElementById("pager");
+      const offersGrid = document.getElementById("offersGrid");
       const cityWrap = document.getElementById("cityFilterWrap");
+      const provinceTabs = document.getElementById("provinceTabs");
+      const cityTabs = document.getElementById("cityTabs");
+      const tourSearch = document.getElementById("tourSearch");
+      let allOffers = [];
+      let offersError = false;
+
+      function renderTabs(container, options, activeValue, onSelect) {
+        container.replaceChildren();
+        const tabs = [
+          { value: "", label: "Semua" },
+          ...options.map((value) => ({ value, label: value })),
+        ];
+        tabs.forEach(({ value, label }) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `filter-tab${value === activeValue ? " active" : ""}`;
+          button.dataset.val = value;
+          button.setAttribute("aria-pressed", String(value === activeValue));
+          button.textContent = label;
+          button.addEventListener("click", () => {
+            container.querySelectorAll(".filter-tab").forEach((tab) => {
+              const active = tab === button;
+              tab.classList.toggle("active", active);
+              tab.setAttribute("aria-pressed", String(active));
+            });
+            onSelect(value || null);
+          });
+          container.append(button);
+        });
+      }
 
       function splitLocations(str) {
         if (!str) return [];
@@ -98,37 +145,19 @@
         ];
       }
 
-      const provinceFilter = createSearchFilter(
-        document.getElementById("provinceTabs"),
-        {
-          placeholder: "Cari provinsi...",
-          onSelect(val) {
-            activeProvince = val;
-            activeCity = null;
-            cityFilter.clear(true);
-            buildCityOptions();
-            load();
-          },
-        },
-      );
-
-      const cityFilter = createSearchFilter(
-        document.getElementById("cityTabs"),
-        {
-          placeholder: "Cari kota...",
-          onSelect(val) {
-            activeCity = val;
-            currentPage = 1;
-            load();
-          },
-        },
-      );
-
       function buildProvinceOptions() {
         const provinces = [
-          ...new Set(allMeta.flatMap((m) => splitLocations(m.province))),
+          ...new Set([
+            ...allMeta.flatMap((m) => splitLocations(m.province)),
+            ...allOffers.flatMap((offer) => splitLocations(offer.province)),
+          ]),
         ].sort();
-        provinceFilter.setOptions(provinces);
+        renderTabs(provinceTabs, provinces, activeProvince || "", (val) => {
+          activeProvince = val;
+          activeCity = null;
+          buildCityOptions();
+          load();
+        });
       }
 
       function buildCityOptions() {
@@ -142,7 +171,16 @@
               .filter((m) =>
                 splitLocations(m.province).includes(activeProvince),
               )
-              .flatMap((m) => splitLocations(m.city)),
+              .flatMap((m) => splitLocations(m.city))
+              .concat(
+                allOffers
+                  .filter(
+                    (offer) =>
+                      !offer.province ||
+                      splitLocations(offer.province).includes(activeProvince),
+                  )
+                  .flatMap((offer) => splitLocations(offer.city)),
+              ),
           ),
         ].sort();
 
@@ -151,20 +189,61 @@
           return;
         }
         cityWrap.style.display = "";
-        cityFilter.setOptions(cities);
+        renderTabs(cityTabs, cities, activeCity || "", (val) => {
+          activeCity = val;
+          currentPage = 1;
+          load();
+        });
       }
 
       function renderPage(page) {
+        const query = tourSearch.value.trim().toLowerCase();
+        const filteredData = allData.filter((item) => {
+          return (
+            !query ||
+            Object.values(item)
+              .filter((value) => typeof value === "string")
+              .join(" ")
+              .toLowerCase()
+              .includes(query)
+          );
+        });
         const {
           pageItems,
           page: p,
           totalPages,
-        } = paginate(allData, page, PAGE_SIZE);
+        } = paginate(filteredData, page, PAGE_SIZE);
         currentPage = p;
 
         grid.innerHTML = pageItems.length
           ? pageItems.map((item, i) => renderCard(item, i * 75)).join("")
-          : '<div class="state-box"><div class="state-icon">🇮🇩</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket untuk destinasi ini sedang kami siapkan.</p></div>';
+          : query
+            ? '<div class="state-box"><div class="state-icon">🇮🇩</div><p class="state-title">Tidak Ada Paket</p><p class="state-desc">Coba ubah kata kunci pencarian.</p></div>'
+            : '<div class="state-box"><div class="state-icon">🇮🇩</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket untuk destinasi ini sedang kami siapkan.</p></div>';
+
+        const matchingOffers = allOffers.filter((offer) => {
+          const matchesProvince =
+            !activeProvince ||
+            !offer.province ||
+            splitLocations(offer.province).includes(activeProvince);
+          const matchesCity =
+            !activeCity || !offer.city || splitLocations(offer.city).includes(activeCity);
+          const matchesSearch =
+            !query ||
+            Object.values(offer)
+              .filter((value) => typeof value === "string")
+              .join(" ")
+              .toLowerCase()
+              .includes(query);
+          return matchesProvince && matchesCity && matchesSearch;
+        });
+        if (!offersError) {
+          offersGrid.innerHTML = matchingOffers.length
+            ? matchingOffers
+                .map((offer, i) => renderOfferCard(offer, i * 75))
+                .join("")
+            : `<div class="state-box"><p class="state-desc">${query ? "Tidak ada promo yang cocok dengan pencarian ini." : "Belum ada promo domestik untuk filter lokasi ini."}</p></div>`;
+        }
 
         const changePage = (newPage) => renderPage(newPage);
         renderPager(pagerTop, currentPage, totalPages, changePage);
@@ -193,12 +272,25 @@
         }
       }
 
+      tourSearch.addEventListener("input", () => {
+        currentPage = 1;
+        renderPage(currentPage);
+      });
+
       async function init() {
         showLoading(grid);
+        showLoading(offersGrid);
         try {
           allMeta = useDemo ? DEMO.domestik : await fetchMetaDomestik();
         } catch {
           allMeta = [];
+        }
+
+        try {
+          allOffers = useDemo ? [] : await fetchOffers("domestik");
+        } catch {
+          offersError = true;
+          showError(offersGrid);
         }
 
         buildProvinceOptions();

@@ -169,6 +169,62 @@
             <h2>Paket Terpopuler</h2>
             <p>Pilihan terbaik dari semua kategori wisata kami.</p>
           </div>
+          <label class="listing-search">
+            <input
+              class="listing-search-input"
+              id="featuredSearch"
+              type="search"
+              aria-label="Cari paket unggulan"
+              placeholder="Cari paket unggulan..."
+              autocomplete="off"
+            />
+          </label>
+          <div
+            class="filter-tabs"
+            id="featuredTabs"
+            aria-label="Filter kategori paket unggulan"
+          >
+            <button
+              class="filter-tab active"
+              type="button"
+              data-cat=""
+              aria-pressed="true"
+            >
+              Semua
+            </button>
+            <button
+              class="filter-tab"
+              type="button"
+              data-cat="domestik"
+              aria-pressed="false"
+            >
+              Domestik
+            </button>
+            <button
+              class="filter-tab"
+              type="button"
+              data-cat="inter"
+              aria-pressed="false"
+            >
+              Mancanegara
+            </button>
+            <button
+              class="filter-tab"
+              type="button"
+              data-cat="cruise"
+              aria-pressed="false"
+            >
+              Cruise
+            </button>
+            <button
+              class="filter-tab"
+              type="button"
+              data-cat="umroh"
+              aria-pressed="false"
+            >
+              Umroh &amp; Haji
+            </button>
+          </div>
           <div class="grid-auto tour-listing-grid" id="featuredGrid"></div>
         </div>
       </section>
@@ -212,6 +268,49 @@
       const useDemo = API_BASE.includes("YOUR_WORKER");
       const featGrid = document.getElementById("featuredGrid");
       const offGrid = document.getElementById("offersGrid");
+      const featuredSearch = document.getElementById("featuredSearch");
+      const featuredTabs = document.getElementById("featuredTabs");
+      let featuredPackages = [];
+      let activeCategory = "";
+
+      function renderFeatured() {
+        const query = featuredSearch.value.trim().toLowerCase();
+        const items = featuredPackages.filter((item) => {
+          const category = item._cat || "";
+          const categoryLabel = category === "inter" ? "mancanegara" : category;
+          const searchable = [
+            ...Object.values(item).filter((value) => typeof value === "string"),
+            categoryLabel,
+          ]
+            .join(" ")
+            .toLowerCase();
+          return (
+            (!activeCategory || category === activeCategory) &&
+            (!query || searchable.includes(query))
+          );
+        });
+
+        featGrid.innerHTML = items.length
+          ? items.map((item, i) => renderCard(item, i * 70)).join("")
+          : !query && !activeCategory
+            ? '<div class="state-box"><p class="state-desc">Belum ada paket tersedia.</p></div>'
+            : '<div class="state-box"><p class="state-desc">Tidak ada paket yang cocok dengan pencarian ini.</p></div>';
+        reObserve();
+      }
+
+      featuredSearch.addEventListener("input", renderFeatured);
+      featuredTabs.addEventListener("click", (event) => {
+        const tab = event.target.closest(".filter-tab");
+        if (!tab) return;
+
+        activeCategory = tab.dataset.cat;
+        featuredTabs.querySelectorAll(".filter-tab").forEach((button) => {
+          const active = button === tab;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+        renderFeatured();
+      });
 
       showLoading(featGrid);
       showLoading(offGrid);
@@ -248,14 +347,12 @@
             offers = off;
           }
 
-          featGrid.innerHTML = featured.length
-            ? featured.map((item, i) => renderCard(item, i * 70)).join("")
-            : '<div class="state-box"><p class="state-desc">Belum ada paket tersedia.</p></div>';
+          featuredPackages = featured;
+          renderFeatured();
 
           allOffers = offers;
           renderOffersPage(1);
 
-          reObserve();
         } catch {
           showError(featGrid);
           showError(offGrid);

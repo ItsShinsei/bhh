@@ -105,14 +105,18 @@
   flex-shrink: 0;
 }
 .dest-search-field {
+  display: block;
   width: 100%;
 }
-.dest-search-field .combobox {
-  max-width: none;
-  margin-bottom: 0;
+.dest-filter-tabs {
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.65rem 1.25rem;
+  border-bottom: 1px solid var(--border);
 }
-.dest-search-field .combobox-list {
-  z-index: 30;
+.dest-filter-tabs .filter-tab {
+  padding: 6px 10px;
+  font-size: 0.72rem;
 }
 
 /* Destination list */
@@ -570,9 +574,13 @@
     padding: 0 1rem 0.7rem;
   }
 
-  .dest-search-field .combobox-control input {
+  .dest-search-field .listing-search-input {
     min-height: 46px;
     font-size: 0.92rem;
+  }
+
+  .dest-filter-tabs {
+    padding: 0 1rem 0.7rem;
   }
 
   .dest-list {

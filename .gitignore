@@ -1,9 +1,12 @@
-schema.sql
+database/*
+!database/schema.sql
+!database/migrations/
+database/migrations/*
+!database/migrations/20261011_add_offer_targeting.sql
 .claude
-.vscode
 opencode.json
 worker.js
-.vscode
+.vscode/
 .token-optimizer
 .opencode
 hooks

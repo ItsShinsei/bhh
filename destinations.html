@@ -93,8 +93,22 @@
           </div>
 
           <div class="dest-search-wrap">
-            <div class="dest-search-field" id="destSearch"></div>
+            <label class="dest-search-field">
+              <input
+                class="listing-search-input"
+                id="destSearch"
+                type="search"
+                aria-label="Cari destinasi"
+                placeholder="Cari destinasi..."
+                autocomplete="off"
+              />
+            </label>
           </div>
+          <div
+            class="filter-tabs dest-filter-tabs"
+            id="destTabs"
+            aria-label="Filter benua destinasi"
+          ></div>
 
           <div class="dest-list" id="destList">
             <div class="dest-list-empty">Memuat destinasi...</div>
@@ -143,7 +157,6 @@
     <script type="module">
       import { API_BASE, driveThumb, waLink } from "./js/config.js";
       import "./js/main.js";
-      import { createSearchFilter } from "./js/listings.js";
 
       // ── Config ──
       const WA_NUMBER = "6281331978219";
@@ -432,20 +445,40 @@
       // ── State ──
       let allDestinations = [];
       let activeSearch = "";
+      let activeContinent = "";
       let activeSlug = null;
       let markers = {};
       let map;
 
-      const destSearch = createSearchFilter(
-        document.getElementById("destSearch"),
-        {
-          placeholder: "Cari destinasi...",
-          onSelect(value) {
-            activeSearch = value || "";
+      const destSearch = document.getElementById("destSearch");
+      const destTabs = document.getElementById("destTabs");
+
+      function renderContinentTabs() {
+        const continents = [
+          ...new Set(allDestinations.map((destination) => destination.continent)),
+        ]
+          .filter(Boolean)
+          .sort();
+        destTabs.replaceChildren();
+
+        const tabs = [
+          { value: "", label: "Semua" },
+          ...continents.map((value) => ({ value, label: value })),
+        ];
+        tabs.forEach(({ value, label }) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `filter-tab${value === activeContinent ? " active" : ""}`;
+          button.setAttribute("aria-pressed", String(value === activeContinent));
+          button.textContent = label;
+          button.addEventListener("click", () => {
+            activeContinent = value;
+            renderContinentTabs();
             renderList();
-          },
-        },
-      );
+          });
+          destTabs.append(button);
+        });
+      }
 
       // ── Helpers ──
       const thumb = (url) => driveThumb(url, "w400") || url;
@@ -503,12 +536,18 @@
 
       // ── Filter & render list ──
       function filtered() {
+        const query = activeSearch.trim().toLowerCase();
         return allDestinations.filter((d) => {
-          const matchQ =
-            !activeSearch ||
-            d.name === activeSearch ||
-            d.continent === activeSearch;
-          return matchQ;
+          const matchesContinent =
+            !activeContinent || d.continent === activeContinent;
+          const matchesSearch =
+            !query ||
+            [d.name, d.continent, d.country, d.slug, d.type, d.badge]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase()
+              .includes(query);
+          return matchesContinent && matchesSearch;
         });
       }
 
@@ -521,6 +560,8 @@
 
         if (!items.length) {
           list.innerHTML = `<div class="dest-list-empty">Tidak ada destinasi ditemukan.</div>`;
+          placeMarkers([]);
+          document.getElementById("destDetail").classList.remove("open");
           return;
         }
 
@@ -639,6 +680,11 @@
         document
           .getElementById("detailClose")
           .addEventListener("click", closeDetail);
+
+        destSearch.addEventListener("input", () => {
+          activeSearch = destSearch.value;
+          renderList();
+        });
 
         // Body
         const photos = dest.photos || [];
@@ -808,16 +854,7 @@
         } catch {
           allDestinations = DEMO_DESTINATIONS;
         }
-        destSearch.setOptions(
-          [
-            ...new Set([
-              ...allDestinations.map((destination) => destination.name),
-              ...allDestinations.map((destination) => destination.continent),
-            ]),
-          ]
-            .filter(Boolean)
-            .sort(),
-        );
+        renderContinentTabs();
         renderList();
       }
 
