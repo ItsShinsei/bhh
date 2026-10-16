@@ -226,6 +226,7 @@
             </button>
           </div>
           <div class="grid-auto tour-listing-grid" id="featuredGrid"></div>
+          <div class="pager" id="featuredPager"></div>
         </div>
       </section>
 
@@ -263,17 +264,22 @@
         showError,
         reObserve,
         DEMO,
+        paginate,
+        renderPager,
       } from "../js/listings.js";
 
       const useDemo = API_BASE.includes("YOUR_WORKER");
       const featGrid = document.getElementById("featuredGrid");
+      const featuredPager = document.getElementById("featuredPager");
       const offGrid = document.getElementById("offersGrid");
       const featuredSearch = document.getElementById("featuredSearch");
       const featuredTabs = document.getElementById("featuredTabs");
       let featuredPackages = [];
       let activeCategory = "";
+      let currentFeaturedPage = 1;
+      const FEATURED_PAGE_SIZE = 6;
 
-      function renderFeatured() {
+      function renderFeatured(page = currentFeaturedPage) {
         const query = featuredSearch.value.trim().toLowerCase();
         const items = featuredPackages.filter((item) => {
           const category = item._cat || "";
@@ -290,20 +296,31 @@
           );
         });
 
-        featGrid.innerHTML = items.length
-          ? items.map((item, i) => renderCard(item, i * 70)).join("")
+        const {
+          pageItems,
+          page: currentPage,
+          totalPages,
+        } = paginate(items, page, FEATURED_PAGE_SIZE);
+        currentFeaturedPage = currentPage;
+        featGrid.innerHTML = pageItems.length
+          ? pageItems.map((item, i) => renderCard(item, i * 70)).join("")
           : !query && !activeCategory
             ? '<div class="state-box"><p class="state-desc">Belum ada paket tersedia.</p></div>'
             : '<div class="state-box"><p class="state-desc">Tidak ada paket yang cocok dengan pencarian ini.</p></div>';
+        renderPager(featuredPager, currentPage, totalPages, renderFeatured);
         reObserve();
       }
 
-      featuredSearch.addEventListener("input", renderFeatured);
+      featuredSearch.addEventListener("input", () => {
+        currentFeaturedPage = 1;
+        renderFeatured();
+      });
       featuredTabs.addEventListener("click", (event) => {
         const tab = event.target.closest(".filter-tab");
         if (!tab) return;
 
         activeCategory = tab.dataset.cat;
+        currentFeaturedPage = 1;
         featuredTabs.querySelectorAll(".filter-tab").forEach((button) => {
           const active = button === tab;
           button.classList.toggle("active", active);
@@ -358,8 +375,6 @@
           showError(offGrid);
         }
       }
-      import { paginate, renderPager } from "../js/listings.js";
-
       const OFFERS_PAGE_SIZE = 6;
       let allOffers = [];
       const offersPagerTop = document.getElementById("offersPagerTop");

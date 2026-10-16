@@ -135,6 +135,8 @@
       import {
         fetchUmroh,
         renderCard,
+        paginate,
+        renderPager,
         showLoading,
         showError,
         reObserve,
@@ -142,10 +144,13 @@
       } from "../js/listings.js";
 
       const useDemo = API_BASE.includes("YOUR_WORKER");
+      const PAGE_SIZE = 6;
       let activeType = null;
       let allPackages = [];
+      let currentPage = 1;
 
       const grid = document.getElementById("grid");
+      const pager = document.getElementById("pager");
       const typeTabs = document.getElementById("typeTabs");
       const tourSearch = document.getElementById("tourSearch");
 
@@ -161,10 +166,11 @@
           });
         tab.classList.add("active");
         activeType = tab.dataset.val || null;
+        currentPage = 1;
         render();
       });
 
-      function render() {
+      function render(page = currentPage) {
         const query = tourSearch.value.trim().toLowerCase();
         const packages = allPackages.filter(
           (item) =>
@@ -177,14 +183,24 @@
                 .includes(query)),
         );
 
-        grid.innerHTML = packages.length
-          ? packages.map((item, i) => renderCard(item, i * 80)).join("")
+        const {
+          pageItems,
+          page: p,
+          totalPages,
+        } = paginate(packages, page, PAGE_SIZE);
+        currentPage = p;
+        grid.innerHTML = pageItems.length
+          ? pageItems.map((item, i) => renderCard(item, i * 80)).join("")
           : '<div class="state-box"><div class="state-icon">🕌</div><p class="state-title">Tidak Ada Paket</p><p class="state-desc">Coba ubah kata kunci pencarian atau filter kategori.</p></div>';
 
+        renderPager(pager, p, totalPages, render);
         reObserve();
       }
 
-      tourSearch.addEventListener("input", render);
+      tourSearch.addEventListener("input", () => {
+        currentPage = 1;
+        render();
+      });
 
       async function init() {
         showLoading(grid);

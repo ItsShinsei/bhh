@@ -100,6 +100,8 @@
       import {
         fetchCruise,
         renderCard,
+        paginate,
+        renderPager,
         showLoading,
         showError,
         reObserve,
@@ -109,12 +111,16 @@
       } from "../js/listings.js";
 
       const search = document.getElementById("cruiseSearch");
+      const grid = document.getElementById("grid");
+      const pager = document.getElementById("pager");
       const offersGrid = document.getElementById("offersGrid");
+      const PAGE_SIZE = 6;
       let allCruise = [];
       let allOffers = [];
       let offersError = false;
+      let currentPage = 1;
 
-      function render() {
+      function render(page = currentPage) {
         const query = search.value.trim().toLowerCase();
         const items = allCruise.filter(
           (item) =>
@@ -125,12 +131,18 @@
               .toLowerCase()
               .includes(query),
         );
-        const grid = document.getElementById("grid");
-        grid.innerHTML = items.length
-          ? items.map((item, i) => renderCard(item, i * 80)).join("")
+        const {
+          pageItems,
+          page: p,
+          totalPages,
+        } = paginate(items, page, PAGE_SIZE);
+        currentPage = p;
+        grid.innerHTML = pageItems.length
+          ? pageItems.map((item, i) => renderCard(item, i * 80)).join("")
           : !query
             ? '<div class="state-box"><div class="state-icon">🚢</div><p class="state-title">Segera Hadir</p><p class="state-desc">Paket cruise sedang kami siapkan. Hubungi kami untuk info lebih lanjut.</p></div>'
             : '<div class="state-box"><div class="state-icon">🚢</div><p class="state-title">Tidak Ada Paket</p><p class="state-desc">Coba ubah kata kunci pencarian.</p></div>';
+        renderPager(pager, p, totalPages, render);
         const matchingOffers = allOffers.filter(
           (offer) =>
             !query ||
@@ -150,10 +162,12 @@
         reObserve();
       }
 
-      search.addEventListener("input", render);
+      search.addEventListener("input", () => {
+        currentPage = 1;
+        render();
+      });
 
       async function init() {
-        const grid = document.getElementById("grid");
         showLoading(grid);
         showLoading(offersGrid);
         const useDemo = API_BASE.includes("YOUR_WORKER");
