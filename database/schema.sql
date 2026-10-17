@@ -48,7 +48,7 @@ CREATE TABLE listings_domestik (
 );
 
 -- ──────────────────────────────────────────
---  INTER (Mancanegara)
+--  INTER (internasional)
 --  Extra: country, city
 --  Filter page by: country, then city
 -- ──────────────────────────────────────────

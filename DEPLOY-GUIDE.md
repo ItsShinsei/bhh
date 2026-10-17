@@ -82,7 +82,7 @@ GET /api/domestik                         → semua paket domestik
 GET /api/domestik?province=Bali           → filter by provinsi
 GET /api/domestik?province=Bali&city=Ubud → filter by provinsi + kota
 
-GET /api/inter                            → semua paket mancanegara
+GET /api/inter                            → semua paket internasional
 GET /api/inter?country=Jepang             → filter by negara
 GET /api/inter?country=Jepang&city=Tokyo  → filter by negara + kota
 

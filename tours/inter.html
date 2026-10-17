@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wisata Mancanegara — Bee Happy Holiday</title>
+    <title>Wisata Internasional — Bee Happy Holiday</title>
     <link rel="icon" type="image/svg+xml" href="../assets/images/BHH.svg" />
     <link rel="stylesheet" href="../css/main.css" />
   </head>
@@ -16,9 +16,9 @@
           <div class="breadcrumb">
             <a href="../index.html">Beranda</a><span>›</span>
             <a href="index.html">Paket Wisata</a><span>›</span>
-            <span>Wisata Mancanegara</span>
+            <span>Wisata Internasional</span>
           </div>
-          <p class="eyebrow mb-2">✈️ Wisata Mancanegara</p>
+          <p class="eyebrow mb-2">✈️ Wisata Internasional</p>
           <h1 class="mb-3">
             Jelajahi <em class="text-gold">Dunia Bersamamu</em>
           </h1>
@@ -36,7 +36,7 @@
               class="listing-search-input"
               id="tourSearch"
               type="search"
-              aria-label="Cari paket mancanegara"
+              aria-label="Cari paket Internasional"
               placeholder="Cari paket..."
               autocomplete="off"
             />
@@ -62,7 +62,7 @@
           <div class="pager" id="pager"></div>
           <div class="section-header reveal mt-8">
             <p class="eyebrow">🎁 Promo</p>
-            <h2>Promo Mancanegara</h2>
+            <h2>Promo Internasional</h2>
           </div>
           <div class="grid-auto" id="offersGrid"></div>
         </div>
@@ -256,7 +256,7 @@
             ? matchingOffers
                 .map((offer, i) => renderOfferCard(offer, i * 75))
                 .join("")
-            : `<div class="state-box"><p class="state-desc">${query ? "Tidak ada promo yang cocok dengan pencarian ini." : "Belum ada promo mancanegara untuk filter lokasi ini."}</p></div>`;
+            : `<div class="state-box"><p class="state-desc">${query ? "Tidak ada promo yang cocok dengan pencarian ini." : "Belum ada promo Internasional untuk filter lokasi ini."}</p></div>`;
         }
 
         const changePage = (newPage) => renderPage(newPage);

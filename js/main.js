@@ -47,7 +47,7 @@ function injectNav() {
           <div class="nav-dropdown">
             <a href="${R}tours/index.html"><span class="nav-dropdown-icon">${icon("globe", 18)}</span> Semua Paket</a>
             <a href="${R}tours/domestik.html"><span class="nav-dropdown-icon">${icon("flag", 18)}</span> Wisata Domestik</a>
-            <a href="${R}tours/inter.html"><span class="nav-dropdown-icon">${icon("plane", 18)}</span> Mancanegara</a>
+            <a href="${R}tours/inter.html"><span class="nav-dropdown-icon">${icon("plane", 18)}</span>Internasional</a>
             <a href="${R}tours/cruise.html"><span class="nav-dropdown-icon">${icon("ship", 18)}</span> Cruise</a>
             <a href="${R}tours/umroh.html"><span class="nav-dropdown-icon">${icon("mosque", 18)}</span> Umroh & Haji</a>
           </div>
@@ -86,7 +86,7 @@ function injectNav() {
       <a class="mobile-nav-link" href="${R}tours/index.html"><span class="mobile-nav-icon">${icon("globe", 18)}</span> Paket Wisata</a>
       <div class="mobile-nav-sub">
         <a href="${R}tours/domestik.html"><span class="mobile-nav-icon">${icon("flag", 15)}</span> Wisata Domestik</a>
-        <a href="${R}tours/inter.html"><span class="mobile-nav-icon">${icon("plane", 15)}</span> Mancanegara</a>
+        <a href="${R}tours/inter.html"><span class="mobile-nav-icon">${icon("plane", 15)}</span> Internasional</a>
         <a href="${R}tours/cruise.html"><span class="mobile-nav-icon">${icon("ship", 15)}</span> Cruise</a>
         <a href="${R}tours/umroh.html"><span class="mobile-nav-icon">${icon("mosque", 15)}</span> Umroh & Haji</a>
       </div>
@@ -167,7 +167,7 @@ function injectFooter() {
           <div class="footer-col-title">Paket Wisata</div>
           <div class="footer-links">
             <a href="${R}tours/domestik.html"><span class="footer-link-icon">${icon("flag", 16)}</span> Wisata Domestik</a>
-            <a href="${R}tours/inter.html"><span class="footer-link-icon">${icon("plane", 16)}</span> Mancanegara</a>
+            <a href="${R}tours/inter.html"><span class="footer-link-icon">${icon("plane", 16)}</span> Internasional</a>
             <a href="${R}tours/cruise.html"><span class="footer-link-icon">${icon("ship", 16)}</span> Cruise</a>
             <a href="${R}tours/umroh.html"><span class="footer-link-icon">${icon("mosque", 16)}</span> Umroh & Haji</a>
           </div>
