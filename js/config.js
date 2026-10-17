@@ -42,6 +42,11 @@ export const COMPANY = {
 
 // ── Social media ──
 export const SOCIALS = {
+  threads: {
+    label: "Threads",
+    handle: "@bee_happyholiday",
+    url: "https://www.threads.com/@bee_happyholiday",
+  },
   instagram: {
     label: "Instagram",
     handle: "@beehappyholiday",

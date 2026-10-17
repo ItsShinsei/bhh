@@ -268,6 +268,14 @@
               <a class="btn btn-outline btn-lg" href="tours/index.html"
                 >Lihat Paket Wisata</a
               >
+              <a
+                class="btn btn-outline btn-lg"
+                id="threadsProfile"
+                href="#"
+                target="_blank"
+                rel="noopener"
+                >Threads @bee_happyholiday</a
+              >
             </div>
           </div>
         </div>
@@ -299,11 +307,12 @@
     </style>
 
     <script type="module">
-      import { waLink } from "./js/config.js";
+      import { SOCIALS, waLink } from "./js/config.js";
       import "./js/main.js";
       document.getElementById("ctaWa").href = waLink(
         "Halo Bee Happy Holiday! Saya ingin konsultasi tentang paket wisata.",
       );
+      document.getElementById("threadsProfile").href = SOCIALS.threads.url;
     </script>
   </body>
 </html>
