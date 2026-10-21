@@ -55,6 +55,8 @@ const CORS = {
 };
 
 const R2_PUBLIC_BASE_URL =
+  "https://beehappyholiday.my.id";
+const LEGACY_R2_PUBLIC_BASE_URL =
   "https://pub-5effb5342cd94102a9ddd904b038efb4.r2.dev";
 
 const ok = (d) =>
@@ -102,7 +104,13 @@ function getR2ObjectKey(imageUrl) {
     return null;
   }
 
-  if (url.origin !== R2_PUBLIC_BASE_URL || url.search || url.hash) return null;
+  if (
+    (url.origin !== R2_PUBLIC_BASE_URL &&
+      url.origin !== LEGACY_R2_PUBLIC_BASE_URL) ||
+    url.search ||
+    url.hash
+  )
+    return null;
 
   let key;
   try {
