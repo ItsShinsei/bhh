@@ -38,10 +38,6 @@ gallery            → foto galeri
 5. **Save**
 6. Catat URL worker: `https://bhh-api.namaakun.workers.dev`
 
-Pastikan custom domain bucket R2 sudah aktif dan sesuai dengan URL publik di
-`worker.js` (`https://beehappyholiday.my.id`) sebelum deploy. Worker memakai
-domain tersebut untuk URL gambar hasil upload.
-
 Pastikan binding R2 `BHH_IMAGES` tetap terpasang saat Worker diperbarui. Saat
 baris yang memakai gambar hasil upload BHH dihapus dari admin, objeknya ikut
 dihapus dari bucket jika tidak dipakai oleh baris lain. URL gambar eksternal
