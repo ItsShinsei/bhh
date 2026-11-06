@@ -4,15 +4,33 @@
     <loc>https://beehappyholiday.my.id/</loc>
   </url>
   <url>
-    <loc>https://beehappyholiday.my.id/about.html</loc>
+    <loc>https://beehappyholiday.my.id/about</loc>
   </url>
   <url>
-    <loc>https://beehappyholiday.my.id/contact.html</loc>
+    <loc>https://beehappyholiday.my.id/contact</loc>
   </url>
   <url>
-    <loc>https://beehappyholiday.my.id/destinations.html</loc>
+    <loc>https://beehappyholiday.my.id/destinations</loc>
   </url>
   <url>
-    <loc>https://beehappyholiday.my.id/galeri.html</loc>
+    <loc>https://beehappyholiday.my.id/galeri</loc>
+  </url>
+  <url>
+    <loc>https://beehappyholiday.my.id/dokumen/dokumen</loc>
+  </url>
+  <url>
+    <loc>https://beehappyholiday.my.id/tours/</loc>
+  </url>
+  <url>
+    <loc>https://beehappyholiday.my.id/tours/cruise</loc>
+  </url>
+  <url>
+    <loc>https://beehappyholiday.my.id/tours/domestik</loc>
+  </url>
+  <url>
+    <loc>https://beehappyholiday.my.id/tours/inter</loc>
+  </url>
+  <url>
+    <loc>https://beehappyholiday.my.id/tours/umroh</loc>
   </url>
 </urlset>
