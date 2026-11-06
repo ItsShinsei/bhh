@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://beehappyholiday.my.id/sitemap.xml
