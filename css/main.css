@@ -11,6 +11,7 @@
 @import "components/nav.css";
 @import "components/cards.css";
 @import "components/misc.css";
+@import "components/faq.css";
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {

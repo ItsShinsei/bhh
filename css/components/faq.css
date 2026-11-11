@@ -1,0 +1,58 @@
+/* ── FAQ accordion (native <details>) ── */
+.faq {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 800px;
+  margin-inline: auto;
+}
+.faq details {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-5);
+  transition: border-color var(--mid);
+}
+.faq details:hover,
+.faq details[open] {
+  border-color: var(--border-hover);
+}
+.faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text);
+  list-style: none;
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+.faq summary::after {
+  content: "+";
+  color: var(--gold-500);
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+.faq details[open] summary::after {
+  content: "–";
+}
+.faq details p {
+  margin: 0 0 var(--space-4);
+  font-size: 0.9rem;
+}
+
+/* ── Static SEO text block on listing pages ── */
+.seo-copy {
+  max-width: 800px;
+  margin-inline: auto;
+}
+.seo-copy h2 {
+  margin-bottom: var(--space-4);
+}
+.seo-copy p + p {
+  margin-top: var(--space-4);
+}
