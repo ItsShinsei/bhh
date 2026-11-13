@@ -9,7 +9,6 @@
 -- ═══════════════════════════════════════════
 
 -- ── DROP (safe re-run) ──
-DROP TABLE IF EXISTS destination_photos;
 DROP TABLE IF EXISTS destinations;
 DROP TABLE IF EXISTS listings_domestik;
 DROP TABLE IF EXISTS listings_inter;
@@ -173,19 +172,6 @@ CREATE TABLE destinations (
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- ──────────────────────────────────────────
---  DESTINATION PHOTOS
---  Many photos per destination
--- ──────────────────────────────────────────
-CREATE TABLE destination_photos (
-  id             INTEGER  PRIMARY KEY AUTOINCREMENT,
-  destination_id INTEGER  NOT NULL REFERENCES destinations(id) ON DELETE CASCADE,
-  image_url      TEXT     NOT NULL,
-  caption        TEXT,
-  sort_order     INTEGER  DEFAULT 0,
-  created_at     DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
 -- ══════════════════════════════════════════
 --  INDEXES
 -- ══════════════════════════════════════════
@@ -210,8 +196,6 @@ CREATE INDEX idx_gallery_cat     ON gallery(category);
 CREATE INDEX idx_dest_continent  ON destinations(continent);
 CREATE INDEX idx_dest_type       ON destinations(type);
 CREATE INDEX idx_dest_slug       ON destinations(slug);
-CREATE INDEX idx_photos_dest_id  ON destination_photos(destination_id);
-CREATE INDEX idx_photos_sort     ON destination_photos(destination_id, sort_order);
 
 -- ══════════════════════════════════════════
 --  SAMPLE DATA — DOMESTIK
@@ -333,39 +317,3 @@ INSERT INTO destinations (slug, name, type, continent, lat, lng, description, im
   ('australia', 'Australia', 'country', 'Oseania', -25.2744, 133.7751,
    'Australia adalah benua sekaligus negara yang menawarkan keragaman alam yang luar biasa. Sydney Opera House dan Harbour Bridge menjadi ikon arsitektur dunia. Great Barrier Reef menghadirkan surga bawah laut yang tak tertandingi. Uluru — batu merah raksasa di tengah outback — memancarkan aura spiritual yang kuat. Dan tentu saja, kanguru, koala, serta wallaby siap menyambut di mana-mana.',
    'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=1200&auto=format&fit=crop', '');
-
--- ══════════════════════════════════════════
---  SAMPLE DATA — DESTINATION PHOTOS
--- ══════════════════════════════════════════
-INSERT INTO destination_photos (destination_id, image_url, caption, sort_order) VALUES
-  (1, 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&auto=format&fit=crop', 'Pegunungan Alpen Swiss', 1),
-  (1, 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&auto=format&fit=crop', 'Interlaken dari ketinggian', 2),
-  (1, 'https://images.unsplash.com/photo-1580674684081-7617fbf3d745?w=800&auto=format&fit=crop', 'Danau Geneva', 3),
-
-  (2, 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800&auto=format&fit=crop', 'Bunga sakura di Tokyo', 1),
-  (2, 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&auto=format&fit=crop', 'Kuil Fushimi Inari Kyoto', 2),
-  (2, 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&auto=format&fit=crop', 'Gunung Fuji', 3),
-
-  (3, 'https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800&auto=format&fit=crop', 'Cappadocia dari udara', 1),
-  (3, 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&auto=format&fit=crop', 'Hagia Sophia Istanbul', 2),
-  (3, 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=800&auto=format&fit=crop', 'Balon udara Cappadocia', 3),
-
-  (4, 'https://images.unsplash.com/photo-1480796927426-f609979314bd?w=800&auto=format&fit=crop', 'Seoul city skyline', 1),
-  (4, 'https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=800&auto=format&fit=crop', 'Gyeongbokgung Palace', 2),
-  (4, 'https://images.unsplash.com/photo-1578637387939-43c525550085?w=800&auto=format&fit=crop', 'Nami Island musim gugur', 3),
-
-  (5, 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&auto=format&fit=crop', 'Menara Eiffel Paris', 1),
-  (5, 'https://images.unsplash.com/photo-1431274172761-fcdab704a4ef?w=800&auto=format&fit=crop', 'Louvre Museum', 2),
-  (5, 'https://images.unsplash.com/photo-1551634979-2b11f8c218da?w=800&auto=format&fit=crop', 'Provence lavender fields', 3),
-
-  (6, 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&auto=format&fit=crop', 'Dubai skyline malam', 1),
-  (6, 'https://images.unsplash.com/photo-1582672060674-bc2bd808a8b5?w=800&auto=format&fit=crop', 'Burj Khalifa', 2),
-  (6, 'https://images.unsplash.com/photo-1518684079-3c830dcef090?w=800&auto=format&fit=crop', 'Desert safari Dubai', 3),
-
-  (7, 'https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=800&auto=format&fit=crop', 'Marina Bay Sands', 1),
-  (7, 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=800&auto=format&fit=crop', 'Gardens by the Bay', 2),
-  (7, 'https://images.unsplash.com/photo-1508964942454-1a56651d54ac?w=800&auto=format&fit=crop', 'Chinatown Singapore', 3),
-
-  (8, 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=800&auto=format&fit=crop', 'Sydney Opera House', 1),
-  (8, 'https://images.unsplash.com/photo-1587139223877-04ea2b0a8ca4?w=800&auto=format&fit=crop', 'Great Barrier Reef', 2),
-  (8, 'https://images.unsplash.com/photo-1529108190281-9a4f620bc2d8?w=800&auto=format&fit=crop', 'Uluru sunset', 3);

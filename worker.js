@@ -12,11 +12,7 @@
      GET    /api/gallery   ?category=domestik|inter|cruise|umroh
 
      GET    /api/destinations           ?continent=Asia ?type=country
-     GET    /api/destinations/:slug     → destination + its photos combined
-     GET    /api/destination-photos     ?destination_id=5
-     POST   /api/destination-photos
-     PUT    /api/destination-photos/:id
-     DELETE /api/destination-photos/:id
+     GET    /api/destinations/:slug     → destination
 
      POST   /api/domestik | /api/inter | /api/cruise | /api/umroh
             /api/offers | /api/reviews | /api/gallery | /api/destinations
@@ -77,7 +73,6 @@ const TABLES = {
   reviews: "reviews",
   gallery: "gallery",
   destinations: "destinations",
-  "destination-photos": "destination_photos",
 };
 
 const IMAGE_COLUMNS = {
@@ -89,7 +84,6 @@ const IMAGE_COLUMNS = {
   reviews: "photo_url",
   gallery: "image_url",
   destinations: "image_url",
-  "destination-photos": "image_url",
 };
 
 function getR2ObjectKey(imageUrl) {
@@ -193,12 +187,6 @@ const EDITABLE_COLUMNS = {
     "description",
     "image_url",
     "badge",
-  ],
-  "destination-photos": [
-    "destination_id",
-    "image_url",
-    "caption",
-    "sort_order",
   ],
 };
 
@@ -360,7 +348,7 @@ export default {
       // ════════════════════════════════════════
       //  DESTINATIONS
       //  GET  /api/destinations            ?continent=Asia ?type=country
-      //  GET  /api/destinations/:slug      → dest + photos
+      //  GET  /api/destinations/:slug      → destination
       //  POST /api/destinations
       // ════════════════════════════════════════
       if (path === "/api/destinations") {
@@ -421,7 +409,7 @@ export default {
         return ok(results);
       }
 
-      // GET /api/destinations/:slug — single destination + its photos
+      // GET /api/destinations/:slug — single destination
       const slugMatch = path.match(/^\/api\/destinations\/([a-z0-9-]+)$/);
       if (slugMatch && request.method === "GET") {
         const slug = slugMatch[1];
@@ -432,54 +420,7 @@ export default {
           .first();
         if (!dest) return err("Destinasi tidak ditemukan", 404);
 
-        const { results: photos } = await env.DB.prepare(
-          `SELECT * FROM destination_photos WHERE destination_id = ? ORDER BY sort_order ASC, id ASC`,
-        )
-          .bind(dest.id)
-          .all();
-
-        return ok({ ...dest, photos });
-      }
-
-      // ════════════════════════════════════════
-      //  DESTINATION PHOTOS
-      //  GET  /api/destination-photos  ?destination_id=5
-      //  POST /api/destination-photos
-      // ════════════════════════════════════════
-      if (path === "/api/destination-photos") {
-        if (request.method === "POST") {
-          const body = await request.json();
-          const { destination_id, image_url, caption, sort_order } = body;
-          if (!destination_id || !image_url)
-            return err(
-              "Missing required fields: destination_id, image_url",
-              400,
-            );
-          const res = await env.DB.prepare(
-            `INSERT INTO destination_photos (destination_id, image_url, caption, sort_order) VALUES (?, ?, ?, ?)`,
-          )
-            .bind(
-              Number(destination_id),
-              image_url,
-              caption || "",
-              Number(sort_order) || 0,
-            )
-            .run();
-          return created({ id: res.meta.last_row_id, ...body });
-        }
-
-        // GET
-        let q = `SELECT * FROM destination_photos WHERE 1=1`;
-        const args = [];
-        if (p.get("destination_id")) {
-          q += ` AND destination_id = ?`;
-          args.push(Number(p.get("destination_id")));
-        }
-        q += ` ORDER BY destination_id ASC, sort_order ASC, id ASC`;
-        const { results } = await env.DB.prepare(q)
-          .bind(...args)
-          .all();
-        return ok(results);
+        return ok(dest);
       }
 
       // ════════════════════════════════════════

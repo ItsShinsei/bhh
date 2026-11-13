@@ -320,29 +320,6 @@ const RESOURCES = [
       },
     ],
   },
-  {
-    key: "destination-photos",
-    label: "Foto Destinasi",
-    endpoint: "/api/destination-photos",
-    listAll: false,
-    fields: [
-      {
-        name: "destination_id",
-        label: "ID Destinasi",
-        type: "number",
-        required: true,
-        hint: "Cek tab Destinasi untuk melihat ID-nya",
-      },
-      { name: "image_url", label: "Foto", type: "image", required: true },
-      { name: "caption", label: "Keterangan", type: "text" },
-      {
-        name: "sort_order",
-        label: "Urutan",
-        type: "number",
-        hint: "Angka lebih kecil tampil lebih dulu",
-      },
-    ],
-  },
 ];
 
 // ── Helpers ──

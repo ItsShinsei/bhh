@@ -3,6 +3,7 @@ database/*
 !database/migrations/
 database/migrations/*
 !database/migrations/20261011_add_offer_targeting.sql
+!database/migrations/20261113_remove_destination_photos.sql
 .claude
 opencode.json
 worker.js
