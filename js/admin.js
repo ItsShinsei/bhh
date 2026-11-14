@@ -442,7 +442,7 @@ function thumbCell(url) {
   const src = driveThumb(url, "w200");
   if (!src) return `<span class="list-state" style="padding:0;">—</span>`;
   const fullImage = driveThumb(url, "w2000");
-  return `<img class="thumb table-image-preview" src="${esc(src)}" data-full-image="${escAttr(fullImage)}" title="Klik untuk melihat gambar penuh" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`;
+  return `<button type="button" class="image-preview-button table-image-preview" data-full-image="${escAttr(fullImage)}" aria-label="Lihat gambar penuh"><img class="thumb" src="${esc(src)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"></button>`;
 }
 
 function expiresCell(expires) {
@@ -522,46 +522,47 @@ RESOURCES.forEach((r) => {
   };
 });
 
-function fieldsHtml(fields) {
+function fieldsHtml(fields, idPrefix) {
   return fields
     .map((f) => {
       const req = f.required ? "required" : "";
+      const inputId = `${idPrefix}-${f.name}`;
       let control;
       if (f.type === "textarea") {
-        control = `<textarea name="${f.name}" ${req}></textarea>`;
+        control = `<textarea id="${inputId}" name="${f.name}" ${req}></textarea>`;
       } else if (f.type === "select") {
         const opts = [
           ...(f.placeholder
             ? [`<option value="" disabled selected>${esc(f.placeholder)}</option>`]
             : []),
           ...f.options
-            .map((o) => `<option value="${esc(o)}">${esc(o)}</option>`)
+            .map((o) => `<option value="${esc(o)}">${esc(o)}</option>`),
         ].join("");
-        control = `<select name="${f.name}" ${req}>${opts}</select>`;
+        control = `<select id="${inputId}" name="${f.name}" ${req}>${opts}</select>`;
       } else if (f.type === "number") {
-        control = `<input type="number" name="${f.name}" ${f.min != null ? `min="${f.min}"` : ""} ${f.max != null ? `max="${f.max}"` : ""} ${req}>`;
+        control = `<input id="${inputId}" type="number" name="${f.name}" ${f.min != null ? `min="${f.min}"` : ""} ${f.max != null ? `max="${f.max}"` : ""} ${req}>`;
       } else if (f.type === "image") {
         control = `
-        <input type="file" name="${f.name}" accept="image/*" data-image-input>
+        <input id="${inputId}" type="file" name="${f.name}" accept="image/*" data-image-input>
         <div class="form-hint">Maks 5MB · JPG, PNG, atau WebP</div>
         <div class="image-preview" data-image-preview></div>
       `;
       } else if (f.name === "price" || f.name === "price2") {
-        control = `<input type="text" name="${f.name}" inputmode="numeric" autocomplete="off" data-rupiah-input ${req}>`;
+        control = `<input id="${inputId}" type="text" name="${f.name}" inputmode="numeric" autocomplete="off" data-rupiah-input ${req}>`;
       } else if (f.name === "lat" || f.name === "lng") {
         const axis = f.name === "lat" ? "lat" : "lng";
         const minmax = axis === "lat" ? "-90 sampai 90" : "-180 sampai 180";
         control = `
-          <input type="text" name="${f.name}" data-coordinate-input="${axis}" ${req}>
+          <input id="${inputId}" type="text" name="${f.name}" data-coordinate-input="${axis}" ${req}>
           <div class="form-hint" data-coordinate-status="${axis}">Validasi: ${minmax}</div>
         `;
       } else {
-        control = `<input type="${f.type}" name="${f.name}" ${req}>`;
+        control = `<input id="${inputId}" type="${f.type}" name="${f.name}" ${req}>`;
       }
       const hintHtml = f.hint
         ? `<div class="form-hint">${esc(f.hint)}</div>`
         : "";
-      return `<div class="form-group"><label>${esc(f.label)}</label>${control}${hintHtml}</div>`;
+      return `<div class="form-group"><label for="${inputId}">${esc(f.label)}</label>${control}${hintHtml}</div>`;
     })
     .join("");
 }
@@ -588,11 +589,15 @@ function wireImagePreviews(form) {
       const img = document.createElement("img");
       img.src = URL.createObjectURL(file);
       img.dataset.fullImage = img.src;
-      img.title = "Klik untuk melihat gambar penuh";
-      img.addEventListener("click", () =>
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "image-preview-button";
+      button.setAttribute("aria-label", "Lihat gambar penuh");
+      button.appendChild(img);
+      button.addEventListener("click", () =>
         openImageViewer(img.dataset.fullImage),
       );
-      preview.appendChild(img);
+      preview.appendChild(button);
     });
   });
 }
@@ -654,18 +659,47 @@ RESOURCES.forEach((r, idx) => {
   tab.type = "button";
   tab.className = "admin-tab" + (idx === 0 ? " active" : "");
   tab.dataset.key = r.key;
+  tab.id = `tab-${r.key}`;
+  tab.setAttribute("role", "tab");
+  tab.setAttribute("aria-controls", `panel-${r.key}`);
+  tab.setAttribute("aria-selected", String(idx === 0));
+  tab.tabIndex = idx === 0 ? 0 : -1;
   tab.innerHTML = `${esc(r.label)} <span class="count" id="count-${r.key}"></span>`;
   tab.addEventListener("click", () => activateTab(r.key));
+  tab.addEventListener("keydown", (event) => {
+    const tabs = [...tabsEl.querySelectorAll('[role="tab"]')];
+    const index = tabs.indexOf(tab);
+    let nextIndex;
+    if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+    else if (event.key === "ArrowLeft")
+      nextIndex = (index - 1 + tabs.length) % tabs.length;
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = tabs.length - 1;
+    else return;
+
+    event.preventDefault();
+    tabs[nextIndex].focus();
+    activateTab(tabs[nextIndex].dataset.key);
+  });
   tabsEl.appendChild(tab);
 });
 
 function activateTab(key) {
   document
     .querySelectorAll(".admin-tab")
-    .forEach((t) => t.classList.toggle("active", t.dataset.key === key));
+    .forEach((t) => {
+      const selected = t.dataset.key === key;
+      t.classList.toggle("active", selected);
+      t.setAttribute("aria-selected", String(selected));
+      t.tabIndex = selected ? 0 : -1;
+    });
   document
     .querySelectorAll(".admin-panel")
-    .forEach((p) => p.classList.toggle("active", p.dataset.key === key));
+    .forEach((p) => {
+      const selected = p.dataset.key === key;
+      p.classList.toggle("active", selected);
+      p.setAttribute("aria-hidden", String(!selected));
+    });
   const r = RESOURCES.find((x) => x.key === key);
   if (r && !r.state.loaded && !r.state.loading) loadList(r);
 }
@@ -675,6 +709,11 @@ RESOURCES.forEach((r) => {
   const panel = document.createElement("section");
   panel.className = "admin-panel";
   panel.dataset.key = r.key;
+  panel.id = `panel-${r.key}`;
+  panel.tabIndex = 0;
+  panel.setAttribute("role", "tabpanel");
+  panel.setAttribute("aria-labelledby", `tab-${r.key}`);
+  panel.setAttribute("aria-hidden", String(r.key !== RESOURCES[0].key));
 
   panel.innerHTML = `
     <div class="panel-grid">
@@ -697,10 +736,10 @@ RESOURCES.forEach((r) => {
               : ""
           }
           <form id="form-${r.key}">
-            ${fieldsHtml(r.fields)}
+            ${fieldsHtml(r.fields, `form-${r.key}`)}
             <button type="submit" class="btn btn-primary">Tambah ${esc(r.label)}</button>
           </form>
-          <div id="result-${r.key}" class="results-small"></div>
+          <div id="result-${r.key}" class="results-small" role="status" aria-live="polite"></div>
         </div>
       </div>
       <div class="panel-list-col">
@@ -710,7 +749,7 @@ RESOURCES.forEach((r) => {
             <button type="button" class="btn btn-outline btn-sm" data-refresh="${r.key}">🔄 Refresh</button>
           </div>
           <div class="list-search">
-            <input type="search" placeholder="Cari ${esc(r.label).toLowerCase()}..." data-search="${r.key}" inputmode="search">
+            <input type="search" aria-label="Cari ${esc(r.label)}" placeholder="Cari ${esc(r.label).toLowerCase()}..." data-search="${r.key}" inputmode="search">
             <div class="list-sort" aria-label="Urutkan data">
               <label for="sort-${r.key}">Urutkan:</label>
               <select id="sort-${r.key}" data-sort="${r.key}">
@@ -729,12 +768,16 @@ RESOURCES.forEach((r) => {
               </select>
             </div>
           </div>
+          <p class="keyboard-hint" id="table-help-${r.key}">
+            Saat tombol baris fokus: ↑/↓ pindah baris, Home/End awal/akhir halaman,
+            Ctrl+Home/End awal/akhir daftar, E edit.
+          </p>
           <div class="table-wrap">
-            <table class="data-table">
+            <table class="data-table" aria-label="Data ${esc(r.label)}" aria-describedby="table-help-${r.key}">
               <thead><tr>
                 <th>ID</th>
                 ${r.columns.map((c) => `<th>${esc(c.label)}</th>`).join("")}
-                <th></th>
+                <th scope="col">Aksi</th>
               </tr></thead>
               <tbody id="tbody-${r.key}">
                 <tr><td colspan="${r.columns.length + 2}" class="list-state">Buka tab ini untuk memuat data.</td></tr>
@@ -742,7 +785,7 @@ RESOURCES.forEach((r) => {
             </table>
           </div>
           <div class="pagination-controls" id="pagination-${r.key}" hidden>
-            <span class="pagination-info" id="paginfo-${r.key}"></span>
+            <span class="pagination-info" id="paginfo-${r.key}" aria-live="polite"></span>
             <div class="pagination-btns">
               <button type="button" class="btn btn-outline btn-sm" data-page-first="${r.key}">« Awal</button>
               <button type="button" class="btn btn-outline btn-sm" data-page-prev="${r.key}">‹ Prev</button>
@@ -762,10 +805,18 @@ mainEl.querySelector(".admin-panel").classList.add("active");
 // ── Edit modal ──
 const editModal = document.createElement("div");
 editModal.className = "modal-overlay";
+editModal.setAttribute("role", "dialog");
+editModal.setAttribute("aria-modal", "true");
+editModal.setAttribute("aria-labelledby", "editModalTitle");
+editModal.setAttribute("aria-describedby", "editModalKeyboardHelp");
+editModal.tabIndex = -1;
 editModal.innerHTML = `
   <div class="modal-box">
     <button type="button" class="modal-close" aria-label="Tutup">&times;</button>
     <h2 id="editModalTitle">Edit</h2>
+    <p class="keyboard-hint" id="editModalKeyboardHelp">
+      Ctrl+Alt+↑/↓ pindah field. Tab/Shift+Tab juga bisa digunakan.
+    </p>
     <form id="editForm"></form>
     <div id="editResult" class="results-small"></div>
   </div>
@@ -774,21 +825,44 @@ document.body.appendChild(editModal);
 
 const imageViewer = document.createElement("div");
 imageViewer.className = "image-viewer-overlay";
+imageViewer.setAttribute("role", "dialog");
+imageViewer.setAttribute("aria-modal", "true");
+imageViewer.setAttribute("aria-label", "Pratinjau gambar penuh");
+imageViewer.tabIndex = -1;
 imageViewer.innerHTML = `
   <button type="button" class="modal-close image-viewer-close" aria-label="Tutup gambar">&times;</button>
   <img class="image-viewer-image" alt="Pratinjau gambar penuh">
 `;
 document.body.appendChild(imageViewer);
 
+let editModalReturnFocus = null;
+let imageViewerReturnFocus = null;
+
+function restoreFocus(target) {
+  if (target?.isConnected && !target.disabled) {
+    target.focus();
+    return;
+  }
+  tabsEl.querySelector('[aria-selected="true"]')?.focus();
+}
+
 function closeImageViewer() {
+  if (!imageViewer.classList.contains("open")) return;
   imageViewer.classList.remove("open");
   imageViewer.querySelector(".image-viewer-image").removeAttribute("src");
+  restoreFocus(imageViewerReturnFocus);
+  imageViewerReturnFocus = null;
 }
 
 function openImageViewer(src) {
   if (!src) return;
+  imageViewerReturnFocus = document.activeElement;
   imageViewer.querySelector(".image-viewer-image").src = src;
   imageViewer.classList.add("open");
+  setTimeout(() => {
+    if (imageViewer.classList.contains("open"))
+      imageViewer.querySelector(".image-viewer-close").focus();
+  }, 50);
 }
 
 imageViewer
@@ -799,27 +873,90 @@ imageViewer.addEventListener("click", (e) => {
 });
 
 function closeEditModal() {
+  if (!editModal.classList.contains("open")) return;
   editModal.classList.remove("open");
   document.getElementById("editForm").innerHTML = "";
   document.getElementById("editResult").innerHTML = "";
+  restoreFocus(editModalReturnFocus);
+  editModalReturnFocus = null;
 }
 editModal
   .querySelector(".modal-close")
   .addEventListener("click", closeEditModal);
+editModal.addEventListener("keydown", (e) => {
+  if (
+    !(e.ctrlKey || e.metaKey) ||
+    !e.altKey ||
+    !["ArrowUp", "ArrowDown"].includes(e.key)
+  )
+    return;
+
+  const controls = [
+    ...editModal.querySelectorAll(
+      '.modal-close, #editForm input:not([type="hidden"]):not([disabled]), #editForm select:not([disabled]), #editForm textarea:not([disabled]), #editForm button:not([disabled])',
+    ),
+  ].filter((control) => control.getClientRects().length > 0);
+  const currentIndex = controls.indexOf(document.activeElement);
+  if (currentIndex < 0 || !controls.length) return;
+
+  e.preventDefault();
+  const step = e.key === "ArrowDown" ? 1 : -1;
+  const nextIndex = (currentIndex + step + controls.length) % controls.length;
+  controls[nextIndex].focus();
+});
 editModal.addEventListener("click", (e) => {
+  const imagePreview = e.target.closest("[data-full-image]");
+  if (imagePreview && editModal.contains(imagePreview)) {
+    openImageViewer(imagePreview.dataset.fullImage);
+    return;
+  }
   if (e.target === editModal) closeEditModal();
 });
 document.addEventListener("keydown", (e) => {
-  if (e.key !== "Escape") return;
-  if (imageViewer.classList.contains("open")) closeImageViewer();
-  else if (editModal.classList.contains("open")) closeEditModal();
+  const activeModal = imageViewer.classList.contains("open")
+    ? imageViewer
+    : editModal.classList.contains("open")
+      ? editModal
+      : null;
+  if (!activeModal) return;
+
+  if (e.key === "Escape") {
+    if (activeModal === imageViewer) closeImageViewer();
+    else closeEditModal();
+    return;
+  }
+
+  if (e.key !== "Tab") return;
+  const focusable = [
+    ...activeModal.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ),
+  ].filter((element) => element.getClientRects().length > 0);
+  if (!focusable.length) {
+    e.preventDefault();
+    activeModal.focus();
+    return;
+  }
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (
+    e.shiftKey &&
+    (document.activeElement === first ||
+      !activeModal.contains(document.activeElement))
+  ) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && (document.activeElement === last || !activeModal.contains(document.activeElement))) {
+    e.preventDefault();
+    first.focus();
+  }
 });
 
 function openEditModal(r, item) {
   document.getElementById("editModalTitle").textContent = `Edit ${r.label}`;
   const form = document.getElementById("editForm");
   form.innerHTML =
-    fieldsHtml(r.fields) +
+    fieldsHtml(r.fields, "editForm") +
     `<button type="submit" class="btn btn-primary">Simpan Perubahan</button>`;
 
   r.fields.forEach((f) => {
@@ -838,12 +975,7 @@ function openEditModal(r, item) {
     const preview = form.querySelector("[data-image-preview]");
     if (preview && current) {
       const fullImage = escAttr(driveThumb(current, "w2000"));
-      preview.innerHTML = `<img src="${esc(driveThumb(current, "w200"))}" data-full-image="${fullImage}" title="Klik untuk melihat gambar penuh" alt="" loading="lazy">`;
-      preview
-        .querySelector("img")
-        .addEventListener("click", () =>
-          openImageViewer(preview.querySelector("img").dataset.fullImage),
-        );
+      preview.innerHTML = `<button type="button" class="image-preview-button" data-full-image="${fullImage}" aria-label="Lihat gambar penuh"><img src="${esc(driveThumb(current, "w200"))}" alt="" loading="lazy"></button>`;
     }
   }
 
@@ -898,7 +1030,12 @@ function openEditModal(r, item) {
     }
   };
 
+  editModalReturnFocus = document.activeElement;
   editModal.classList.add("open");
+  setTimeout(() => {
+    if (editModal.classList.contains("open"))
+      form.querySelector("input, select, textarea, button")?.focus();
+  }, 50);
 }
 
 // ── Wire up add forms, search, pagination, refresh, edit/delete ──
@@ -1046,40 +1183,108 @@ RESOURCES.forEach((r) => {
       }
     });
 
-  document
-    .getElementById(`tbody-${r.key}`)
-    .addEventListener("click", async (e) => {
-      const imagePreview = e.target.closest("[data-full-image]");
-      if (imagePreview) {
-        openImageViewer(imagePreview.dataset.fullImage);
-        return;
-      }
+  const tbody = document.getElementById(`tbody-${r.key}`);
+  tbody.addEventListener("keydown", (e) => {
+    const control = e.target.closest(
+      "[data-edit], [data-delete], [data-full-image]",
+    );
+    if (
+      !control ||
+      e.altKey ||
+      ((e.ctrlKey || e.metaKey) && !["Home", "End"].includes(e.key))
+    )
+      return;
 
-      const editBtn = e.target.closest("[data-edit]");
-      if (editBtn) {
-        const id = Number(editBtn.dataset.edit);
-        const item = r.state.items.find((it) => it.id === id);
-        if (item) openEditModal(r, item);
-        return;
-      }
+    const rows = [...tbody.querySelectorAll("tr")].filter((row) =>
+      row.querySelector("[data-edit]"),
+    );
+    const currentRow = control.closest("tr");
+    const currentIndex = rows.indexOf(currentRow);
+    if (currentIndex < 0) return;
 
-      const btn = e.target.closest("[data-delete]");
-      if (!btn) return;
-      const id = btn.dataset.delete;
-      const label = btn.dataset.label || `#${id}`;
-      if (!confirm(`Hapus "${label}"? Tindakan ini tidak bisa dibatalkan.`))
-        return;
-      btn.disabled = true;
-      btn.textContent = "Menghapus...";
-      try {
-        await apiFetch(`${r.endpoint}/${id}`, { method: "DELETE" });
-        loadList(r, { force: true, preservePage: true });
-      } catch (err) {
-        alert(`Gagal menghapus: ${err.message}`);
-        btn.disabled = false;
-        btn.textContent = "🗑️ Hapus";
+    if (e.key === "e" || e.key === "E") {
+      e.preventDefault();
+      currentRow.querySelector("[data-edit]")?.click();
+      return;
+    }
+
+    const totalPages = Math.max(
+      1,
+      Math.ceil(r.state.filtered.length / PAGE_SIZE),
+    );
+    let targetPage = r.state.page;
+    let targetIndex = currentIndex;
+    if (e.key === "ArrowDown") {
+      if (currentIndex < rows.length - 1) targetIndex++;
+      else if (targetPage < totalPages) {
+        targetPage++;
+        targetIndex = 0;
       }
-    });
+    } else if (e.key === "ArrowUp") {
+      if (currentIndex > 0) targetIndex--;
+      else if (targetPage > 1) {
+        targetPage--;
+        targetIndex = PAGE_SIZE - 1;
+      }
+    } else if (e.key === "Home") {
+      targetPage = e.ctrlKey || e.metaKey ? 1 : targetPage;
+      targetIndex = 0;
+    } else if (e.key === "End") {
+      if (e.ctrlKey || e.metaKey) targetPage = totalPages;
+      targetIndex = rows.length - 1;
+    } else return;
+
+    e.preventDefault();
+    const selector = control.matches("[data-delete]")
+      ? "[data-delete]"
+      : control.matches("[data-full-image]")
+        ? "[data-full-image]"
+        : "[data-edit]";
+    if (targetPage !== r.state.page) {
+      r.state.page = targetPage;
+      renderTable(r);
+    }
+
+    const targetRows = [...tbody.querySelectorAll("tr")].filter((row) =>
+      row.querySelector("[data-edit]"),
+    );
+    const targetRow = targetRows[Math.min(targetIndex, targetRows.length - 1)];
+    (targetRow?.querySelector(selector) ||
+      targetRow?.querySelector("[data-edit]"))?.focus();
+  });
+
+  tbody.addEventListener("click", async (e) => {
+    const imagePreview = e.target.closest("[data-full-image]");
+    if (imagePreview) {
+      openImageViewer(imagePreview.dataset.fullImage);
+      return;
+    }
+
+    const editBtn = e.target.closest("[data-edit]");
+    if (editBtn) {
+      const id = Number(editBtn.dataset.edit);
+      const item = r.state.items.find((it) => it.id === id);
+      if (item) openEditModal(r, item);
+      return;
+    }
+
+    const btn = e.target.closest("[data-delete]");
+    if (!btn) return;
+    const id = btn.dataset.delete;
+    const label = btn.dataset.label || `#${id}`;
+    if (!confirm(`Hapus "${label}"? Tindakan ini tidak bisa dibatalkan.`))
+      return;
+    btn.disabled = true;
+    btn.textContent = "Menghapus...";
+    try {
+      await apiFetch(`${r.endpoint}/${id}`, { method: "DELETE" });
+      loadList(r, { force: true, preservePage: true });
+    } catch (err) {
+      alert(`Gagal menghapus: ${err.message}`);
+      btn.disabled = false;
+      btn.textContent = "🗑️ Hapus";
+    }
+  });
 });
 
 function showResult(key, message, type) {
