@@ -25,7 +25,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@400;500;600;700&display=swap" />
     <link rel="stylesheet" href="css/main.css" />
-  </head></head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/destination.css" />
+  </head>
   <body>
     <div id="page">
       <div id="nav-placeholder"></div>
@@ -158,6 +160,7 @@
       <div id="footer-placeholder"></div>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module">
       import { API_BASE, driveThumb, waLink } from "./js/config.js";
       import "./js/main.js";
@@ -385,6 +388,15 @@
 
       // ── Init map ──
       function initMap() {
+        if (!window.L) {
+          const mapWrap = document.getElementById("destMap");
+          if (mapWrap) {
+            mapWrap.innerHTML =
+              '<div class="dest-list-empty">Peta tidak dapat dimuat saat ini. Silakan refresh halaman.</div>';
+          }
+          return;
+        }
+
         map = L.map("destMap", {
           center: [20, 20],
           zoom: 2,
